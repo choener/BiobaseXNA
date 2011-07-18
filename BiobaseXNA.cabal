@@ -1,4 +1,4 @@
-name:           Biobase
+name:           BiobaseXNA
 version:        0.5.0.0
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@tbi.univie.ac.at
@@ -22,42 +22,11 @@ extra-source-files:
 
 library
   build-depends:
-    attoparsec,
-    attoparsec-enumerator,
     base >3 && <5,
     bytestring,
-    containers,
-    directory,
-    either-unwrap,
-    enumerator,
-    filepath,
-    parsec,
-    primitive,
-    text,
-    transformers,
-    tuple,
     vector >=0.7 && <0.8,
-    vector-read-instances,
-    HsTools,
-    ParsecTools,
-    PrimitiveArray
 
   exposed-modules:
-    Biobase.Constants
-    Biobase.DataSource.DotParen
-    Biobase.DataSource.DotParen.Import
-    Biobase.DataSource.FR3D
-    Biobase.DataSource.FR3D.Import
-    Biobase.DataSource.Infernal.Taxonomy
-    Biobase.DataSource.Infernal.Taxonomy.Import
-    Biobase.DataSource.Infernal.VerboseHit
-    Biobase.DataSource.Infernal.VerboseHit.Export
-    Biobase.DataSource.Infernal.VerboseHit.Import
-    Biobase.DataSource.Infernal.VerboseHit.Internal
-    Biobase.DataSource.MCFold
-    Biobase.DataSource.MCFold.Conversions
-    Biobase.DataSource.MCFold.Import
-    Biobase.DataSource.TrainingData
     Biobase.Primary
     Biobase.Primary.Bounds
     Biobase.Primary.Hashed
