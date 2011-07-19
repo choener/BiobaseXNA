@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -19,6 +20,7 @@ import Data.Ix (Ix(..))
 import Data.Tuple (swap)
 
 import Biobase.Primary
+import Biobase.Primary.Bounds
 
 
 
@@ -34,7 +36,7 @@ type Pair = (Nuc,Nuc)
 
 -- | Annotation for a basepair.
 
-type ExtPairAnnotation = (Edge,Edge,CTisomerism)
+type ExtPairAnnotation = (CTisomerism,Edge,Edge)
 
 -- | An extended basepair is a basepair, annotated with edge and CTisomerism.
 
@@ -125,6 +127,16 @@ instance Bounded Edge where
   minBound = wc
   maxBound = unknownEdge
 
+instance Bounds Edge where
+  minNormal = wc
+  maxNormal = wc
+  minExtended = wc
+  maxExtended = hoogsteen
+
+instance Enum Edge where
+  toEnum   = Edge
+  fromEnum = unEdge
+
 -- ** Instances for 'CTisomerism'
 
 deriving instance Prim CTisomerism
@@ -136,3 +148,21 @@ instance Bounded CTisomerism where
   minBound = cis
   maxBound = unknownCT
 
+instance Bounds CTisomerism where
+  minNormal = cis
+  maxNormal = cis
+  minExtended = cis
+  maxExtended = trans
+
+instance Enum CTisomerism where
+  toEnum   = CT
+  fromEnum = unCT
+
+-- ** special show instances
+
+-- | This one requires ghc head
+--
+-- TODO maybe newtype this triple?
+
+instance Show (CTisomerism,Edge,Edge) where
+  show (ct,eI,eJ) = concat [show ct, show eI, show eJ]

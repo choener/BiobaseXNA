@@ -17,15 +17,15 @@
 module Biobase.Primary where
 
 import Data.Char (toUpper)
+import Data.Ix (Ix(..))
 import Data.Primitive.Types
+import Data.Tuple (swap)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Text as T
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
-import Data.Ix (Ix(..))
-import Data.Tuple (swap)
 
 import Biobase.Primary.Bounds
 
@@ -83,7 +83,6 @@ charNucList =
   ]
 
 nucCharList = map swap charNucList
-
 
 
 

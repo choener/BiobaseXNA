@@ -23,8 +23,12 @@ extra-source-files:
 library
   build-depends:
     base >3 && <5,
+    text,
     bytestring,
-    vector >=0.7 && <0.8,
+    primitive,
+    tuple,
+    vector-read-instances,
+    vector >=0.7 && <0.8
 
   exposed-modules:
     Biobase.Primary
