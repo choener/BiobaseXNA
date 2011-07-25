@@ -95,13 +95,13 @@ test :: (Int,[ExtPairIdx])
 test = (20,test')
 
 test' =
-  [ ((2,15),(wc,wc,cis))
-  , ((3,14),(wc,wc,cis))
-  , ((4,13),(wc,wc,cis))
-  , ((5,12),(wc,wc,cis))
-  , ((6,10),(wc,hoogsteen,trans))
-  , ((2,18),(sugar,sugar,trans))
-  , ((15,18),(sugar,sugar,cis))
+  [ ((2,15),(cis,wc,wc))
+  , ((3,14),(cis,wc,wc))
+  , ((4,13),(cis,wc,wc))
+  , ((5,12),(cis,wc,wc))
+  , ((6,10),(trans,wc,hoogsteen))
+  , ((2,18),(trans,sugar,sugar))
+  , ((15,18),(cis,sugar,sugar))
   ]
 
 
@@ -131,7 +131,7 @@ instance MkD2Secondary D1Secondary where
   fromD2S (D2S xs) = D1S . VU.map (sel1 . sel1) $ xs
 
 instance MkD2Secondary (Int,[ExtPairIdx]) where
-  mkD2S (len,ps) = let xs = concatMap (\((i,j),(e1,e2,ct)) ->
+  mkD2S (len,ps) = let xs = concatMap (\((i,j),(ct,e1,e2)) ->
                                           [ (i, (j,e1,ct))
                                           , (j, (i,e2,ct))
                                           ]) ps
@@ -140,7 +140,7 @@ instance MkD2Secondary (Int,[ExtPairIdx]) where
   fromD2S (D2S s) = ( VU.length s
                     , let (xs,ys) = unzip . VU.toList $ s
                           g i j = let z = s VU.! i in if sel1 (sel1 z) == j then sel2 (sel1 z) else sel2 (sel2 z)
-                          f (i,(j,eI,ct)) = ((i,j),(eI,g j i,ct))
+                          f (i,(j,eI,ct)) = ((i,j),(ct,eI,g j i))
                       in
                       map f . filter (\(i,(j,_,_)) -> i<j && j>=0) $ zip [0..] xs ++ zip [0..] ys
                     )
