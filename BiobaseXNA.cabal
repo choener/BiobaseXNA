@@ -1,5 +1,5 @@
 name:           BiobaseXNA
-version:        0.5.0.0
+version:        0.5.0.1
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@tbi.univie.ac.at
 homepage:       http://www.tbi.univie.ac.at/~choener/
@@ -23,12 +23,12 @@ extra-source-files:
 library
   build-depends:
     base >3 && <5,
-    text,
     bytestring,
     primitive,
+    text,
     tuple,
-    vector-read-instances,
-    vector >=0.7 && <0.8
+    vector >=0.7 && <0.8,
+    vector-read-instances
 
   exposed-modules:
     Biobase.Primary

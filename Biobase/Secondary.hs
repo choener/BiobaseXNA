@@ -1,6 +1,8 @@
+{-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE StandaloneDeriving #-}
 
 -- | Secondary structure: define basepairs as Int-tuples, the three edges, a
@@ -18,11 +20,23 @@ import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 import Data.Ix (Ix(..))
 import Data.Tuple (swap)
+import Data.List as L
+import Data.Char (toLower, toUpper)
 
 import Biobase.Primary
 import Biobase.Primary.Bounds
 
 
+
+-- | Easy reading of a three-Char string into a triple.
+
+threeChar :: String -> ExtPairAnnotation
+threeChar s@[c,x,y]
+  | Just c' <- L.lookup (toLower c) charCTList
+  , Just x' <- L.lookup (toUpper x) charEdgeList
+  , Just y' <- L.lookup (toUpper y) charEdgeList
+  = (c',x',y')
+  | otherwise = error $ "can't convert string: " ++ s
 
 -- | A basepair is simply a pair of Ints which are 0-indexing a sequence.
 --
@@ -89,8 +103,8 @@ antiCT = undefined
 paraCT = undefined
 
 charCTList =
-  [ ('C',cis)
-  , ('T',trans)
+  [ ('c',cis)
+  , ('t',trans)
   -- TODO antiCT, paraCT
   ]
 
@@ -164,5 +178,5 @@ instance Enum CTisomerism where
 --
 -- TODO maybe newtype this triple?
 
-instance Show (CTisomerism,Edge,Edge) where
-  show (ct,eI,eJ) = concat [show ct, show eI, show eJ]
+--instance Show (CTisomerism,Edge,Edge) where
+--  show (ct,eI,eJ) = concat [show ct, show eI, show eJ]
