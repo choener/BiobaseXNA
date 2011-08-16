@@ -48,12 +48,14 @@ type Primary = VU.Vector Nuc
 
 -- * Efficient nucleotide encoding
 
--- A 'Nuc'leotide is simply an Int wrapped up.
+-- A 'Nuc'leotide is simply an Int wrapped up. 'nIMI' provides for
+-- intermolecular initialization, 'nN' stands for "any" nucleotides, 'nA',
+-- 'nC', 'nG', 'nT' / 'nU' are normal nucleotides.
 
 newtype Nuc = Nuc {unNuc :: Int}
   deriving (Eq,Ord,Ix)
 
-(nN : nA : nC : nG : nT : _) = map Nuc [0 .. ]
+(nN : nA : nC : nG : nT : nIMI : _) = map Nuc [0 .. ]
 nU = nT
 
 acgt = [nA..nT]

@@ -40,6 +40,9 @@ instance RemovePseudoKnots (VU.Vector PairIdx) where
         Just pos = VU.elemIndex mmx cnts
         incomp (i,j) = VU.length $ VU.filter (\(k,l) -> i<k&&k<j&&j<l || k<i&&i<l&&l<j) ps
 
+instance RemovePseudoKnots [PairIdx] where
+  removeByCounting = VU.toList . removeByCounting . VU.fromList
+
 -- | Remove pseudoknotted pairs from extended RNA secondary structures.
 
 instance RemovePseudoKnots (VU.Vector ExtPairIdx) where
@@ -53,3 +56,6 @@ instance RemovePseudoKnots (VU.Vector ExtPairIdx) where
         mmx = VU.maximum cnts
         Just pos = VU.elemIndex mmx cnts
         incomp ((i,j),_) = VU.length $ VU.filter (\((k,l),_) -> i<k&&k<j&&j<l || k<i&&i<l&&l<j) ps
+
+instance RemovePseudoKnots [ExtPairIdx] where
+  removeByCounting = VU.toList . removeByCounting . VU.fromList
