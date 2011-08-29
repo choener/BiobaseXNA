@@ -1,5 +1,5 @@
 name:           BiobaseXNA
-version:        0.5.0.1
+version:        0.5.1.0
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@tbi.univie.ac.at
 homepage:       http://www.tbi.univie.ac.at/~choener/
@@ -38,6 +38,7 @@ library
     Biobase.Secondary.Constraint
     Biobase.Secondary.Diagrams
     Biobase.Secondary.PseudoKnots
+    Biobase.Secondary.Vienna
 
   ghc-options:
     -O2

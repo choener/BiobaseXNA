@@ -38,28 +38,6 @@ threeChar s@[c,x,y]
   = (c',x',y')
   | otherwise = error $ "can't convert string: " ++ s
 
--- | A basepair is simply a pair of Ints which are 0-indexing a sequence.
---
--- TODO storable vector, newtype, peek/poke?
-
-type PairIdx = (Int,Int)
-
--- | A pair as a tuple containing 'Nuc's.
-
-type Pair = (Nuc,Nuc)
-
--- | Annotation for a basepair.
-
-type ExtPairAnnotation = (CTisomerism,Edge,Edge)
-
--- | An extended basepair is a basepair, annotated with edge and CTisomerism.
-
-type ExtPairIdx = (PairIdx,ExtPairAnnotation)
-
--- | An extended basepair, with nucleotides an annotation.
-
-type ExtPair = (Pair,ExtPairAnnotation)
-
 -- | Each nucleotide in a pair may be paired using one of three edges:
 -- watson-crik, sugar, or hoogsteen.
 
@@ -172,7 +150,35 @@ instance Enum CTisomerism where
   toEnum   = CT
   fromEnum = unCT
 
--- ** special show instances
+
+
+-- * Types
+
+-- | A basepair is simply a pair of Ints which are 0-indexing a sequence.
+--
+-- TODO storable vector, newtype, peek/poke?
+
+type PairIdx = (Int,Int)
+
+-- | A pair as a tuple containing 'Nuc's.
+
+type Pair = (Nuc,Nuc)
+
+-- | Annotation for a basepair.
+
+type ExtPairAnnotation = (CTisomerism,Edge,Edge)
+
+-- | An extended basepair is a basepair, annotated with edge and CTisomerism.
+
+type ExtPairIdx = (PairIdx,ExtPairAnnotation)
+
+-- | An extended basepair, with nucleotides an annotation.
+
+type ExtPair = (Pair,ExtPairAnnotation)
+
+
+
+-- * special show instances
 
 -- | This one requires ghc head
 --
@@ -180,3 +186,4 @@ instance Enum CTisomerism where
 
 --instance Show (CTisomerism,Edge,Edge) where
 --  show (ct,eI,eJ) = concat [show ct, show eI, show eJ]
+
