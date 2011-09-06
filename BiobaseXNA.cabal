@@ -1,5 +1,5 @@
 name:           BiobaseXNA
-version:        0.5.1.0
+version:        0.5.2.0
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@tbi.univie.ac.at
 homepage:       http://www.tbi.univie.ac.at/~choener/
@@ -17,6 +17,10 @@ description:
                 efficient encodings for short sequences, as required by RNA
                 folding tools. Extended RNA secondary structures can be
                 represented as well.
+                .
+                Changes since 0.5.1.0
+                .
+                * bonusTable for constrained folding
 
 extra-source-files:
 
@@ -28,7 +32,8 @@ library
     text,
     tuple,
     vector >=0.7 && <0.8,
-    vector-read-instances
+    vector-read-instances,
+    PrimitiveArray
 
   exposed-modules:
     Biobase.Primary
