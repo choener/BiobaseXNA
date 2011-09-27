@@ -16,7 +16,6 @@
 module Biobase.Secondary.Diagrams where
 
 import qualified Data.Vector.Unboxed as VU
-import Data.Vector.Unboxed.Read
 import Data.List (sort,groupBy,sortBy)
 import Data.Tuple.Select (sel1,sel2)
 import Data.Tuple (swap)
