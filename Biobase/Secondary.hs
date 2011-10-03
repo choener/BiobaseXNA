@@ -1,3 +1,4 @@
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -84,6 +85,7 @@ charCTList =
   [ ('c',cis)
   , ('t',trans)
   -- TODO antiCT, paraCT
+  -- TODO '?' type (??? could denote bifurcation)
   ]
 
 ctCharList = map swap charCTList
@@ -178,6 +180,28 @@ type ExtPair = (Pair,ExtPairAnnotation)
 
 
 
+-- * little helpers
+
+cWW = (cis,wc,wc)
+cWS = (cis,wc,sugar)
+cWH = (cis,wc,hoogsteen)
+cSW = (cis,sugar,wc)
+cSS = (cis,sugar,sugar)
+cSH = (cis,sugar,hoogsteen)
+cHW = (cis,hoogsteen,wc)
+cHS = (cis,hoogsteen,sugar)
+cHH = (cis,hoogsteen,hoogsteen)
+tWW = (trans,wc,wc)
+tWS = (trans,wc,sugar)
+tWH = (trans,wc,hoogsteen)
+tSW = (trans,sugar,wc)
+tSS = (trans,sugar,sugar)
+tSH = (trans,sugar,hoogsteen)
+tHW = (trans,hoogsteen,wc)
+tHS = (trans,hoogsteen,sugar)
+tHH = (trans,hoogsteen,hoogsteen)
+
+
 -- * special show instances
 
 -- | This one requires ghc head
@@ -187,3 +211,37 @@ type ExtPair = (Pair,ExtPairAnnotation)
 --instance Show (CTisomerism,Edge,Edge) where
 --  show (ct,eI,eJ) = concat [show ct, show eI, show eJ]
 
+
+
+-- * tuple-like selection
+
+-- | Selection of nucleotides and/or type classes independent of which type we
+-- are looking at.
+
+class BaseSelect a b | a -> b where
+  -- |  select first index or nucleotide
+  baseL :: a -> b
+  -- | select second index or nucleotide
+  baseR :: a -> b
+  -- | select basepair type if existing or return default cWW
+  baseT :: a -> ExtPairAnnotation
+
+-- | extended pairtype annotation given
+
+instance BaseSelect ((a,a),ExtPairAnnotation) a where
+  baseL ((a,_),_) = a
+  baseR ((_,b),_) = b
+  baseT (_,t) = t
+  {-# INLINE baseL #-}
+  {-# INLINE baseR #-}
+  {-# INLINE baseT #-}
+
+-- | simple cis/wc-wc basepairs
+
+instance BaseSelect (a,a) a where
+  baseL (a,_) = a
+  baseR (_,a) = a
+  baseT _ = cWW
+  {-# INLINE baseL #-}
+  {-# INLINE baseR #-}
+  {-# INLINE baseT #-}
