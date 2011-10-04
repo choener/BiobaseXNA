@@ -227,6 +227,12 @@ class BaseSelect a b | a -> b where
   baseR :: a -> b
   -- | select basepair type if existing or return default cWW
   baseT :: a -> ExtPairAnnotation
+  -- | update first index or nucleotide
+  updL :: a -> b -> a
+  -- | update second index or nucleotide
+  updR :: a -> b -> a
+  -- | update basepair type, error if not possible due to type a
+  updT :: a -> ExtPairAnnotation -> a
 
 -- | extended pairtype annotation given
 
@@ -234,9 +240,15 @@ instance BaseSelect ((a,a),ExtPairAnnotation) a where
   baseL ((a,_),_) = a
   baseR ((_,b),_) = b
   baseT (_,t) = t
+  updL ((_,y),t) n = ((n,y),t)
+  updR ((x,_),t) n = ((x,n),t)
+  updT (xy,_) n = (xy,n)
   {-# INLINE baseL #-}
   {-# INLINE baseR #-}
   {-# INLINE baseT #-}
+  {-# INLINE updL #-}
+  {-# INLINE updR #-}
+  {-# INLINE updT #-}
 
 -- | simple cis/wc-wc basepairs
 
@@ -244,6 +256,12 @@ instance BaseSelect (a,a) a where
   baseL (a,_) = a
   baseR (_,a) = a
   baseT _ = cWW
+  updL (_,y) n = (n,y)
+  updR (x,_) n = (x,n)
+  updT xy n = if n==cWW then xy else error $ "updT on standard pairs can not update to: " ++ show n
   {-# INLINE baseL #-}
   {-# INLINE baseR #-}
   {-# INLINE baseT #-}
+  {-# INLINE updL #-}
+  {-# INLINE updR #-}
+  {-# INLINE updT #-}
