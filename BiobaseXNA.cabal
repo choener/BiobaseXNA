@@ -20,7 +20,7 @@ description:
                 .
                 Changes since 0.5.3.0
                 .
-                * tuple-like (selN) selection of basepairing elements
+                * tuple-like (selN) selection of basepairing elements (baseL,baseR,baseT)
                 .
                 Changes since 0.5.1.0
                 .

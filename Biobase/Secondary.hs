@@ -37,6 +37,7 @@ threeChar s@[c,x,y]
   , Just x' <- L.lookup (toUpper x) charEdgeList
   , Just y' <- L.lookup (toUpper y) charEdgeList
   = (c',x',y')
+  | map toLower s == "bif" = (unknownCT,unknownEdge,unknownEdge)
   | otherwise = error $ "can't convert string: " ++ s
 
 -- | Each nucleotide in a pair may be paired using one of three edges:
@@ -84,6 +85,7 @@ paraCT = undefined
 charCTList =
   [ ('c',cis)
   , ('t',trans)
+  , ('?',unknownCT)
   -- TODO antiCT, paraCT
   -- TODO '?' type (??? could denote bifurcation)
   ]
