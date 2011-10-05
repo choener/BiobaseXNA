@@ -18,9 +18,23 @@ description:
                 folding tools. Extended RNA secondary structures can be
                 represented as well.
                 .
+                Contains data from:
+                .
+                Frequency and isostericity of RNA base pairs
+                .
+                Jesse Stombaugh, Craig L. Zirbel, Eric Westhof, and Neocles B. Leontis
+                .
+                Nucl. Acids Res. (2009)
+                .
+                doi:10.1093/nar/gkp011
+                .
+                .
+                .
                 Changes since 0.5.4.0
                 .
                 * tuple-like updating (updL, updR, updT)
+                .
+                * isostericity data, loaded from csv files
                 .
                 Changes since 0.5.3.0
                 .
@@ -31,11 +45,15 @@ description:
                 * bonusTable for constrained folding
 
 extra-source-files:
+  sources/isostericity-matrices.csv
+  sources/isostericity-detailed.csv
 
 library
   build-depends:
     base >3 && <5,
     bytestring,
+    csv,
+    file-embed,
     primitive,
     text,
     tuple,
@@ -49,6 +67,7 @@ library
     Biobase.Secondary
     Biobase.Secondary.Constraint
     Biobase.Secondary.Diagrams
+    Biobase.Secondary.Isostericity
     Biobase.Secondary.PseudoKnots
     Biobase.Secondary.Vienna
 
