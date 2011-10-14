@@ -1,3 +1,4 @@
+{-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -24,45 +25,79 @@ import Biobase.Secondary
 
 
 
+-- | Methods to determine the isostericity classes for a given basepair type,
+-- or alternatively which basepair types are in a certain isostericity class.
+--
+-- TODO This requires a major cleanup: right now we are handling 'String's as
+-- class descriptors, but we should really be newtype-wrapping or create enum
+-- data constructors.
+
 class IsostericityLookup a where
   -- | To which classes does a basepair+type belong
   getClasses :: a -> [String] -- TODO this should return [Class]
   -- | What basepairs+type are in a particular class
   inClass :: String -> [a]
 
+-- | For extended basepairs, we take the default mapping and go from there.
+--
+-- TODO inClass missing
+
 instance IsostericityLookup ExtPair where
-  getClasses p@((x,y),t)
+  getClasses p
     | Just cs <- M.lookup p defaultIsostericityMap
     = cs
-    {-
-    | cs <- M.lookup ((y,x),t) defaultIsostericityMap
+    | otherwise = []
+  inClass x = map fst . filter ((x `elem`).snd) $ M.assocs defaultIsostericityMap
+
+-- | Normal basepairs are assumed to have cWW basepairing.
+--
+-- TODO inClass missing
+
+instance IsostericityLookup Pair where
+  getClasses p
+    | Just cs <- M.lookup (p,cWW) defaultIsostericityMap
     = cs
-    | otherwise = [] -}
+    | otherwise = []
+  inClass x = map (baseP.fst) -- remove extended information
+            . filter ((cWW==).baseT.fst) -- keep only cWW pairs (baseT-ype)
+            . filter ((x `elem`).snd) -- select based on class
+            $ M.assocs defaultIsostericityMap
+
+
+
+-- ** default data
+
+-- | The default isostericity mapping.
 
 defaultIsostericityMap = mkIsostericityMap parsedCSV
 
--- | mapping of (pair,pairtype) to isostericity class
+-- | Mapping of (pair,pairtype) to isostericity class.
 
 mkIsostericityMap = M.fromListWith (\x y -> nub $ x++y) . mkIsostericityList
 
+-- | Process CSV list-of-lists to get the isostericity data.
+
 mkIsostericityList gs = concatMap f gs where
-  f g = map (\e -> ((let [x,y] = fst e in (mkNuc x, mkNuc y), threeChar bpt), nub $ snd e)) $ map entry xs where --  (bpt,map entry xs) where
+  f g = map (\e ->  ( ( let [x,y] = fst e
+                        in (mkNuc x, mkNuc y), threeChar bpt
+                      )
+                    , nub $ snd e)
+            ) $ map entry xs where
     bpt = head $ head g
     xs = tail g
     entry x = (x!!0, takeWhile ((=='I') . head) $ drop 2 x)
 
--- | 
+-- | Simple parsing of raw CSV data.
 
 parsedCSV = filter (not . null) gs where
   gs = map (filter ((""/=).head)) . groupBy (\x y -> ""/= (head y)) $ csv
   Right csv = parseCSV "isostericity/detailed" $ BS.unpack detailedCSV
 
-test = do
-  mapM_ (\p -> print p >> putStrLn "") parsedCSV
+
 
 -- ** Raw embeddings
 
--- | Raw CSV data
+-- | Raw CSV data, embedded into the library.
 
 detailedCSV :: ByteString
 detailedCSV = $(embedFile "sources/isostericity-detailed.csv")

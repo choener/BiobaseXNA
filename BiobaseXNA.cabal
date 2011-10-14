@@ -32,7 +32,9 @@ description:
                 .
                 Changes since 0.5.4.0
                 .
-                * tuple-like updating (updL, updR, updT)
+                * tuple-like updating (updL, updR, updP, updT)
+                .
+                * baseP pair selection
                 .
                 * isostericity data, loaded from csv files
                 .
@@ -51,6 +53,7 @@ extra-source-files:
 library
   build-depends:
     base >3 && <5,
+    containers,
     bytestring,
     csv,
     file-embed,
