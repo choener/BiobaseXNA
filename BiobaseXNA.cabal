@@ -26,9 +26,13 @@ description:
                 .
                 Nucl. Acids Res. (2009)
                 .
-                doi:10.1093\/nar\/gkp011
+                <http://dx.crossref.org/10.1093%2Fnar%2Fgkp011>
                 .
                 .
+                .
+                Changes since 0.5.5.0
+                .
+                * isostericity for the 6 "missing" classes
                 .
                 Changes since 0.5.4.0
                 .
