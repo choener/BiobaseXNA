@@ -15,6 +15,7 @@ module Biobase.Secondary.Isostericity where
 
 import Data.ByteString.Char8 (ByteString)
 import Data.FileEmbed (embedFile)
+import Data.Function (on)
 import Data.List
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Map as M
@@ -77,7 +78,8 @@ mkIsostericityMap = M.fromListWith (\x y -> nub $ x++y) . mkIsostericityList
 
 -- | Process CSV list-of-lists to get the isostericity data.
 
-mkIsostericityList gs = concatMap f gs where
+mkIsostericityList :: [[[String]]] -> [(ExtPair, [String])]
+mkIsostericityList gs = nubBy ((==) `on` fst) . concatMap turn . concatMap f $ gs where
   f g = map (\e ->  ( ( let [x,y] = fst e
                         in (mkNuc x, mkNuc y), threeChar bpt
                       )
@@ -86,6 +88,7 @@ mkIsostericityList gs = concatMap f gs where
     bpt = head $ head g
     xs = tail g
     entry x = (x!!0, takeWhile ((=='I') . head) $ drop 2 x)
+  turn entry@(((x,y),(wc,tx,ty)), cs) = [entry, (((y,x),(wc,ty,tx)), cs)]
 
 -- | Simple parsing of raw CSV data.
 
