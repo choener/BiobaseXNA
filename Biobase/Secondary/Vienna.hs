@@ -25,7 +25,7 @@ import Biobase.Primary.Bounds
 newtype ViennaPair = ViennaPair Int
   deriving (Eq,Ord,Ix)
 
-(vpNP:vpCG:vpGC:vpGU:vpUG:vpAU:vpUA:vpNS:_) = map ViennaPair [0..]
+(vpNP:vpCG:vpGC:vpGU:vpUG:vpAU:vpUA:vpNS:vpUndefined:_) = map ViennaPair [0..]
 
 class MkViennaPair a where
   mkViennaPair :: a -> ViennaPair
