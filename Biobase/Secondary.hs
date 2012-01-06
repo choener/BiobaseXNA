@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -15,14 +16,17 @@
 
 module Biobase.Secondary where
 
+import Data.Array.Repa.Index
+import Data.Array.Repa.Shape
+import Data.Char (toLower, toUpper)
+import Data.Ix (Ix(..))
+import Data.List as L
 import Data.Primitive.Types
+import Data.Tuple (swap)
+import GHC.Base (remInt,quotInt)
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
-import Data.Ix (Ix(..))
-import Data.Tuple (swap)
-import Data.List as L
-import Data.Char (toLower, toUpper)
 
 import Biobase.Primary
 import Biobase.Primary.Bounds
@@ -46,7 +50,39 @@ threeChar s@[c,x,y]
 newtype Edge = Edge {unEdge :: Int}
   deriving (Eq,Ord,Ix)
 
-(wc : sugar : hoogsteen : unknownEdge : _) = map Edge [0..]
+instance (Shape sh,Show sh) => Shape (sh :. Edge) where
+  rank (sh:._) = rank sh + 1
+  zeroDim = zeroDim:.Edge 0
+  unitDim = unitDim:.Edge 1 -- TODO does this one make sense?
+  intersectDim (sh1:.n1) (sh2:.n2) = intersectDim sh1 sh2 :. min n1 n2
+  addDim (sh1:.Edge n1) (sh2:.Edge n2) = addDim sh1 sh2 :. Edge (n1+n2) -- TODO will not necessarily yield a valid Edge
+  size (sh1:.Edge n) = size sh1 * n
+  sizeIsValid (sh1:.Edge n) = sizeIsValid (sh1:.n)
+  toIndex (sh1:.Edge sh2) (sh1':.Edge sh2') = toIndex (sh1:.sh2) (sh1':.sh2')
+  fromIndex (ds:.Edge d) n = fromIndex ds (n `quotInt` d) :. Edge r where
+                              r | rank ds == 0 = n
+                                | otherwise    = n `remInt` d
+  inShapeRange (sh1:.n1) (sh2:.n2) (idx:.i) = i>=n1 && i<n2 && inShapeRange sh1 sh2 idx
+  listOfShape (sh:.Edge n) = n : listOfShape sh
+  shapeOfList xx = case xx of
+    []   -> error "empty list in shapeOfList/Primary"
+    x:xs -> shapeOfList xs :. Edge x
+  deepSeq (sh:.n) x = deepSeq sh (n `seq` x)
+  {-# INLINE rank #-}
+  {-# INLINE zeroDim #-}
+  {-# INLINE unitDim #-}
+  {-# INLINE intersectDim #-}
+  {-# INLINE addDim #-}
+  {-# INLINE size #-}
+  {-# INLINE sizeIsValid #-}
+  {-# INLINE toIndex #-}
+  {-# INLINE fromIndex #-}
+  {-# INLINE inShapeRange #-}
+  {-# INLINE listOfShape #-}
+  {-# INLINE shapeOfList #-}
+  {-# INLINE deepSeq #-}
+
+(wc : sugar : hoogsteen : unknownEdge : edgeUndefined : _) = map Edge [0..]
 
 charEdgeList =
   [ ('W',wc)
@@ -78,7 +114,39 @@ instance Read Edge where
 newtype CTisomerism = CT {unCT :: Int}
   deriving (Eq,Ord,Ix)
 
-(cis : trans : unknownCT : _) = map CT [0..]
+instance (Shape sh,Show sh) => Shape (sh :. CTisomerism) where
+  rank (sh:._) = rank sh + 1
+  zeroDim = zeroDim:.CT 0
+  unitDim = unitDim:.CT 1 -- TODO does this one make sense?
+  intersectDim (sh1:.n1) (sh2:.n2) = intersectDim sh1 sh2 :. min n1 n2
+  addDim (sh1:.CT n1) (sh2:.CT n2) = addDim sh1 sh2 :. CT (n1+n2) -- TODO will not necessarily yield a valid CT
+  size (sh1:.CT n) = size sh1 * n
+  sizeIsValid (sh1:.CT n) = sizeIsValid (sh1:.n)
+  toIndex (sh1:.CT sh2) (sh1':.CT sh2') = toIndex (sh1:.sh2) (sh1':.sh2')
+  fromIndex (ds:.CT d) n = fromIndex ds (n `quotInt` d) :. CT r where
+                              r | rank ds == 0 = n
+                                | otherwise    = n `remInt` d
+  inShapeRange (sh1:.n1) (sh2:.n2) (idx:.i) = i>=n1 && i<n2 && inShapeRange sh1 sh2 idx
+  listOfShape (sh:.CT n) = n : listOfShape sh
+  shapeOfList xx = case xx of
+    []   -> error "empty list in shapeOfList/Primary"
+    x:xs -> shapeOfList xs :. CT x
+  deepSeq (sh:.n) x = deepSeq sh (n `seq` x)
+  {-# INLINE rank #-}
+  {-# INLINE zeroDim #-}
+  {-# INLINE unitDim #-}
+  {-# INLINE intersectDim #-}
+  {-# INLINE addDim #-}
+  {-# INLINE size #-}
+  {-# INLINE sizeIsValid #-}
+  {-# INLINE toIndex #-}
+  {-# INLINE fromIndex #-}
+  {-# INLINE inShapeRange #-}
+  {-# INLINE listOfShape #-}
+  {-# INLINE shapeOfList #-}
+  {-# INLINE deepSeq #-}
+
+(cis : trans : unknownCT : undefinedCT : _) = map CT [0..]
 antiCT = undefined
 paraCT = undefined
 
