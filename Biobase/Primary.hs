@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -18,10 +19,13 @@
 
 module Biobase.Primary where
 
+import Data.Array.Repa.Index
+import Data.Array.Repa.Shape
 import Data.Char (toUpper)
 import Data.Ix (Ix(..))
 import Data.Primitive.Types
 import Data.Tuple (swap)
+import GHC.Base (remInt,quotInt)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Text as T
@@ -55,7 +59,7 @@ type Primary = VU.Vector Nuc
 newtype Nuc = Nuc {unNuc :: Int}
   deriving (Eq,Ord,Ix)
 
-(nN : nA : nC : nG : nT : nIMI : _) = map Nuc [0 .. ]
+(nN : nA : nC : nG : nT : nIMI : nUndefined : _) = map Nuc [0 .. ]
 nU = nT
 
 acgt = [nA..nT]
@@ -114,6 +118,44 @@ deriving instance Prim Nuc
 deriving instance VGM.MVector VU.MVector Nuc
 deriving instance VG.Vector VU.Vector Nuc
 deriving instance VU.Unbox Nuc
+
+-- Shape-based indexing. Nucleotide representations go from nN (0) to nU (4),
+-- with additional symbols being available for specialized problems. This is a
+-- bit of a problem for shape-based indexing. In particular, we need to be
+-- careful with size operations. To include, say, all of nN to nU one needs a
+-- size of (z:.nIMI), as nIMI is the first element not in the size anymore.
+
+instance (Shape sh,Show sh) => Shape (sh :. Nuc) where
+  rank (sh:._) = rank sh + 1
+  zeroDim = zeroDim:.Nuc 0
+  unitDim = unitDim:.Nuc 1 -- TODO does this one make sense?
+  intersectDim (sh1:.n1) (sh2:.n2) = intersectDim sh1 sh2 :. min n1 n2
+  addDim (sh1:.Nuc n1) (sh2:.Nuc n2) = addDim sh1 sh2 :. Nuc (n1+n2) -- TODO will not necessarily yield a valid Nuc
+  size (sh1:.Nuc n) = size sh1 * n
+  sizeIsValid (sh1:.Nuc n) = sizeIsValid (sh1:.n)
+  toIndex (sh1:.Nuc sh2) (sh1':.Nuc sh2') = toIndex (sh1:.sh2) (sh1':.sh2')
+  fromIndex (ds:.Nuc d) n = fromIndex ds (n `quotInt` d) :. Nuc r where
+                              r | rank ds == 0 = n
+                                | otherwise    = n `remInt` d
+  inShapeRange (sh1:.n1) (sh2:.n2) (idx:.i) = i>=n1 && i<n2 && inShapeRange sh1 sh2 idx
+  listOfShape (sh:.Nuc n) = n : listOfShape sh
+  shapeOfList xx = case xx of
+    []   -> error "empty list in shapeOfList/Primary"
+    x:xs -> shapeOfList xs :. Nuc x
+  deepSeq (sh:.n) x = deepSeq sh (n `seq` x)
+  {-# INLINE rank #-}
+  {-# INLINE zeroDim #-}
+  {-# INLINE unitDim #-}
+  {-# INLINE intersectDim #-}
+  {-# INLINE addDim #-}
+  {-# INLINE size #-}
+  {-# INLINE sizeIsValid #-}
+  {-# INLINE toIndex #-}
+  {-# INLINE fromIndex #-}
+  {-# INLINE inShapeRange #-}
+  {-# INLINE listOfShape #-}
+  {-# INLINE shapeOfList #-}
+  {-# INLINE deepSeq #-}
 
 -- | The bounded instance from GHC proper. Captures all defined symbols.
 

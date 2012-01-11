@@ -1,9 +1,9 @@
 name:           BiobaseXNA
-version:        0.5.6.0
+version:        0.6.0.0
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@tbi.univie.ac.at
 homepage:       http://www.tbi.univie.ac.at/~choener/
-copyright:      Christian Hoener zu Siederdissen, 2011
+copyright:      Christian Hoener zu Siederdissen, 2011-2012
 category:       Bioinformatics
 synopsis:       Efficient RNA/DNA representations
 license:        GPL-3
@@ -30,25 +30,9 @@ description:
                 .
                 .
                 .
-                Changes since 0.5.5.0
+                New in 0.6.0.0
                 .
-                * isostericity for the 6 "missing" classes
-                .
-                Changes since 0.5.4.0
-                .
-                * tuple-like updating (updL, updR, updP, updT)
-                .
-                * baseP pair selection
-                .
-                * isostericity data, loaded from csv files
-                .
-                Changes since 0.5.3.0
-                .
-                * tuple-like (selN) selection of basepairing elements (baseL,baseR,baseT)
-                .
-                Changes since 0.5.1.0
-                .
-                * bonusTable for constrained folding
+                * Updated to PrimitiveArrays >= 0.1
 
 extra-source-files:
   sources/isostericity-matrices.csv
@@ -65,7 +49,8 @@ library
     text,
     tuple,
     vector >=0.9 && <0.10,
-    PrimitiveArray
+    repa >= 2,
+    PrimitiveArray >= 0.1
 
   exposed-modules:
     Biobase.Primary
@@ -80,4 +65,8 @@ library
 
   ghc-options:
     -O2
+
+source-repository head
+  type: git
+  location: git://github.com/choener/BiobaseXNA
 

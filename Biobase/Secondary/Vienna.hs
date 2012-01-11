@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -8,12 +9,15 @@
 
 module Biobase.Secondary.Vienna where
 
+import Data.Array.Repa.Index
+import Data.Array.Repa.Shape
 import Data.Ix
 import Data.Primitive.Types
+import Data.Tuple (swap)
+import GHC.Base (remInt,quotInt)
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
-import Data.Tuple (swap)
 
 import Biobase.Primary
 import Biobase.Primary.Bounds
@@ -25,7 +29,39 @@ import Biobase.Primary.Bounds
 newtype ViennaPair = ViennaPair Int
   deriving (Eq,Ord,Ix)
 
-(vpNP:vpCG:vpGC:vpGU:vpUG:vpAU:vpUA:vpNS:_) = map ViennaPair [0..]
+instance (Shape sh,Show sh) => Shape (sh :. ViennaPair) where
+  rank (sh:._) = rank sh + 1
+  zeroDim = zeroDim:.ViennaPair 0
+  unitDim = unitDim:.ViennaPair 1 -- TODO does this one make sense?
+  intersectDim (sh1:.n1) (sh2:.n2) = intersectDim sh1 sh2 :. min n1 n2
+  addDim (sh1:.ViennaPair n1) (sh2:.ViennaPair n2) = addDim sh1 sh2 :. ViennaPair (n1+n2) -- TODO will not necessarily yield a valid ViennaPair
+  size (sh1:.ViennaPair n) = size sh1 * n
+  sizeIsValid (sh1:.ViennaPair n) = sizeIsValid (sh1:.n)
+  toIndex (sh1:.ViennaPair sh2) (sh1':.ViennaPair sh2') = toIndex (sh1:.sh2) (sh1':.sh2')
+  fromIndex (ds:.ViennaPair d) n = fromIndex ds (n `quotInt` d) :. ViennaPair r where
+                              r | rank ds == 0 = n
+                                | otherwise    = n `remInt` d
+  inShapeRange (sh1:.n1) (sh2:.n2) (idx:.i) = i>=n1 && i<n2 && inShapeRange sh1 sh2 idx
+  listOfShape (sh:.ViennaPair n) = n : listOfShape sh
+  shapeOfList xx = case xx of
+    []   -> error "empty list in shapeOfList/Primary"
+    x:xs -> shapeOfList xs :. ViennaPair x
+  deepSeq (sh:.n) x = deepSeq sh (n `seq` x)
+  {-# INLINE rank #-}
+  {-# INLINE zeroDim #-}
+  {-# INLINE unitDim #-}
+  {-# INLINE intersectDim #-}
+  {-# INLINE addDim #-}
+  {-# INLINE size #-}
+  {-# INLINE sizeIsValid #-}
+  {-# INLINE toIndex #-}
+  {-# INLINE fromIndex #-}
+  {-# INLINE inShapeRange #-}
+  {-# INLINE listOfShape #-}
+  {-# INLINE shapeOfList #-}
+  {-# INLINE deepSeq #-}
+
+(vpNP:vpCG:vpGC:vpGU:vpUG:vpAU:vpUA:vpNS:vpUndefined:_) = map ViennaPair [0..]
 
 class MkViennaPair a where
   mkViennaPair :: a -> ViennaPair

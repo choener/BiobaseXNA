@@ -6,6 +6,8 @@
 
 module Biobase.Secondary.Constraint where
 
+import Data.Array.Repa.Index
+import Data.Array.Repa.Shape
 import Data.Char (toLower)
 import Data.Primitive.Types
 import qualified Data.Vector.Generic as VG
@@ -13,7 +15,7 @@ import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
 import Data.PrimitiveArray
-import Data.PrimitiveArray.Ix
+import Data.PrimitiveArray.Unboxed
 
 import Biobase.Secondary.Diagrams
 
@@ -48,49 +50,49 @@ nobonusCC = VU.fromList ".x"
 -- TODO and again, we should parametrize over "Energy", "Score", etc (that is,
 -- Prim a)
 
-bonusTable :: Double -> Double -> Constraint -> PrimArray (Int,Int) Double
+bonusTable :: Double -> Double -> Constraint -> PrimArray DIM2 Double
 bonusTable bonus malus (Constraint constraint) = arr where
-  arr = fromAssocs (0,0) (n,n) 0 $ bonusBr ++ bonusAn ++ bonusBa ++ malusBr ++ malusAn ++ malusX
+  arr = fromAssocs zeroDim (Z:.n:.n) 0 $ bonusBr ++ bonusAn ++ bonusBa ++ malusBr ++ malusAn ++ malusX
   n = VU.length constraint -1
   infixl 1 `xor`
   xor a b = a && not b || not a && b
   -- "()" bonus energies
-  bonusBr = [ ((i,j),bonus)
+  bonusBr = [ (Z:.i:.j,bonus)
             | (i,('(',j)) <- zip [0..] $ VU.toList constraint
             ]
-  malusBr = [ ((i,j),malus)
+  malusBr = [ (Z:.i:.j,malus)
             | i <- [0..n]
             , j <- [i..n]
             , let bi = constraint VU.! i
             , let bj = constraint VU.! j
             , fst bi == '(' && snd bi /= j || fst bj == ')' && snd bj /= i
             ]
-  bonusAn = [ ((i,j),bonus)
+  bonusAn = [ (Z:.i:.j,bonus)
             | i<-[0..n]
             , fst (constraint VU.! i) == '<'
             , j<-[i+1..n]
             ] ++
-            [ ((i,j),bonus)
+            [ (Z:.i:.j,bonus)
             | j<-[0..n]
             , fst (constraint VU.! j) == '>'
             , i<-[0..j-1]
             ]
-  malusAn = [ ((i,j),malus)
+  malusAn = [ (Z:.i:.j,malus)
             | i<-[0..n]
             , j<-[i+1..n]
             , fst (constraint VU.! j) == '<'
             ] ++
-            [ ((i,j),malus)
+            [ (Z:.i:.j,malus)
             | i<-[0..n]
             , j<-[i+1..n]
             , fst (constraint VU.! i) == '>'
             ]
-  bonusBa = [ ((i,j),bonus)
+  bonusBa = [ (Z:.i:.j,bonus)
             | i<-[0..n]
             , j<-[i+1..n]
             , fst (constraint VU.! i) == '|' || fst (constraint VU.! j) == '|'
             ]
-  malusX  = [ ((i,j),malus)
+  malusX  = [ (Z:.i:.j,malus)
             | i<-[0..n]
             , j<-[i+1..n]
             , fst (constraint VU.! i) == 'x' || fst (constraint VU.! j) == 'x'
