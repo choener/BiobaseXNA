@@ -111,6 +111,7 @@ instance Bounds ViennaPair where
 instance Show ViennaPair where
   show x
     | Just s <- x `lookup` pairToString = s
+    | otherwise = "??"
 
 instance Read ViennaPair where
   readsPrec p [] = []
