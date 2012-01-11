@@ -64,7 +64,7 @@ library
     Biobase.Secondary.Vienna
 
   ghc-options:
-    -O2
+    -Odph -funbox-strict-fields
 
 source-repository head
   type: git
