@@ -15,7 +15,7 @@ import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
 import Data.PrimitiveArray
-import Data.PrimitiveArray.Unboxed
+import Data.PrimitiveArray.Unboxed.Zero
 
 import Biobase.Secondary.Diagrams
 

@@ -12,6 +12,8 @@ module Biobase.Secondary.Vienna where
 import Data.Array.Repa.Index
 import Data.Array.Repa.Shape
 import Data.Ix
+import Data.PrimitiveArray
+import Data.PrimitiveArray.Unboxed.Zero
 import Data.Primitive.Types
 import Data.Tuple (swap)
 import GHC.Base (remInt,quotInt)
@@ -68,7 +70,8 @@ class MkViennaPair a where
   fromViennaPair :: ViennaPair -> a
 
 instance MkViennaPair (Nuc,Nuc) where
-  mkViennaPair (b1,b2)
+  mkViennaPair (b1,b2) = viennaPairTable `unsafeIndex` (Z:.b1:.b2)
+  {-
     | b1==nC&&b2==nG = vpCG
     | b1==nG&&b2==nC = vpGC
     | b1==nG&&b2==nU = vpGU
@@ -76,6 +79,8 @@ instance MkViennaPair (Nuc,Nuc) where
     | b1==nA&&b2==nU = vpAU
     | b1==nU&&b2==nA = vpUA
     | otherwise = vpNS
+  -}
+  {-# INLINE mkViennaPair #-}
   fromViennaPair p
     | p==vpCG = (nC,nG)
     | p==vpGC = (nG,nC)
@@ -84,6 +89,17 @@ instance MkViennaPair (Nuc,Nuc) where
     | p==vpAU = (nA,nU)
     | p==vpUA = (nU,nA)
     | otherwise = error "non-standard pairs can't be backcasted"
+  {-# INLINE fromViennaPair #-}
+
+viennaPairTable = fromAssocs (Z:.nN:.nN) (Z:.nU:.nU) vpNS
+  [ (Z:.nC:.nG , vpCG)
+  , (Z:.nG:.nC , vpGC)
+  , (Z:.nG:.nU , vpGU)
+  , (Z:.nU:.nG , vpUG)
+  , (Z:.nA:.nU , vpAU)
+  , (Z:.nU:.nA , vpUA)
+  ]
+{-# NOINLINE viennaPairTable #-}
 
 deriving instance VGM.MVector VU.MVector ViennaPair
 deriving instance VG.Vector VU.Vector ViennaPair
