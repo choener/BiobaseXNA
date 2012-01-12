@@ -14,6 +14,8 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
+import Data.PrimitiveArray
+
 import Biobase.Primary
 
 
@@ -35,10 +37,14 @@ deriving instance VU.Unbox HashedPrimary
 -- with each other. All indices start at 0.
 --
 -- The empty input produces an index of 0.
+--
+-- TODO currently goes the very inefficient way of creating a temporary vector
+-- for 'ps'. We could in O(1) create a vector from a Primary ...
 
 mkHashedPrimary :: (Nuc,Nuc) -> Primary -> HashedPrimary
-mkHashedPrimary (l,u) ps = assert (VU.all (\p -> l<=p && p<=u) ps) $ HashedPrimary idx where
+mkHashedPrimary (l,u) ps' = assert (VU.all (\p -> l<=p && p<=u) ps) $ HashedPrimary idx where
   idx   = VU.sum $ VU.zipWith f ps (VU.enumFromStepN (VU.length ps -1) (-1) (VU.length ps))
   f p c = (unNuc p - unNuc l) * (cnst^c)
   cnst = unNuc u - unNuc l + 1
+  ps = VU.fromList $ toList ps'
 {-# INLINE mkHashedPrimary #-}

@@ -33,6 +33,9 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
+import Data.PrimitiveArray
+import Data.PrimitiveArray.Unboxed.Zero
+
 import Biobase.Primary.Bounds
 
 
@@ -46,7 +49,7 @@ import Biobase.Primary.Bounds
 class MkPrimary a where
   mkPrimary :: a -> Primary
 
-type Primary = VU.Vector Nuc
+type Primary = PrimArray (Z:.Int) Nuc
 
 
 
@@ -180,7 +183,7 @@ instance Enum Nuc where
 -- ** Instances for 'MkPrimary'
 
 instance MkPrimary String where
-  mkPrimary = VU.fromList . map mkNuc
+  mkPrimary xs = fromList (Z:.0) (Z:.length xs -1) $ map mkNuc xs
 
 instance MkPrimary BS.ByteString where
   mkPrimary = mkPrimary . BS.unpack
@@ -192,5 +195,5 @@ instance MkPrimary T.Text where
   mkPrimary = mkPrimary . T.unpack
 
 instance MkPrimary [Nuc] where
-  mkPrimary = VU.fromList
+  mkPrimary xs = fromList (Z:.0) (Z:.length xs -1) xs
 
