@@ -51,6 +51,13 @@ class MkPrimary a where
 
 type Primary = PrimArray (Z:.Int) Nuc
 
+instance Ord Primary where
+  xs <= ys
+    | bx==by    = toList xs <= toList ys
+    | otherwise = bx<=by
+    where (_,Z:.bx) = bounds xs
+          (_,Z:.by) = bounds ys
+
 
 
 -- * Efficient nucleotide encoding
