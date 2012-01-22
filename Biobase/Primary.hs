@@ -22,6 +22,7 @@ module Biobase.Primary where
 import Data.Array.Repa.Index
 import Data.Array.Repa.Shape
 import Data.Char (toUpper)
+import Data.ExtShape
 import Data.Ix (Ix(..))
 import Data.Primitive.Types
 import Data.Tuple (swap)
@@ -49,7 +50,14 @@ import Biobase.Primary.Bounds
 class MkPrimary a where
   mkPrimary :: a -> Primary
 
-type Primary = PrimArray (Z:.Int) Nuc
+type Primary = Arr0 DIM1 Nuc
+
+instance Eq Primary where
+  xs == ys
+    | bx==by = sliceEq xs zeroDim ys zeroDim bx
+    | otherwise = False
+    where (_,bx) = bounds xs
+          (_,by) = bounds ys
 
 instance Ord Primary where
   xs <= ys
@@ -166,6 +174,10 @@ instance (Shape sh,Show sh) => Shape (sh :. Nuc) where
   {-# INLINE listOfShape #-}
   {-# INLINE shapeOfList #-}
   {-# INLINE deepSeq #-}
+
+instance (Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. Nuc) where
+  subDim (sh1:.Nuc n1) (sh2:.Nuc n2) = subDim sh1 sh2 :. Nuc (n1-n2)
+  rangeList (sh1:.Nuc n1) (sh2:.Nuc n2) = [ sh:.Nuc n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
 
 -- | The bounded instance from GHC proper. Captures all defined symbols.
 

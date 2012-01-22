@@ -11,9 +11,10 @@ module Biobase.Secondary.Vienna where
 
 import Data.Array.Repa.Index
 import Data.Array.Repa.Shape
+import Data.ExtShape
 import Data.Ix
-import Data.PrimitiveArray
-import Data.PrimitiveArray.Unboxed.Zero
+import Data.PrimitiveArray as PA
+import Data.PrimitiveArray.Unboxed.Zero as PA
 import Data.Primitive.Types
 import Data.Tuple (swap)
 import GHC.Base (remInt,quotInt)
@@ -63,6 +64,10 @@ instance (Shape sh,Show sh) => Shape (sh :. ViennaPair) where
   {-# INLINE shapeOfList #-}
   {-# INLINE deepSeq #-}
 
+instance (Eq sh, Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. ViennaPair) where
+  subDim (sh1:.ViennaPair n1) (sh2:.ViennaPair n2) = subDim sh1 sh2 :. (ViennaPair $ n1-n2)
+  rangeList (sh1:.ViennaPair n1) (sh2:.ViennaPair n2) = [sh:.ViennaPair n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
+
 (vpNP:vpCG:vpGC:vpGU:vpUG:vpAU:vpUA:vpNS:vpUndefined:_) = map ViennaPair [0..]
 
 class MkViennaPair a where
@@ -70,7 +75,7 @@ class MkViennaPair a where
   fromViennaPair :: ViennaPair -> a
 
 instance MkViennaPair (Nuc,Nuc) where
-  mkViennaPair (b1,b2) = viennaPairTable `unsafeIndex` (Z:.b1:.b2)
+  mkViennaPair (b1,b2) = viennaPairTable `PA.index` (Z:.b1:.b2)
   {-
     | b1==nC&&b2==nG = vpCG
     | b1==nG&&b2==nC = vpGC
@@ -91,6 +96,7 @@ instance MkViennaPair (Nuc,Nuc) where
     | otherwise = error "non-standard pairs can't be backcasted"
   {-# INLINE fromViennaPair #-}
 
+viennaPairTable :: Arr0 (Z:.Nuc:.Nuc) ViennaPair
 viennaPairTable = fromAssocs (Z:.nN:.nN) (Z:.nU:.nU) vpNS
   [ (Z:.nC:.nG , vpCG)
   , (Z:.nG:.nC , vpGC)

@@ -50,7 +50,7 @@ nobonusCC = VU.fromList ".x"
 -- TODO and again, we should parametrize over "Energy", "Score", etc (that is,
 -- Prim a)
 
-bonusTable :: Double -> Double -> Constraint -> PrimArray DIM2 Double
+bonusTable :: Double -> Double -> Constraint -> Arr0 DIM2 Double
 bonusTable bonus malus (Constraint constraint) = arr where
   arr = fromAssocs zeroDim (Z:.n:.n) 0 $ bonusBr ++ bonusAn ++ bonusBa ++ malusBr ++ malusAn ++ malusX
   n = VU.length constraint -1
