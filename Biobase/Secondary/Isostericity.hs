@@ -87,7 +87,7 @@ mkIsostericityList gs = nubBy ((==) `on` fst) . concatMap turn . concatMap f $ g
             ) $ map entry xs where
     bpt = head $ head g
     xs = tail g
-    entry x = (x!!0, takeWhile ((=='I') . head) $ drop 2 x)
+    entry x = (x!!0, map (filter (\z -> not $ z `elem` "()")) . takeWhile ('I' `elem`) . drop 2 $ x)
   turn entry@(((x,y),(wc,tx,ty)), cs) = [entry, (((y,x),(wc,ty,tx)), cs)]
 
 -- | Simple parsing of raw CSV data.

@@ -49,8 +49,7 @@ library
     text,
     tuple,
     vector >=0.9 && <0.10,
-    repa >= 2,
-    PrimitiveArray >= 0.2.0.0
+    PrimitiveArray == 0.2.0.0
 
   exposed-modules:
     Biobase.Primary

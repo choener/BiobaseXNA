@@ -1,3 +1,4 @@
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE PatternGuards #-}
@@ -16,8 +17,8 @@
 
 module Biobase.Secondary where
 
-import Data.Array.Repa.Index
-import Data.Array.Repa.Shape
+import "PrimitiveArray" Data.Array.Repa.Index
+import "PrimitiveArray" Data.Array.Repa.Shape
 import Data.Char (toLower, toUpper)
 import Data.Ix (Ix(..))
 import Data.List as L

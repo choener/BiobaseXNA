@@ -1,3 +1,4 @@
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE OverlappingInstances #-}
@@ -19,8 +20,8 @@
 
 module Biobase.Primary where
 
-import Data.Array.Repa.Index
-import Data.Array.Repa.Shape
+import "PrimitiveArray" Data.Array.Repa.Index
+import "PrimitiveArray" Data.Array.Repa.Shape
 import Data.Char (toUpper)
 import Data.ExtShape
 import Data.Ix (Ix(..))
