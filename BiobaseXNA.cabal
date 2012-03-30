@@ -1,5 +1,5 @@
 name:           BiobaseXNA
-version:        0.6.2.3
+version:        0.6.2.4
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@tbi.univie.ac.at
 homepage:       http://www.tbi.univie.ac.at/~choener/
@@ -41,10 +41,10 @@ extra-source-files:
 library
   build-depends:
     base >3 && <5,
-    containers >= 0.4,
     bytestring >= 0.9,
+    containers >= 0.4,
     csv        == 0.1.2,
-    file-embed == 0.0.*,
+    file-embed >= 0.0.4.1,
     primitive  >= 0.4.1,
     text       >= 0.11,
     tuple      >= 0.2,
