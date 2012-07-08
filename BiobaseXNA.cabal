@@ -1,5 +1,5 @@
 name:           BiobaseXNA
-version:        0.6.2.4
+version:        0.6.2.5
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@tbi.univie.ac.at
 homepage:       http://www.tbi.univie.ac.at/~choener/
@@ -49,7 +49,7 @@ library
     text       >= 0.11,
     tuple      >= 0.2,
     vector     >=0.9 && <0.10,
-    PrimitiveArray == 0.2.1.1
+    PrimitiveArray == 0.2.2.0
 
   exposed-modules:
     Biobase.Primary
@@ -63,7 +63,7 @@ library
     Biobase.Secondary.Vienna
 
   ghc-options:
-    -Odph -funbox-strict-fields -fspec-constr
+    -O2 -funbox-strict-fields
 
 source-repository head
   type: git
