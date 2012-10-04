@@ -45,10 +45,10 @@ library
     containers     >= 0.4           ,
     csv            == 0.1.2         ,
     file-embed     >= 0.0.4         ,
-    primitive      >= 0.4.1         ,
+    primitive      >= 0.4           ,
     text           >= 0.11          ,
     tuple          >= 0.2           ,
-    vector         >= 0.9 && <0.10  ,
+    vector         >= 0.10          ,
     PrimitiveArray == 0.3.0.0
 
   exposed-modules:
