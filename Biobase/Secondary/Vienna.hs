@@ -1,3 +1,4 @@
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -9,18 +10,19 @@
 
 module Biobase.Secondary.Vienna where
 
-import Data.Array.Repa.Index
-import Data.Array.Repa.Shape
-import Data.ExtShape
 import Data.Ix
-import Data.PrimitiveArray as PA
-import Data.PrimitiveArray.Unboxed.Zero as PA
 import Data.Primitive.Types
 import Data.Tuple (swap)
 import GHC.Base (remInt,quotInt)
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
+
+import Data.ExtShape
+import Data.PrimitiveArray as PA
+import Data.PrimitiveArray.Zero.Unboxed as PA
+import "PrimitiveArray" Data.Array.Repa.Index
+import "PrimitiveArray" Data.Array.Repa.Shape
 
 import Biobase.Primary
 import Biobase.Primary.Bounds

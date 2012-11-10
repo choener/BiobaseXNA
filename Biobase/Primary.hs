@@ -20,10 +20,7 @@
 
 module Biobase.Primary where
 
-import "PrimitiveArray" Data.Array.Repa.Index
-import "PrimitiveArray" Data.Array.Repa.Shape
 import Data.Char (toUpper)
-import Data.ExtShape
 import Data.Ix (Ix(..))
 import Data.Primitive.Types
 import Data.Tuple (swap)
@@ -35,8 +32,11 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
+import Data.ExtShape
 import Data.PrimitiveArray
-import Data.PrimitiveArray.Unboxed.Zero
+import Data.PrimitiveArray.Zero.Unboxed
+import "PrimitiveArray" Data.Array.Repa.Index
+import "PrimitiveArray" Data.Array.Repa.Shape
 
 import Biobase.Primary.Bounds
 

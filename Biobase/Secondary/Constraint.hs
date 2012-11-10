@@ -1,3 +1,4 @@
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -6,8 +7,6 @@
 
 module Biobase.Secondary.Constraint where
 
-import Data.Array.Repa.Index
-import Data.Array.Repa.Shape
 import Data.Char (toLower)
 import Data.Primitive.Types
 import qualified Data.Vector.Generic as VG
@@ -15,7 +14,9 @@ import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
 import Data.PrimitiveArray
-import Data.PrimitiveArray.Unboxed.Zero
+import Data.PrimitiveArray.Zero.Unboxed
+import "PrimitiveArray" Data.Array.Repa.Index
+import "PrimitiveArray" Data.Array.Repa.Shape
 
 import Biobase.Secondary.Diagrams
 
