@@ -1,5 +1,5 @@
 name:           BiobaseXNA
-version:        0.6.3.0
+version:        0.6.3.1
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@tbi.univie.ac.at
 homepage:       http://www.tbi.univie.ac.at/~choener/
@@ -49,7 +49,7 @@ library
     text           >= 0.11          ,
     tuple          >= 0.2           ,
     vector         >= 0.10          ,
-    PrimitiveArray == 0.4.0.0
+    PrimitiveArray >= 0.4.0.1
 
   exposed-modules:
     Biobase.Primary
