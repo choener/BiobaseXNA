@@ -59,3 +59,4 @@ instance RemovePseudoKnots (VU.Vector ExtPairIdx) where
 
 instance RemovePseudoKnots [ExtPairIdx] where
   removeByCounting = VU.toList . removeByCounting . VU.fromList
+

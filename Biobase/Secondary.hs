@@ -17,8 +17,8 @@
 
 module Biobase.Secondary where
 
-import "PrimitiveArray" Data.Array.Repa.Index
-import "PrimitiveArray" Data.Array.Repa.Shape
+import Data.Array.Repa.Index
+import Data.Array.Repa.Shape
 import Data.Char (toLower, toUpper)
 import Data.Ix (Ix(..))
 import Data.List as L
@@ -346,3 +346,4 @@ instance BaseSelect (a,a) a where
   {-# INLINE updR #-}
   {-# INLINE updP #-}
   {-# INLINE updT #-}
+

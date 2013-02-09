@@ -4,16 +4,11 @@
 
 -- | Types for RNA secondary structure. Types vary from the simplest array
 -- (D1Secondary) to rather complex ones.
---
--- TODO The complex ones are still coming in from other libraries.
---
--- TODO can we use Char8 instead of Char?
---
--- TODO prepare for extended RNA secondary structures!
 
 {-# LANGUAGE RecordWildCards #-}
 
 module Biobase.Secondary.Diagrams where
+
 
 import qualified Data.Vector.Unboxed as VU
 import Data.List (sort,groupBy,sortBy)
@@ -200,3 +195,4 @@ dotBracket dict xs = sort . concatMap (f xs) $ dict where
     g k (s:st) (x:xs)
       | r==x = (s,k) : g (k+1) st xs
     g a b c = error $ show (a,b,c)
+

@@ -32,14 +32,11 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
-import Data.ExtShape
-import Data.PrimitiveArray
-import Data.PrimitiveArray.Zero.Unboxed
-import "PrimitiveArray" Data.Array.Repa.Index
-import "PrimitiveArray" Data.Array.Repa.Shape
+import Data.Array.Repa.ExtShape
+import Data.Array.Repa.Index
+import Data.Array.Repa.Shape
 
 import Biobase.Primary.Bounds
-
 
 
 -- * Convert different types of sequence representations to the internal
@@ -51,21 +48,8 @@ import Biobase.Primary.Bounds
 class MkPrimary a where
   mkPrimary :: a -> Primary
 
-type Primary = Arr0 DIM1 Nuc
+type Primary = VU.Vector Nuc
 
-instance Eq Primary where
-  xs == ys
-    | bx==by = sliceEq xs zeroDim ys zeroDim bx
-    | otherwise = False
-    where (_,bx) = bounds xs
-          (_,by) = bounds ys
-
-instance Ord Primary where
-  xs <= ys
-    | bx==by    = toList xs <= toList ys
-    | otherwise = bx<=by
-    where (_,Z:.bx) = bounds xs
-          (_,Z:.by) = bounds ys
 
 
 
@@ -78,13 +62,12 @@ instance Ord Primary where
 newtype Nuc = Nuc {unNuc :: Int}
   deriving (Eq,Ord,Ix)
 
-(nN : nA : nC : nG : nT : nIMI : nUndefined : _) = map Nuc [0 .. ]
-nU = nT
+(nN : nA : nC : nG : nT : nU : nIMI : nUndefined : _) = map Nuc [0 .. ]
 
-acgt = [nA..nT]
-acgu = acgt
-nacgt = [nN..nT]
-nacgu = nacgt
+acgt = [nA,nC,nG,nT]
+acgu = [nA,nC,nG,nU]
+nacgt = nN:acgt
+nacgu = nN:acgu
 
 -- | Translate between 'Char's and 'Nuc's.
 
@@ -180,6 +163,7 @@ instance (Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. Nuc) where
   subDim (sh1:.Nuc n1) (sh2:.Nuc n2) = subDim sh1 sh2 :. Nuc (n1-n2)
   rangeList (sh1:.Nuc n1) (sh2:.Nuc n2) = [ sh:.Nuc n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
 
+{-
 -- | The bounded instance from GHC proper. Captures all defined symbols.
 
 instance Bounded Nuc where
@@ -194,6 +178,9 @@ instance Bounds Nuc where
   minExtended = nN
   maxExtended = nT
 
+
+-}
+
 -- | Enum
 
 instance Enum Nuc where
@@ -203,7 +190,7 @@ instance Enum Nuc where
 -- ** Instances for 'MkPrimary'
 
 instance MkPrimary String where
-  mkPrimary xs = fromList (Z:.0) (Z:.length xs -1) $ map mkNuc xs
+  mkPrimary = VU.fromList . map mkNuc
 
 instance MkPrimary BS.ByteString where
   mkPrimary = mkPrimary . BS.unpack
@@ -215,5 +202,5 @@ instance MkPrimary T.Text where
   mkPrimary = mkPrimary . T.unpack
 
 instance MkPrimary [Nuc] where
-  mkPrimary xs = fromList (Z:.0) (Z:.length xs -1) xs
+  mkPrimary = VU.fromList
 

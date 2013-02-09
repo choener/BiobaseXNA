@@ -1,9 +1,9 @@
 name:           BiobaseXNA
-version:        0.6.3.1
+version:        0.7.0.0
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@tbi.univie.ac.at
 homepage:       http://www.tbi.univie.ac.at/~choener/
-copyright:      Christian Hoener zu Siederdissen, 2011-2012
+copyright:      Christian Hoener zu Siederdissen, 2011-2013
 category:       Bioinformatics
 synopsis:       Efficient RNA/DNA representations
 license:        GPL-3
@@ -13,10 +13,13 @@ stability:      experimental
 cabal-version:  >= 1.6.0
 description:
                 This is a base library for bioinformatics with emphasis on RNA
-                and DNA primary structure and related tools. Provided are
-                efficient encodings for short sequences, as required by RNA
-                folding tools. Extended RNA secondary structures can be
-                represented as well.
+                and DNA primary structure.
+                .
+                Provided are efficient encodings for short sequences, as
+                required by RNA folding tools. Extended RNA secondary
+                structures can be represented as well.
+                .
+                .
                 .
                 Contains data from:
                 .
@@ -30,7 +33,11 @@ description:
                 .
                 .
                 .
-                New in 0.6.2.0
+                new in 0.7
+                .
+                * updated to PrimitiveArray >= 0.5
+                .
+                new in 0.6.2.0
                 .
                 * Updated to PrimitiveArray >= 0.2.0.0
 
@@ -41,15 +48,16 @@ extra-source-files:
 library
   build-depends:
     base >3 && <5,
-    bytestring     >= 0.9           ,
+    bytestring     >= 0.10          ,
     containers     >= 0.4           ,
     csv            == 0.1.2         ,
-    file-embed     >= 0.0.4         ,
-    primitive      >= 0.4           ,
+    file-embed     >= 0.0.4.7       ,
+    primitive      >= 0.5           ,
+    repa           >= 3.2           ,
     text           >= 0.11          ,
     tuple          >= 0.2           ,
     vector         >= 0.10          ,
-    PrimitiveArray >= 0.4.0.1
+    PrimitiveArray >= 0.5
 
   exposed-modules:
     Biobase.Primary
