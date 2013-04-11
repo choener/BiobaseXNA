@@ -14,6 +14,7 @@ import Data.Primitive.Types
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
+import Prelude as P
 
 import Data.PrimitiveArray
 import Data.PrimitiveArray.Zero
@@ -51,7 +52,7 @@ nobonusCC = VU.fromList ".x"
 -- TODO and again, we should parametrize over "Energy", "Score", etc (that is,
 -- Prim a)
 
-bonusTable :: Double -> Double -> Constraint -> U DIM2 Double
+bonusTable :: Double -> Double -> Constraint -> Unboxed DIM2 Double
 bonusTable bonus malus (Constraint constraint) = arr where
   arr = fromAssocs zeroDim (Z:.n:.n) 0 $ bonusBr ++ bonusAn ++ bonusBa ++ malusBr ++ malusAn ++ malusX
   n = VU.length constraint -1
@@ -109,7 +110,7 @@ testC = putStrLn $ f as where
 -- * Instances
 
 instance MkConstraint String where
-  mkConstraint xs = mkConstraint . VU.fromList . map toLower $ xs
+  mkConstraint xs = mkConstraint . VU.fromList . P.map toLower $ xs
 
 instance MkConstraint (VU.Vector Char) where
   mkConstraint cs = Constraint $ VU.zip cs ks where

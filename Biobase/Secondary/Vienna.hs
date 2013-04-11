@@ -19,6 +19,7 @@ import GHC.Base (remInt,quotInt)
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
+import Prelude as P
 
 import Data.Array.Repa.ExtShape
 import Data.PrimitiveArray as PA
@@ -70,7 +71,7 @@ instance (Eq sh, Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. ViennaPair) 
   subDim (sh1:.ViennaPair n1) (sh2:.ViennaPair n2) = subDim sh1 sh2 :. (ViennaPair $ n1-n2)
   rangeList (sh1:.ViennaPair n1) (sh2:.ViennaPair n2) = [sh:.ViennaPair n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
 
-(vpNP:vpCG:vpGC:vpGU:vpUG:vpAU:vpUA:vpNS:vpUndefined:_) = map ViennaPair [0..]
+(vpNP:vpCG:vpGC:vpGU:vpUG:vpAU:vpUA:vpNS:vpUndefined:_) = P.map ViennaPair [0..]
 
 class MkViennaPair a where
   mkViennaPair :: a -> ViennaPair
@@ -96,7 +97,7 @@ instance MkViennaPair (Nuc,Nuc) where
     | otherwise = error "non-standard pairs can't be backcasted"
   {-# INLINE fromViennaPair #-}
 
-viennaPairTable :: U (Z:.Nuc:.Nuc) ViennaPair
+viennaPairTable :: Unboxed (Z:.Nuc:.Nuc) ViennaPair
 viennaPairTable = fromAssocs (Z:.nN:.nN) (Z:.nU:.nU) vpNS
   [ (Z:.nC:.nG , vpCG)
   , (Z:.nG:.nC , vpGC)
@@ -142,7 +143,7 @@ instance Read ViennaPair where
     | x ==' ' = readsPrec p (y:xs)
     | Just n <- (x:y:[]) `lookup` s2p = [(n,xs)]
     | otherwise = []
-    where s2p = (map swap pairToString)
+    where s2p = (P.map swap pairToString)
 
 
 
