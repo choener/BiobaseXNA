@@ -85,6 +85,7 @@ d2Compare ((i,j),_) ((k,l),_)
 
 d2Grouping ((i,j),_) ((k,l),_) = i<=k && j>=l
 
+{-
 test :: (Int,[ExtPairIdx])
 test = (20,test')
 
@@ -97,7 +98,7 @@ test' =
   , ((2,18),(trans,sugar,sugar))
   , ((15,18),(cis,sugar,sugar))
   ]
-
+-}
 
 -- * Instances for D1S
 

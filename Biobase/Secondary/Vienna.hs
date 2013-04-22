@@ -97,6 +97,17 @@ instance MkViennaPair (Nuc,Nuc) where
     | otherwise = error "non-standard pairs can't be backcasted"
   {-# INLINE fromViennaPair #-}
 
+isViennaPair :: Nuc -> Nuc -> Bool
+isViennaPair a b = f a b where
+  f l r =  l==nC && r==nG
+        || l==nG && r==nC
+        || l==nA && r==nU
+        || l==nU && r==nA
+        || l==nG && r==nU
+        || l==nU && r==nG
+  {-# INLINE f #-}
+{-# INLINE isViennaPair #-}
+
 viennaPairTable :: Unboxed (Z:.Nuc:.Nuc) ViennaPair
 viennaPairTable = fromAssocs (Z:.nN:.nN) (Z:.nU:.nU) vpNS
   [ (Z:.nC:.nG , vpCG)

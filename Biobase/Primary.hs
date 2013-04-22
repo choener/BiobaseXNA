@@ -66,6 +66,7 @@ newtype Nuc = Nuc {unNuc :: Int}
 
 acgt = [nA,nC,nG,nT]
 acgu = [nA,nC,nG,nU]
+cgau = [nC,nG,nA,nU]
 nacgt = nN:acgt
 nacgu = nN:acgu
 
