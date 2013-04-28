@@ -73,6 +73,14 @@ library
   ghc-options:
     -O2 -funbox-strict-fields
 
+executable SubOptDistance
+  build-depends:
+    cmdargs >= 0.10
+  main-is:
+    SubOptDistance.hs
+  ghc-options:
+    -O2
+
 source-repository head
   type: git
   location: git://github.com/choener/BiobaseXNA
