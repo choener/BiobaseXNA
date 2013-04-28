@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
@@ -30,7 +31,8 @@ main = do
   let xs = map (\(s,e) -> (s,dotBracket ["()"] s,e)) $ map (break isSpace) xs'
   let q = dotBracket ["()"] structure
   let (d,x,e) = getMinimalDistance q xs
-  printf "%4d %s %s\n" d x e
+  let distance :: Double = read e - ((/100) . read $ words sqn !! 1)
+  printf "%4d %s %s %8.2f\n" d x e distance
 
 getMinimalDistance :: [PairIdx] -> [(String,[PairIdx],String)] -> (Int,String,String)
 getMinimalDistance q xs = g $ minimumBy (comparing f) xs where
