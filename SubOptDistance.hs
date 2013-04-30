@@ -25,9 +25,15 @@ data Options = Options
 
 options = Options
   { structure = "" &= args
-  , aq = True
-  , qa = True
-  }
+  , aq = True &= help "perform target \\\\ query calculation"
+  , qa = True &= help "perform query \\\\ target calculation"
+  } &= help helpLines
+
+helpLines = unlines
+  [ "This program reads a bunch of RNAsubopt lines on STDIN. Provide an"
+  , "additional structure as the argument line. The result will be the"
+  , "sub-optimal line with lowest base pair distance to the query line."
+  ]
 
 main = do
   Options{..} <- cmdArgs options
