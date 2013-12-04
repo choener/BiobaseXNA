@@ -50,7 +50,7 @@ library
     base >3 && <5,
     bytestring     >= 0.10          ,
     containers     >= 0.4           ,
-    csv            == 0.1.2         ,
+    csv            >= 0.1.2         ,
     file-embed     >= 0.0.4.7       ,
     primitive      >= 0.5           ,
     repa           >= 3.2           ,
@@ -60,6 +60,7 @@ library
     PrimitiveArray >= 0.5
 
   exposed-modules:
+    Biobase.Codon
     Biobase.Primary
     Biobase.Primary.Bounds
     Biobase.Primary.Hashed
