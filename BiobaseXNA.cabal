@@ -30,20 +30,13 @@ description:
                 Nucl. Acids Res. (2009)
                 .
                 <http://dx.crossref.org/10.1093%2Fnar%2Fgkp011>
-                .
-                .
-                .
-                new in 0.7
-                .
-                * updated to PrimitiveArray >= 0.5
-                .
-                new in 0.6.2.0
-                .
-                * Updated to PrimitiveArray >= 0.2.0.0
+
+
 
 extra-source-files:
   sources/isostericity-matrices.csv
   sources/isostericity-detailed.csv
+  changelog
 
 library
   build-depends:
@@ -53,11 +46,11 @@ library
     csv            >= 0.1.2         ,
     file-embed     >= 0.0.4.7       ,
     primitive      >= 0.5           ,
+    PrimitiveArray >= 0.5           ,
     repa           >= 3.2           ,
     text           >= 0.11          ,
     tuple          >= 0.2           ,
-    vector         >= 0.10          ,
-    PrimitiveArray >= 0.5
+    vector         >= 0.10
 
   exposed-modules:
     Biobase.Codon
