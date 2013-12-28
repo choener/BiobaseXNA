@@ -1,8 +1,16 @@
-0.7
-    * updated to PrimitiveArray >= 0.5
+0.8.0.0
+-------
 
-    * added Codon table
+- Biobase.Codon -> Biobase.AAseq
+- and efficient encoding of AAseqs
+
+0.7
+---
+
+- updated to PrimitiveArray >= 0.5
+- added Codon table
 
 0.6.2.0
+-------
 
-    * Updated to PrimitiveArray >= 0.2.0.0
+- Updated to PrimitiveArray >= 0.2.0.0
