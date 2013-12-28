@@ -40,7 +40,9 @@ newtype AA = AA { unAA :: Int }
 
 -- * Creating functions and aa data.
 
-(aStop:aA:aC:aD:aE:aF:aG:aH:aI:aK:aL:aM:aN:aP:aQ:aR:aS:aT:aV:aW:aY:aUndefined:_) = map AA [0..]
+(aStop:aA:aB:aC:aD:aE:aF:aG:aH:aI:aK:aL:aM:aN:aP:aQ:aR:aS:aT:aV:aW:aX:aY:aZ:aUndefined:_) = map AA [0..]
+
+aaRange = [aStop .. pred aUndefined]
 
 -- | Translate 'Char' amino acid representation into efficient 'AA' newtype.
 
@@ -77,6 +79,7 @@ primaryToAAseq = mkAAseq . go where
 charAAList =
   [ ('/',aStop)
   , ('A',aA)
+  , ('B',aB)
   , ('C',aC)
   , ('D',aD)
   , ('E',aE)
@@ -95,7 +98,9 @@ charAAList =
   , ('T',aT)
   , ('V',aV)
   , ('W',aW)
+  , ('X',aX)
   , ('Y',aY)
+  , ('Z',aZ)
   ]
 
 aACharList = map swap charAAList
