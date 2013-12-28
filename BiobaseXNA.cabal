@@ -13,21 +13,19 @@ stability:      experimental
 cabal-version:  >= 1.6.0
 description:
                 This is a base library for bioinformatics with emphasis on RNA
-                and DNA primary structure.
+                and DNA primary structure as well as amino acid sequences.
                 .
                 Provided are efficient encodings for short sequences, as
                 required by RNA folding tools. Extended RNA secondary
                 structures can be represented as well.
                 .
-                .
-                .
                 Contains data from:
                 .
+                @
                 Frequency and isostericity of RNA base pairs
-                .
                 Jesse Stombaugh, Craig L. Zirbel, Eric Westhof, and Neocles B. Leontis
-                .
                 Nucl. Acids Res. (2009)
+                @
                 .
                 <http://dx.crossref.org/10.1093%2Fnar%2Fgkp011>
 
@@ -53,7 +51,7 @@ library
     vector         >= 0.10
 
   exposed-modules:
-    Biobase.Codon
+    Biobase.AAseq
     Biobase.Primary
     Biobase.Primary.Bounds
     Biobase.Primary.Hashed

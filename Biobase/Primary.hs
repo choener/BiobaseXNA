@@ -164,24 +164,6 @@ instance (Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. Nuc) where
   subDim (sh1:.Nuc n1) (sh2:.Nuc n2) = subDim sh1 sh2 :. Nuc (n1-n2)
   rangeList (sh1:.Nuc n1) (sh2:.Nuc n2) = [ sh:.Nuc n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
 
-{-
--- | The bounded instance from GHC proper. Captures all defined symbols.
-
-instance Bounded Nuc where
-  minBound = nN
-  maxBound = nT
-
--- | Special bounds for energy / score arrays
-
-instance Bounds Nuc where
-  minNormal = nA
-  maxNormal = nT
-  minExtended = nN
-  maxExtended = nT
-
-
--}
-
 -- | Enum
 
 instance Enum Nuc where
