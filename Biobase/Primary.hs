@@ -95,6 +95,22 @@ charNucList =
 
 nucCharList = map swap charNucList
 
+-- ** Methods to convert between DNA and RNA
+--
+-- TODO add all the rev-comp stuff and whatnot
+
+-- | @T@ to @U@
+
+convT2U x
+  | x == nT   = nU
+  | otherwise = x
+
+-- | @U@ to @T@
+
+convU2T x
+  | x == nU   = nT
+  | otherwise = x
+
 
 
 -- * Instances of different type classes
