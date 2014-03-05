@@ -10,11 +10,13 @@
 module Biobase.Secondary.Diagrams where
 
 
+import           Control.Applicative
+import           Control.Arrow
+import           Data.List (sort,groupBy,sortBy)
+import           Data.Tuple.Select (sel1,sel2)
+import           Data.Tuple (swap)
 import qualified Data.Vector.Unboxed as VU
-import Data.List (sort,groupBy,sortBy)
-import Data.Tuple.Select (sel1,sel2)
-import Data.Tuple (swap)
-import Control.Arrow
+import           Text.Printf
 
 import Biobase.Primary
 import Biobase.Secondary
@@ -155,7 +157,7 @@ instance MkD2Secondary (Int,[ExtPairIdx]) where
 instance MkD1Secondary ([String],String) where
   mkD1S (dict,xs) = mkD1S (length xs,ps) where
     ps :: [(Int,Int)]
-    ps = dotBracket dict xs
+    ps = unsafeDotBracket dict xs
   fromD1S (D1S s) = ([], zipWith f [0..] $ VU.toList s) where
     f k (-1) = '.'
     f k p
@@ -185,8 +187,8 @@ instance MkD1Secondary (VU.Vector Char) where
 -- | Secondary structure parser which allows pseudoknots, if they use different
 -- kinds of brackets.
 
-dotBracket :: [String] -> String -> [(Int,Int)]
-dotBracket dict xs = sort . concatMap (f xs) $ dict where
+unsafeDotBracket :: [String] -> String -> [(Int,Int)]
+unsafeDotBracket dict xs = sort . concatMap (f xs) $ dict where
   f xs [l,r] = g 0 [] . map (\x -> if x `elem` [l,r] then x else '.') $ xs where
     g :: Int -> [Int] -> String -> [(Int,Int)]
     g _ st [] = []
@@ -196,4 +198,21 @@ dotBracket dict xs = sort . concatMap (f xs) $ dict where
     g k (s:st) (x:xs)
       | r==x = (s,k) : g (k+1) st xs
     g a b c = error $ show (a,b,c)
+
+-- | Secondary structure parser with a notion of errors. We either return a
+-- @Right@ structure, including flags, or a @Left@ error.
+
+dotBracket :: [String] -> String -> Either String ( [(Int,Int)] )
+dotBracket dict xs = fmap (sort . concat) . sequence . map (f xs) $ dict where
+  f ys [l,r] = g 0 [] . map (\x -> if x `elem` [l,r] then x else '.') $ ys where
+    g :: Int -> [Int] -> String -> Either String ( [(Int,Int)] )
+    g _ [] [] = pure []
+    g k st ('.':xs) = g (k+1) st xs
+    g k st (x:xs) | l==x = g (k+1) (k:st) xs
+    g k (s:st) (x:xs) | r==x = ((s,k):) <$> g (k+1) st xs
+    g k [] xs = fail $ printf "too many closing brackets at position %d: '%s'" k xs
+    g k st [] = fail $ printf "too many opening brackets, opening bracket(s) at: %s" (show $ reverse st)
+    g a b c   = fail $ printf "unspecified error: " ++ show (a,b,c)
+  f xs lr@(_:_:_:_) = fail $ printf "unsound dictionary: %s" lr
+  f xs lr     = fail $ printf "unspecified error: dict: %s, input: %s" lr xs
 
