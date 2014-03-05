@@ -1,3 +1,9 @@
+0.8.2.0
+-------
+
+- dotBracket -> unsafeDotBracket
+- new 'dotBracket' function works in the error monad
+
 0.8.1.1
 -------
 
