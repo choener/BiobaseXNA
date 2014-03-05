@@ -203,16 +203,16 @@ unsafeDotBracket dict xs = sort . concatMap (f xs) $ dict where
 -- @Right@ structure, including flags, or a @Left@ error.
 
 dotBracket :: [String] -> String -> Either String ( [(Int,Int)] )
-dotBracket dict xs = fmap (sort . concat) . sequence . map (f xs) $ dict where
+dotBracket dict str = fmap (sort . concat) . sequence . map (f str) $ dict where
   f ys [l,r] = g 0 [] . map (\x -> if x `elem` [l,r] then x else '.') $ ys where
     g :: Int -> [Int] -> String -> Either String ( [(Int,Int)] )
     g _ [] [] = pure []
     g k st ('.':xs) = g (k+1) st xs
     g k st (x:xs) | l==x = g (k+1) (k:st) xs
     g k (s:st) (x:xs) | r==x = ((s,k):) <$> g (k+1) st xs
-    g k [] xs = fail $ printf "too many closing brackets at position %d: '%s'" k xs
-    g k st [] = fail $ printf "too many opening brackets, opening bracket(s) at: %s" (show $ reverse st)
-    g a b c   = fail $ printf "unspecified error: " ++ show (a,b,c)
-  f xs lr@(_:_:_:_) = fail $ printf "unsound dictionary: %s" lr
-  f xs lr     = fail $ printf "unspecified error: dict: %s, input: %s" lr xs
+    g k [] xs = fail $ printf "too many closing brackets at position %d: '%s' (dot-bracket: %s)" k xs str
+    g k st [] = fail $ printf "too many opening brackets, opening bracket(s) at: %s (dot-bracket: %s)" (show $ reverse st) str
+    g a b c   = fail $ printf "unspecified error: %s (dot-bracket: %s)" (show (a,b,c)) str
+  f xs lr@(_:_:_:_) = fail $ printf "unsound dictionary: %s (dot-bracket: %s)" lr str
+  f xs lr     = fail $ printf "unspecified error: dict: %s, input: %s (dot-bracket: %s)" lr xs str
 

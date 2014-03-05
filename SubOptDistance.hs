@@ -5,15 +5,16 @@
 
 module Main where
 
-import System.Console.CmdArgs
 import Control.Arrow
 import Data.Char (isSpace)
+import Data.Either (either)
 import Data.List
 import Data.Ord
+import System.Console.CmdArgs
 import Text.Printf
 
-import Biobase.Secondary.Diagrams
 import Biobase.Secondary
+import Biobase.Secondary.Diagrams
 
 
 
@@ -38,8 +39,8 @@ helpLines = unlines
 main = do
   Options{..} <- cmdArgs options
   (sqn:xs') <- fmap lines $ getContents
-  let xs = map (\(s,e) -> (s,dotBracket ["()"] s,read e)) $ map (break isSpace) xs'
-  let q = dotBracket ["()"] structure
+  let xs = map (\(s,e) -> (s,either error id $ dotBracket ["()"] s,read e)) $ map (break isSpace) xs'
+  let q = either error id $ dotBracket ["()"] structure
   let (d,x,e) = getMinimalDistance aq qa q xs
   let distance :: Double = e - ((/100) . read $ words sqn !! 1)
   printf "%4d %s %8.2f %8.2f\n" d x e distance
