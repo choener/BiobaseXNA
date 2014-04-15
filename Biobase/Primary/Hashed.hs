@@ -1,30 +1,34 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 
 -- | Fast hash functions for 'Primary' sequences. A hash is just an 'Int', so
 -- use these only for short sequences.
+--
+-- TODO replace with standard hashing functions used by Haskell libs?
 
 module Biobase.Primary.Hashed where
 
-import Control.Exception.Base (assert)
-import Data.Ix
-import Data.Primitive.Types
+import           Control.Exception.Base (assert)
+import           Data.Ix
+import           Data.Primitive.Types
+import           Data.Vector.Unboxed.Deriving
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
-import Biobase.Primary
+import           Biobase.Primary
 
 
 
-newtype HashedPrimary = HashedPrimary Int
+newtype HashedPrimary = HashedPrimary { unHashedPrimary :: Int }
   deriving (Eq,Ord,Ix,Read,Show,Enum,Bounded)
 
-deriving instance Prim HashedPrimary
-deriving instance VGM.MVector VU.MVector HashedPrimary
-deriving instance VG.Vector VU.Vector HashedPrimary
-deriving instance VU.Unbox HashedPrimary
+derivingUnbox "HashedPrimary"
+  [t| HashedPrimary -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
+
 
 -- | Given a piece of primary sequence information, reduce it to an index.
 --

@@ -7,6 +7,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 
 -- | Secondary structure: define basepairs as Int-tuples, the three edges, a
 -- nucleotide can use for pairing and the cis/trans isomerism. Both edges and
@@ -17,20 +19,21 @@
 
 module Biobase.Secondary where
 
-import Data.Array.Repa.Index
-import Data.Array.Repa.Shape
-import Data.Char (toLower, toUpper)
-import Data.Ix (Ix(..))
-import Data.List as L
-import Data.Primitive.Types
-import Data.Tuple (swap)
-import GHC.Base (remInt,quotInt)
+import           Data.Array.Repa.Index
+import           Data.Array.Repa.Shape
+import           Data.Char (toLower, toUpper)
+import           Data.Ix (Ix(..))
+import           Data.List as L
+import           Data.Primitive.Types
+import           Data.Tuple (swap)
+import           Data.Vector.Unboxed.Deriving
+import           GHC.Base (remInt,quotInt)
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
-import Biobase.Primary
-import Biobase.Primary.Bounds
+import           Biobase.Primary
+import           Biobase.Primary.Bounds
 
 
 
@@ -183,11 +186,6 @@ instance Read CTisomerism where
 
 -- ** Instances for 'Edge'
 
-deriving instance Prim Edge
-deriving instance VGM.MVector VU.MVector Edge
-deriving instance VG.Vector VU.Vector Edge
-deriving instance VU.Unbox Edge
-
 instance Bounded Edge where
   minBound = wc
   maxBound = unknownEdge
@@ -203,11 +201,6 @@ instance Enum Edge where
   fromEnum = unEdge
 
 -- ** Instances for 'CTisomerism'
-
-deriving instance Prim CTisomerism
-deriving instance VGM.MVector VU.MVector CTisomerism
-deriving instance VG.Vector VU.Vector CTisomerism
-deriving instance VU.Unbox CTisomerism
 
 instance Bounded CTisomerism where
   minBound = cis
@@ -346,4 +339,10 @@ instance BaseSelect (a,a) a where
   {-# INLINE updR #-}
   {-# INLINE updP #-}
   {-# INLINE updT #-}
+
+derivingUnbox "Edge"
+  [t| Edge -> Int |] [| unEdge |] [| Edge |]
+
+derivingUnbox "CTisomerism"
+  [t| CTisomerism -> Int |] [| unCT |] [| CT |]
 

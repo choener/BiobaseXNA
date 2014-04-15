@@ -1,12 +1,14 @@
-{-# LANGUAGE PackageImports #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE PatternGuards #-}
-{-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverlappingInstances #-}
+{-# LANGUAGE PackageImports #-}
+{-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 -- | The primary structure: interface to efficient encoding of RNA and DNA
 -- sequences. The design aims toward the 'vector' library and repa. In
@@ -20,11 +22,12 @@
 
 module Biobase.Primary where
 
-import Data.Char (toUpper)
-import Data.Ix (Ix(..))
-import Data.Primitive.Types
-import Data.Tuple (swap)
-import GHC.Base (remInt,quotInt)
+import           Data.Char (toUpper)
+import           Data.Ix (Ix(..))
+import           Data.Primitive.Types
+import           Data.Tuple (swap)
+import           Data.Vector.Unboxed.Deriving
+import           GHC.Base (remInt,quotInt)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Text as T
@@ -32,11 +35,12 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
-import Data.Array.Repa.ExtShape
-import Data.Array.Repa.Index
-import Data.Array.Repa.Shape
+import           Data.Array.Repa.ExtShape
+import           Data.Array.Repa.Index
+import           Data.Array.Repa.Shape
 
-import Biobase.Primary.Bounds
+import           Biobase.Primary.Bounds
+
 
 
 -- * Convert different types of sequence representations to the internal
@@ -131,12 +135,8 @@ instance Read Nuc where
     | Just n <- x `lookup` charNucList = [(n,xs)]
     | otherwise = []
 
--- for vectors
-
-deriving instance Prim Nuc
-deriving instance VGM.MVector VU.MVector Nuc
-deriving instance VG.Vector VU.Vector Nuc
-deriving instance VU.Unbox Nuc
+derivingUnbox "Nuc"
+  [t| Nuc -> Int |] [| unNuc |] [| Nuc |]
 
 -- Shape-based indexing. Nucleotide representations go from nN (0) to nU (4),
 -- with additional symbols being available for specialized problems. This is a

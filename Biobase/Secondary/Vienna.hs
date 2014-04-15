@@ -5,34 +5,37 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 
 -- | Encoding of Watson-Crick and Wobble Pairs in the Vienna RNA package style.
 
 module Biobase.Secondary.Vienna where
 
-import Data.Array.Repa.Index
-import Data.Array.Repa.Shape
-import Data.Ix
-import Data.Primitive.Types
-import Data.Tuple (swap)
-import GHC.Base (remInt,quotInt)
+import           Data.Array.Repa.Index
+import           Data.Array.Repa.Shape
+import           Data.Ix
+import           Data.Primitive.Types
+import           Data.Tuple (swap)
+import           Data.Vector.Unboxed.Deriving
+import           GHC.Base (remInt,quotInt)
+import           Prelude as P
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
-import Prelude as P
 
-import Data.Array.Repa.ExtShape
-import Data.PrimitiveArray as PA
-import Data.PrimitiveArray.Zero as PA
+import           Data.Array.Repa.ExtShape
+import           Data.PrimitiveArray as PA
+import           Data.PrimitiveArray.Zero as PA
 
-import Biobase.Primary
-import Biobase.Primary.Bounds
+import           Biobase.Primary
+import           Biobase.Primary.Bounds
 
 
 
 -- | Use machine Ints internally
 
-newtype ViennaPair = ViennaPair Int
+newtype ViennaPair = ViennaPair { unViennaPair :: Int }
   deriving (Eq,Ord,Ix)
 
 instance (Shape sh,Show sh) => Shape (sh :. ViennaPair) where
@@ -119,11 +122,6 @@ viennaPairTable = fromAssocs (Z:.nN:.nN) (Z:.nU:.nU) vpNS
   ]
 {-# NOINLINE viennaPairTable #-}
 
-deriving instance VGM.MVector VU.MVector ViennaPair
-deriving instance VG.Vector VU.Vector ViennaPair
-deriving instance VU.Unbox ViennaPair
-deriving instance Prim ViennaPair
-
 instance Enum ViennaPair where
   toEnum x
     | x>=0 && x<=7 = ViennaPair x
@@ -178,4 +176,7 @@ revPair p
 cguaP = [vpCG..vpUA]
 cgnsP = [vpCG..vpNS]
 pairToString = [(vpCG,"CG"),(vpGC,"GC"),(vpUA,"UA"),(vpAU,"AU"),(vpGU,"GU"),(vpUG,"UG"),(vpNS,"NS"),(vpNP,"NP")]
+
+derivingUnbox "ViennaPair"
+  [t| ViennaPair -> Int |] [| unViennaPair |] [| ViennaPair |]
 

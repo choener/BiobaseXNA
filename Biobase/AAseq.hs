@@ -5,6 +5,8 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 
 -- | This module has the translation tables for the genetic code.
 
@@ -14,6 +16,7 @@ import           Control.Arrow ((***))
 import           Data.Ix (Ix(..))
 import           Data.Primitive.Types
 import           Data.Tuple (swap)
+import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
@@ -23,11 +26,11 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
-import Data.Array.Repa.ExtShape
-import Data.Array.Repa.Index
-import Data.Array.Repa.Shape
+import           Data.Array.Repa.ExtShape
+import           Data.Array.Repa.Index
+import           Data.Array.Repa.Shape
 
-import Biobase.Primary
+import           Biobase.Primary
 
 
 
@@ -188,11 +191,6 @@ instance Read AA where
     | Just aa <- x `lookup` charAAList = [(aa,xs)]
     | otherwise = []
 
-deriving instance Prim AA
-deriving instance VGM.MVector VU.MVector AA
-deriving instance VG.Vector VU.Vector AA
-deriving instance VU.Unbox AA
-
 instance (Shape sh,Show sh) => Shape (sh :. AA) where
   rank (sh:._) = rank sh + 1
   zeroDim = zeroDim:.AA 0
@@ -250,4 +248,7 @@ instance MkAAseq BSL.ByteString where
 
 instance MkAAseq T.Text where
   mkAAseq = VU.fromList . map toAA . T.unpack
+
+derivingUnbox "AA"
+  [t| AA -> Int |] [| unAA |] [| AA |]
 
