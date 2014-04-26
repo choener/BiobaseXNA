@@ -54,17 +54,20 @@ library
     vector-th-unbox >= 0.2
 
   exposed-modules:
-    Biobase.AAseq
+--    Biobase.AAseq
     Biobase.Primary
-    Biobase.Primary.Bounds
-    Biobase.Primary.Hashed
-    Biobase.Primary.IUPAC
-    Biobase.Secondary
-    Biobase.Secondary.Constraint
-    Biobase.Secondary.Diagrams
-    Biobase.Secondary.Isostericity
-    Biobase.Secondary.PseudoKnots
-    Biobase.Secondary.Vienna
+    Biobase.Primary.AA
+    Biobase.Primary.Nuc
+    Biobase.Primary.Trans
+--    Biobase.Primary.Bounds
+--    Biobase.Primary.Hashed
+--    Biobase.Primary.IUPAC
+--    Biobase.Secondary
+--    Biobase.Secondary.Constraint
+--    Biobase.Secondary.Diagrams
+--    Biobase.Secondary.Isostericity
+--    Biobase.Secondary.PseudoKnots
+--    Biobase.Secondary.Vienna
 
   ghc-options:
     -O2 -funbox-strict-fields
