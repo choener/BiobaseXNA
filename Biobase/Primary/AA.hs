@@ -30,8 +30,6 @@ import           Data.Array.Repa.ExtShape
 import           Data.Array.Repa.Index
 import           Data.Array.Repa.Shape
 
---import           Biobase.Primary
-
 
 
 -- | The amino acid newtype.

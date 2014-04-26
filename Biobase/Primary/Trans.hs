@@ -4,6 +4,11 @@
 
 module Biobase.Primary.Trans where
 
+import Biobase.Primary.AA
+import Biobase.Primary.Nuc
+
+
+
 {-
 
 -- | Using the codon table, create an 'AAseq' from the 'Primary' sequence.

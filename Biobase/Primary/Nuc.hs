@@ -1,3 +1,5 @@
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -27,16 +29,17 @@
 
 module Biobase.Primary.Nuc where
 
-import           Data.String
 import           Data.Char (toUpper)
 import           Data.Ix (Ix(..))
 import           Data.Primitive.Types
+import           Data.String
 import           Data.Tuple (swap)
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
@@ -95,12 +98,11 @@ charRNA = f . toUpper where
     _   -> rN
 {-# INLINE charRNA #-}
 
-rnaChar x
-  | x==rA = 'A'
-  | x==rC = 'C'
-  | x==rG = 'G'
-  | x==rU = 'U'
-  | x==rN = 'N'
+rnaChar x | x==rA = 'A'
+          | x==rC = 'C'
+          | x==rG = 'G'
+          | x==rU = 'U'
+          | x==rN = 'N'
 {-# INLINE rnaChar #-}            
 
 charDNA = f . toUpper where
@@ -112,12 +114,11 @@ charDNA = f . toUpper where
     _   -> dN
 {-# INLINE charDNA #-}
 
-dnaChar x
-  | x==dA = 'A'
-  | x==dC = 'C'
-  | x==dG = 'G'
-  | x==dT = 'T'
-  | x==dN = 'N'
+dnaChar x | x==dA = 'A'
+          | x==dC = 'C'
+          | x==dG = 'G'
+          | x==dT = 'T'
+          | x==dN = 'N'
 {-# INLINE dnaChar #-}            
 
 charXNA = f . toUpper where
@@ -130,14 +131,119 @@ charXNA = f . toUpper where
     _   -> xN
 {-# INLINE charXNA #-}
 
-xnaChar x
-  | x==xA = 'A'
-  | x==xC = 'C'
-  | x==xG = 'G'
-  | x==xT = 'T'
-  | x==xU = 'U'
-  | x==xN = 'N'
+xnaChar x | x==xA = 'A'
+          | x==xC = 'C'
+          | x==xG = 'G'
+          | x==xT = 'T'
+          | x==xU = 'U'
+          | x==xN = 'N'
 {-# INLINE xnaChar #-}            
+
+type Primary t = VU.Vector (Nuc t)
+
+rnaSeq :: MkPrimary n RNA => n -> Primary RNA
+rnaSeq = primary
+
+dnaSeq :: MkPrimary n DNA => n -> Primary DNA
+dnaSeq = primary
+
+xnaSeq :: MkPrimary n XNA => n -> Primary XNA
+xnaSeq = primary
+
+-- | Produce the complement of a RNA or DNA sequence. Does intentionally
+-- not work for XNA sequences as it is not possible to uniquely translate
+-- @A@ into either @U@ or @T@.
+
+class Complement s t where
+    complement :: s -> t
+
+-- | To 'transcribe' a DNA sequence into RNA we reverse the complement of
+-- the sequence.
+
+transcribe :: Primary DNA -> Primary RNA
+transcribe = VU.reverse . complement
+
+instance Complement (Nuc RNA) (Nuc RNA) where
+    complement z
+      | z==rA = rU
+      | z==rC = rG
+      | z==rG = rC
+      | z==rU = rA
+      | z==rN = rN
+
+instance Complement (Nuc DNA) (Nuc DNA) where
+    complement z
+      | z==dA = dT
+      | z==dC = dG
+      | z==dG = dC
+      | z==dT = dA
+      | z==dN = dN
+
+instance Complement (Nuc DNA) (Nuc RNA) where
+    complement z
+      | z==dA = rU
+      | z==dC = rG
+      | z==dG = rC
+      | z==dT = rA
+      | z==dN = rN
+
+instance Complement (Nuc RNA) (Nuc DNA) where
+    complement z
+      | z==rA = dT
+      | z==rC = dG
+      | z==rG = dC
+      | z==rU = dA
+      | z==rN = dN
+
+instance (Complement s t, VU.Unbox s, VU.Unbox t) => Complement (VU.Vector s) (VU.Vector t) where
+    complement = VU.map complement
+
+instance (Complement s t, Functor f) => Complement (f s) (f t) where
+    complement = fmap complement
+
+-- |
+
+{-
+transcription :: Primary DNA -> Primary RNA
+transcription = VU.map f where
+  f z | z==dA = rU
+      | z==dC = rG
+      | z==dG = rC
+      | z==dT = rA
+      | z==dN = rN
+
+reverseTranscription :: Primary RNA -> Primary DNA
+reverseTranscription 
+-}
+
+-- | Conversion from a large number of sequence-like inputs to primary
+-- sequences.
+
+class MkPrimary n t where
+    primary :: n -> Primary t
+
+instance MkPrimary (VU.Vector Char) RNA where
+    primary = VU.map charRNA
+
+instance MkPrimary (VU.Vector Char) DNA where
+    primary = VU.map charDNA
+
+instance MkPrimary (VU.Vector Char) XNA where
+    primary = VU.map charXNA
+
+instance MkPrimary (VU.Vector Char) t =>  MkPrimary T.Text t where
+    primary = primary . VU.fromList . T.unpack
+
+instance MkPrimary (VU.Vector Char) t => MkPrimary TL.Text t where
+    primary = primary . VU.fromList . TL.unpack
+
+instance MkPrimary (VU.Vector Char) t => MkPrimary BS.ByteString t where
+    primary = primary . VU.fromList . BS.unpack
+
+instance MkPrimary (VU.Vector Char) t => MkPrimary BSL.ByteString t where
+    primary = primary . VU.fromList . BSL.unpack
+
+
 
 instance IsString [Nuc RNA] where
     fromString = map charRNA
@@ -148,14 +254,10 @@ instance IsString [Nuc DNA] where
 instance IsString [Nuc XNA] where
     fromString = map charXNA
 
-instance IsString (VU.Vector (Nuc RNA)) where
+instance (VU.Unbox (Nuc t), IsString [Nuc t]) => IsString (VU.Vector (Nuc t)) where
     fromString = VU.fromList . fromString
 
-instance IsString (VU.Vector (Nuc DNA)) where
-    fromString = VU.fromList . fromString
 
-instance IsString (VU.Vector (Nuc XNA)) where
-    fromString = VU.fromList . fromString
 
 instance (Shape sh,Show sh) => Shape (sh :. Nuc z) where
   rank (sh:._) = rank sh + 1
@@ -192,8 +294,6 @@ instance (Shape sh,Show sh) => Shape (sh :. Nuc z) where
 instance (Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. Nuc z) where
   subDim (sh1:.Nuc n1) (sh2:.Nuc n2) = subDim sh1 sh2 :. Nuc (n1-n2)
   rangeList (sh1:.Nuc n1) (sh2:.Nuc n2) = [ sh:.Nuc n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
-
-
 
 
 
