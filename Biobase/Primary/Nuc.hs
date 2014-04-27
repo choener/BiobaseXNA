@@ -150,6 +150,36 @@ dnaSeq = primary
 xnaSeq :: MkPrimary n XNA => n -> Primary XNA
 xnaSeq = primary
 
+-- | Convert from one representation into the other without the
+-- complementary step. As of now, this is only to transform between @U@ and
+-- @T@.
+--
+-- TODO this looks a lot like we could just @unsafeCoerce@ (but lets check
+-- if the compiler is smart enough to recognize the pattern)
+
+class Transform s t where
+  transform :: s -> t
+
+instance Transform (Nuc DNA) (Nuc RNA) where
+    transform z | z==dA     = rA
+                | z==dC     = rC
+                | z==dG     = rG
+                | z==dT     = rU
+                | otherwise = rN
+
+instance Transform (Nuc RNA) (Nuc DNA) where
+    transform z | z==rA     = dA
+                | z==rC     = dC
+                | z==rG     = dG
+                | z==rU     = dT
+                | otherwise = dN
+
+instance (Transform s t, VU.Unbox s, VU.Unbox t) => Transform (VU.Vector s) (VU.Vector t) where
+    transform = VU.map transform
+
+instance (Transform s t, Functor f) => Transform (f s) (f t) where
+    transform = fmap transform
+
 -- | Produce the complement of a RNA or DNA sequence. Does intentionally
 -- not work for XNA sequences as it is not possible to uniquely translate
 -- @A@ into either @U@ or @T@.
