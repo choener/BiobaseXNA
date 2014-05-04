@@ -58,11 +58,11 @@ library
 --    Biobase.AAseq
     Biobase.Primary
     Biobase.Primary.AA
+--    Biobase.Primary.Bounds
+    Biobase.Primary.Hashed
+    Biobase.Primary.IUPAC
     Biobase.Primary.Nuc
     Biobase.Primary.Trans
---    Biobase.Primary.Bounds
---    Biobase.Primary.Hashed
-    Biobase.Primary.IUPAC
 --    Biobase.Secondary
 --    Biobase.Secondary.Constraint
 --    Biobase.Secondary.Diagrams

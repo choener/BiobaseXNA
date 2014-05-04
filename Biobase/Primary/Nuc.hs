@@ -66,7 +66,7 @@ data DNA
 data XNA
 
 newtype Nuc t = Nuc { unNuc :: Int }
-                deriving (Eq,Ord,Show,Generic)
+                deriving (Eq,Ord,Generic)
 
 instance Hashable (Nuc t)
 
@@ -94,13 +94,25 @@ nucXNA = Nuc
 
 (xA:xC:xG:xT:xU:xN:_) = map nucXNA [0..]
 
+instance Bounded (Nuc RNA) where
+    minBound = rA
+    maxBound = rN
+
+instance Bounded (Nuc DNA) where
+    minBound = dA
+    maxBound = dN
+
+instance Bounded (Nuc XNA) where
+    minBound = xA
+    maxBound = xN
+
 instance Enum (Nuc RNA) where
     succ x | x==rN = error "succ/Nuc RNA"
     succ (Nuc x)   = Nuc $ x+1
     pred x | x==rA = error "pred/Nuc RNA"
     pred (Nuc x)   = Nuc $ x-1
     toEnum k | k>=0 && k<=4 = Nuc k
-    toEnum k                = error "toEnum/Nuc RNA"
+    toEnum k                = error $ "toEnum/Nuc RNA " ++ show k
     fromEnum (Nuc k) = k
 
 instance Enum (Nuc DNA) where
@@ -109,7 +121,16 @@ instance Enum (Nuc DNA) where
     pred x | x==dA = error "pred/Nuc DNA"
     pred (Nuc x)   = Nuc $ x-1
     toEnum k | k>=0 && k<=4 = Nuc k
-    toEnum k                = error "toEnum/Nuc RNA"
+    toEnum k                = error $ "toEnum/Nuc DNA " ++ show k
+    fromEnum (Nuc k) = k
+
+instance Enum (Nuc XNA) where
+    succ x | x==xN = error "succ/Nuc XNA"
+    succ (Nuc x)   = Nuc $ x+1
+    pred x | x==xA = error "pred/Nuc XNA"
+    pred (Nuc x)   = Nuc $ x-1
+    toEnum k | k>=0 && k<=5 = Nuc k
+    toEnum k                = error $ "toEnum/Nuc XNA " ++ show k
     fromEnum (Nuc k) = k
 
 acgu :: [Nuc RNA]
@@ -167,6 +188,15 @@ xnaChar x | x==xA = 'A'
           | x==xU = 'U'
           | x==xN = 'N'
 {-# INLINE xnaChar #-}            
+
+instance Show (Nuc RNA) where
+    show c = [rnaChar c]
+
+instance Show (Nuc DNA) where
+    show c = [dnaChar c]
+
+instance Show (Nuc XNA) where
+    show c = [xnaChar c]
 
 type Primary t = VU.Vector (Nuc t)
 
@@ -291,6 +321,15 @@ instance (Complement s t, Functor f) => Complement (f s) (f t) where
 
 class MkPrimary n t where
     primary :: n -> Primary t
+
+instance MkPrimary String RNA where
+    primary = primary . VU.fromList
+
+instance MkPrimary String DNA where
+    primary = primary . VU.fromList
+
+instance MkPrimary String XNA where
+    primary = primary . VU.fromList
 
 instance MkPrimary (VU.Vector Char) RNA where
     primary = VU.map charRNA

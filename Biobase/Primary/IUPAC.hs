@@ -3,12 +3,8 @@
 
 -- | Degenerate base symbol representation. We use the same conventions as in
 -- <<https://en.wikipedia.org/wiki/Nucleic_acid_notation>> which ignores
--- @U@racil, except if it stands alone. Therefore, any RNA sequence should be
--- converted to DNA (and back afterwards).
---
--- NOTE that the generic 'Char' instance is not optimized for speed.
---
--- TODO this should be easier once we have instances for RNA,DNA, etc
+-- @U@racil, except if it stands alone for @Char@ and @XNA@ targets. If the
+-- 'Degenerate' target is @RNA@, then we create @U@s instead of @T@s.
 
 module Biobase.Primary.IUPAC where
 
@@ -44,18 +40,6 @@ instance Degenerate (Nuc DNA) where
 instance Degenerate (Nuc XNA) where
     fromDegenerate = map charXNA . fromDegenerate
     toDegenerate   = toDegenerate . map xnaChar
-
-{-
--- | TODO use Degenerate DNA and transform 'T' to 'U' (i need a function
--- dna -> rna in Nuc.hs for that)
-instance Degenerate (Nuc RNA) where
-    fromDegenerate = error "write me" -- map (transform . charDNA) . fromDegenerate . dnaChar
-    toDegenerate   = error "write me" -- fmap charRNA . toDegenerate . map rnaChar
-
-instance Degenerate (Nuc DNA) where
-    fromDegenerate = map charDNA . fromDegenerate . dnaChar
-    toDegenerate   = fmap charDNA . toDegenerate . map dnaChar
--}
 
 -- ** Raw embeddings
 

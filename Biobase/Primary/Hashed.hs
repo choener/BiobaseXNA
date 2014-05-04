@@ -3,17 +3,17 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
--- | Fast hash functions for 'Primary' sequences. A hash is just an 'Int', so
--- use these only for short sequences.
---
--- TODO replace with standard hashing functions used by Haskell libs?
+-- | Fast hash functions for 'Primary' sequences. This function maps
+-- primary sequences to a continuous set of Ints @[0 ..]@ where the maximum
+-- is dependent on the input length. This allows us to map short sequences
+-- into contiguous memory locations. Useful for, say, energy lookup tables.
 
 module Biobase.Primary.Hashed where
 
-{-
-
-import           Control.Exception.Base (assert)
 import           Data.Ix
 import           Data.Primitive.Types
 import           Data.Vector.Unboxed.Deriving
@@ -21,36 +21,41 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
-import           Biobase.Primary
+import           Biobase.Primary.Nuc
 
 
 
-newtype HashedPrimary = HashedPrimary { unHashedPrimary :: Int }
+-- | The hash of a primary sequence.
+
+newtype HashedPrimary t = HashedPrimary { unHashedPrimary :: Int }
   deriving (Eq,Ord,Ix,Read,Show,Enum,Bounded)
 
-derivingUnbox "HashedPrimary"
-  [t| HashedPrimary -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
+derivingUnbox "HashedPrimaryRNA"
+  [t| HashedPrimary RNA -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
+
+derivingUnbox "HashedPrimaryDNA"
+  [t| HashedPrimary DNA -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
+
+derivingUnbox "HashedPrimaryXNA"
+  [t| HashedPrimary XNA -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
 
 
 -- | Given a piece of primary sequence information, reduce it to an index.
---
--- Will throw an assertion in debug code if 'ps' are not within bounds. Note
--- that "mkPrimary [minBound]" and "mkPrimary [minBound,minBound]" map to the
--- same index. Meaning that indices are only unique within the same length
--- group. Furthermore, indices with different (l,u)-bounds are not compatible
--- with each other. All indices start at 0.
---
 -- The empty input produces an index of 0.
---
--- TODO currently goes the very inefficient way of creating a temporary vector
--- for 'ps'. We could in O(1) create a vector from a Primary ...
 
-mkHashedPrimary :: (Nuc,Nuc) -> Primary -> HashedPrimary
-mkHashedPrimary (l,u) ps = assert (VU.all (\p -> l<=p && p<=u) ps) $ HashedPrimary idx where
-  idx   = VU.sum $ VU.zipWith f ps (VU.enumFromStepN (VU.length ps -1) (-1) (VU.length ps))
-  f p c = (unNuc p - unNuc l) * (cnst^c)
-  cnst = unNuc u - unNuc l + 1
+mkHashedPrimary :: forall t . (VU.Unbox (Nuc t), Bounded (Nuc t), Enum (Nuc t)) => Primary t -> HashedPrimary t
+mkHashedPrimary = HashedPrimary . fst . VU.foldl' f (0, 1) where
+  f (z, c) n = (z + c * (fromEnum n +1), c * (fromEnum (maxBound :: Nuc t) + 1))
 {-# INLINE mkHashedPrimary #-}
 
--}
+-- | Turn a hash back into a sequence. Will fail if the resulting sequence
+-- has more than 100 elements.
+
+hash2primary :: forall t . (VU.Unbox (Nuc t), Bounded (Nuc t), Enum (Nuc t)) => HashedPrimary t -> Primary t
+hash2primary (HashedPrimary h) = VU.unfoldrN l f h where
+  m = fromEnum (maxBound :: Nuc t) +1
+  l = VU.length . VU.takeWhile (>0) . VU.iterateN 100 (`div` m) $ h
+  f k = if k>0 then Just (toEnum $ ((k-1) `mod` m) , (k-1) `div` m)
+               else Nothing
+{-# INLINE hash2primary #-}
 
