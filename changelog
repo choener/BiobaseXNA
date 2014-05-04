@@ -7,6 +7,9 @@ contains both U and T)
 - import Biobase.Primary to get everything under Primary.*
 - import Biobase.Secondary to get everything under Secondary.*
 
+- SubOptDistance now extends all structure lines of RNAsubopt with a third
+field, the distance
+
 0.8.3.0
 -------
 
