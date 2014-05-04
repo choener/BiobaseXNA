@@ -1,14 +1,12 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
 
 -- | Types for RNA secondary structure. Types vary from the simplest array
 -- (D1Secondary) to rather complex ones.
 
-{-# LANGUAGE RecordWildCards #-}
-
 module Biobase.Secondary.Diagrams where
-
 
 import           Control.Applicative
 import           Control.Arrow
@@ -18,14 +16,14 @@ import           Data.Tuple (swap)
 import qualified Data.Vector.Unboxed as VU
 import           Text.Printf
 
-import Biobase.Primary
-import Biobase.Secondary
+import           Biobase.Primary.Nuc
+import           Biobase.Secondary.Basepair
 
 
 
 -- | RNA secondary structure with 1-diagrams. Each nucleotide is paired with at
--- most one other nucleotide. A nucleotide with index k \in [0..len-1] is
--- paired if unD1S VU.! k > 0.
+-- most one other nucleotide. A nucleotide with index @k@ in @[0..len-1]@ is
+-- paired if @unD1S VU.! k >=0 0@ Unpaired status is @-1@.
 
 newtype D1Secondary = D1S {unD1S :: VU.Vector Int}
   deriving (Read,Show,Eq)
@@ -36,13 +34,13 @@ newtype D1Secondary = D1S {unD1S :: VU.Vector Int}
 newtype D2Secondary = D2S {unD2S :: VU.Vector ( (Int,Edge,CTisomerism), (Int,Edge,CTisomerism) )}
   deriving (Read,Show,Eq)
 
--- |
+-- | Conversion to and from 1-diagrams.
 
 class MkD1Secondary a where
   mkD1S :: a -> D1Secondary
   fromD1S :: D1Secondary -> a
 
--- |
+-- | Conversion to and from 2-diagrams.
 
 class MkD2Secondary a where
   mkD2S :: a -> D2Secondary
@@ -52,12 +50,12 @@ class MkD2Secondary a where
 
 -- * Tree-based representation
 --
--- Tree -> d1/2Secondary ?
+-- TODO Tree -> d1/2Secondary ?
 
 -- | A secondary-structure tree. Has no notion of pseudoknots.
 
-data SSTree idx a = SSTree idx a [SSTree idx a]
-                  | SSExt  Int a [SSTree idx a]
+data SSTree idx a = SSTree   idx a [SSTree idx a]
+                  | SSExtern Int a [SSTree idx a]
   deriving (Read,Show,Eq)
 
 -- | Create a tree from (pseudoknot-free [not checked]) 1-diagrams.
@@ -65,8 +63,8 @@ data SSTree idx a = SSTree idx a [SSTree idx a]
 d1sTree :: D1Secondary -> SSTree PairIdx ()
 d1sTree s = ext $ sort ps where
   (len,ps) = fromD1S s
-  ext [] = SSExt len () []
-  ext xs = SSExt len () . map tree $ groupBy (\l r -> snd l > fst r) xs -- ">=" would be partial allowance for 2-diagrams
+  ext [] = SSExtern len () []
+  ext xs = SSExtern len () . map tree $ groupBy (\l r -> snd l > fst r) xs -- ">=" would be partial allowance for 2-diagrams
   tree [ij]    = SSTree ij () []
   tree (ij:xs) = SSTree ij () . map tree $ groupBy (\l r -> snd l > fst r) xs
 
@@ -75,8 +73,8 @@ d1sTree s = ext $ sort ps where
 d2sTree :: D2Secondary -> SSTree ExtPairIdx ()
 d2sTree s = ext $ sortBy d2Compare ps where
   (len,ps) = fromD2S s
-  ext [] = SSExt len () []
-  ext xs = SSExt len () . map tree . groupBy d2Grouping $ xs
+  ext [] = SSExtern len () []
+  ext xs = SSExtern len () . map tree . groupBy d2Grouping $ xs
   tree [ij]    = SSTree ij () []
   tree (ij:xs) = SSTree ij () . map tree . groupBy d2Grouping $ xs
 
@@ -86,21 +84,6 @@ d2Compare ((i,j),_) ((k,l),_)
   | otherwise = compare (i,j) (k,l)
 
 d2Grouping ((i,j),_) ((k,l),_) = i<=k && j>=l
-
-{-
-test :: (Int,[ExtPairIdx])
-test = (20,test')
-
-test' =
-  [ ((2,15),(cis,wc,wc))
-  , ((3,14),(cis,wc,wc))
-  , ((4,13),(cis,wc,wc))
-  , ((5,12),(cis,wc,wc))
-  , ((6,10),(trans,wc,hoogsteen))
-  , ((2,18),(trans,sugar,sugar))
-  , ((15,18),(cis,sugar,sugar))
-  ]
--}
 
 -- * Instances for D1S
 
@@ -149,16 +132,12 @@ instance MkD2Secondary (Int,[ExtPairIdx]) where
 -- | A second primitive generator, requiring dictionary and String. This one
 -- generates pairs that are then used by the above instance. The dict is a list
 -- of possible brackets: ["()"] being the minimal set.
---
--- NOTE no dictionary is returned by "fromD1S".
---
--- TODO return dictionary that is actually seen?
 
 instance MkD1Secondary ([String],String) where
   mkD1S (dict,xs) = mkD1S (length xs,ps) where
     ps :: [(Int,Int)]
     ps = unsafeDotBracket dict xs
-  fromD1S (D1S s) = ([], zipWith f [0..] $ VU.toList s) where
+  fromD1S (D1S s) = (["()"], zipWith f [0..] $ VU.toList s) where
     f k (-1) = '.'
     f k p
       | k>p = ')'
@@ -173,11 +152,11 @@ instance MkD1Secondary ([String],VU.Vector Char) where
 -- | A "fast" instance for getting the pair list of vienna-structures.
 
 instance MkD1Secondary String where
-  mkD1S xs = mkD1S (["()"],xs)
+  mkD1S xs = mkD1S (["()" ::String],xs)
   fromD1S s = let (_::[String],res) = fromD1S s in res
 
 instance MkD1Secondary (VU.Vector Char) where
-  mkD1S xs = mkD1S (["()"],xs)
+  mkD1S xs = mkD1S (["()" ::String],xs)
   fromD1S s = let (_::[String],res::VU.Vector Char) = fromD1S s in res
 
 

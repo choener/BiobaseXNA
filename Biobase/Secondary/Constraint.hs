@@ -1,29 +1,32 @@
-{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+
+-- | Simple oldstyle RNAfold constraints. A constraint yields a bonus or
+-- malus to energy.
 
 module Biobase.Secondary.Constraint where
 
-import Data.Array.Repa.Index
-import Data.Array.Repa.Shape
-import Data.Char (toLower)
-import Data.Primitive.Types
+import           Data.Array.Repa.Index
+import           Data.Array.Repa.Shape
+import           Data.Char (toLower)
+import           Data.Primitive.Types
+import           Prelude as P
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
-import Prelude as P
 
-import Data.PrimitiveArray
-import Data.PrimitiveArray.Zero
+import           Data.PrimitiveArray
+import           Data.PrimitiveArray.Zero
 
-import Biobase.Secondary.Diagrams
-
+import           Biobase.Secondary.Diagrams
 
 
--- | We can create a constraint from different sources
+
+-- | We can create a constraint from different sources.
 
 class MkConstraint a where
   mkConstraint :: a -> Constraint
@@ -34,9 +37,11 @@ class MkConstraint a where
 newtype Constraint = Constraint {unConstraint :: VU.Vector (Char,Int)}
   deriving (Show,Read,Eq)
 
+bonusCC :: VU.Vector Char
 bonusCC = VU.fromList "()<>|"
 {-# NOINLINE bonusCC #-}
 
+nobonusCC :: VU.Vector Char
 nobonusCC = VU.fromList ".x"
 {-# NOINLINE nobonusCC #-}
 
@@ -99,13 +104,6 @@ bonusTable bonus malus (Constraint constraint) = arr where
             , j<-[i+1..n]
             , fst (constraint VU.! i) == 'x' || fst (constraint VU.! j) == 'x'
             ]
-
-{-
-testC = putStrLn $ f as where
-  f [] = ""
-  f xs = show (take 9 xs) ++ "\n" ++ f (drop 9 xs)
-  as = toList $ bonusTable (1) 2 (mkConstraint "(<<..x|>)")
--}
 
 -- * Instances
 

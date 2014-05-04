@@ -9,12 +9,12 @@
 --
 -- TODO Check if there are corner-cases remaining when considering 2-diagrams.
 
-module Biobase.Secondary.PseudoKnots where
+module Biobase.Secondary.Pseudoknots where
 
+import           Data.List
 import qualified Data.Vector.Unboxed as VU
-import Data.List
 
-import Biobase.Secondary
+import Biobase.Secondary.Basepair
 
 
 

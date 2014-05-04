@@ -5,7 +5,7 @@
 
 module Biobase.Primary.Bounds where
 
-
+{-
 
 -- | 'minNormal' and 'maxNormal' encode for, say, ACGU; while 'minExtended' and
 -- 'maxExtended' would allow 'N' as well. See Biobase.RNA and
@@ -50,3 +50,6 @@ instance (Bounds a, Bounds b, Bounds c, Bounds d, Bounds e, Bounds f) => Bounds 
   maxNormal = (maxNormal, maxNormal, maxNormal, maxNormal, maxNormal, maxNormal)
   minExtended = (minExtended, minExtended, minExtended, minExtended, minExtended, minExtended)
   maxExtended = (maxExtended, maxExtended, maxExtended, maxExtended, maxExtended, maxExtended)
+
+-}
+

@@ -5,6 +5,7 @@
 contains both U and T)
 - translation between XNA and protein (Biobase.Primary.Trans)
 - import Biobase.Primary to get everything under Primary.*
+- import Biobase.Secondary to get everything under Secondary.*
 
 0.8.3.0
 -------

@@ -28,8 +28,7 @@ import           Data.Array.Repa.ExtShape
 import           Data.PrimitiveArray as PA
 import           Data.PrimitiveArray.Zero as PA
 
-import           Biobase.Primary
-import           Biobase.Primary.Bounds
+import           Biobase.Primary.Nuc
 
 
 
@@ -80,45 +79,45 @@ class MkViennaPair a where
   mkViennaPair :: a -> ViennaPair
   fromViennaPair :: ViennaPair -> a
 
-instance MkViennaPair (Nuc,Nuc) where
+instance MkViennaPair (Nuc RNA, Nuc RNA) where
   mkViennaPair (b1,b2) -- = viennaPairTable `PA.index` (Z:.b1:.b2)
-    | b1==nC&&b2==nG = vpCG
-    | b1==nG&&b2==nC = vpGC
-    | b1==nG&&b2==nU = vpGU
-    | b1==nU&&b2==nG = vpUG
-    | b1==nA&&b2==nU = vpAU
-    | b1==nU&&b2==nA = vpUA
+    | b1==rC&&b2==rG = vpCG
+    | b1==rG&&b2==rC = vpGC
+    | b1==rG&&b2==rU = vpGU
+    | b1==rU&&b2==rG = vpUG
+    | b1==rA&&b2==rU = vpAU
+    | b1==rU&&b2==rA = vpUA
     | otherwise = vpNS
   {-# INLINE mkViennaPair #-}
   fromViennaPair p
-    | p==vpCG = (nC,nG)
-    | p==vpGC = (nG,nC)
-    | p==vpGU = (nG,nU)
-    | p==vpUG = (nU,nG)
-    | p==vpAU = (nA,nU)
-    | p==vpUA = (nU,nA)
+    | p==vpCG = (rC,rG)
+    | p==vpGC = (rG,rC)
+    | p==vpGU = (rG,rU)
+    | p==vpUG = (rU,rG)
+    | p==vpAU = (rA,rU)
+    | p==vpUA = (rU,rA)
     | otherwise = error "non-standard pairs can't be backcasted"
   {-# INLINE fromViennaPair #-}
 
-isViennaPair :: Nuc -> Nuc -> Bool
+isViennaPair :: Nuc RNA -> Nuc RNA -> Bool
 isViennaPair a b = f a b where
-  f l r =  l==nC && r==nG
-        || l==nG && r==nC
-        || l==nA && r==nU
-        || l==nU && r==nA
-        || l==nG && r==nU
-        || l==nU && r==nG
+  f l r =  l==rC && r==rG
+        || l==rG && r==rC
+        || l==rA && r==rU
+        || l==rU && r==rA
+        || l==rG && r==rU
+        || l==rU && r==rG
   {-# INLINE f #-}
 {-# INLINE isViennaPair #-}
 
-viennaPairTable :: Unboxed (Z:.Nuc:.Nuc) ViennaPair
-viennaPairTable = fromAssocs (Z:.nN:.nN) (Z:.nU:.nU) vpNS
-  [ (Z:.nC:.nG , vpCG)
-  , (Z:.nG:.nC , vpGC)
-  , (Z:.nG:.nU , vpGU)
-  , (Z:.nU:.nG , vpUG)
-  , (Z:.nA:.nU , vpAU)
-  , (Z:.nU:.nA , vpUA)
+viennaPairTable :: Unboxed (Z:.Nuc RNA:.Nuc RNA) ViennaPair
+viennaPairTable = fromAssocs (Z:.rN:.rN) (Z:.rU:.rU) vpNS
+  [ (Z:.rC:.rG , vpCG)
+  , (Z:.rG:.rC , vpGC)
+  , (Z:.rG:.rU , vpGU)
+  , (Z:.rU:.rG , vpUG)
+  , (Z:.rA:.rU , vpAU)
+  , (Z:.rU:.rA , vpUA)
   ]
 {-# NOINLINE viennaPairTable #-}
 
@@ -133,12 +132,6 @@ instance Enum ViennaPair where
 instance Bounded ViennaPair where
   minBound = vpNP
   maxBound = vpNS
-
-instance Bounds ViennaPair where
-  minNormal = vpCG
-  maxNormal = vpUA
-  minExtended = vpNP
-  maxExtended = vpNS
 
 instance Show ViennaPair where
   show x

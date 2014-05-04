@@ -1,28 +1,31 @@
-{-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 -- | Provides detailed information on isostericity of RNA basepairs. All data
 -- is extracted from csv files which were created from supplemental files in:
 --
+-- @
 -- Frequency and isostericity of RNA base pairs
 -- Jesse Stombaugh, Craig L. Zirbel, Eric Westhof, and Neocles B. Leontis
 -- Nucl. Acids Res. (2009)
 -- doi:10.1093/nar/gkp011
+-- @
+--
 
 module Biobase.Secondary.Isostericity where
 
-import Data.ByteString.Char8 (ByteString)
-import Data.FileEmbed (embedFile)
-import Data.Function (on)
-import Data.List
+import           Data.ByteString.Char8 (ByteString)
+import           Data.FileEmbed (embedFile)
+import           Data.Function (on)
+import           Data.List
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Map as M
-import Text.CSV
+import           Text.CSV
 
-import Biobase.Primary
-import Biobase.Secondary
+import           Biobase.Primary.Nuc
+import           Biobase.Secondary.Basepair
 
 
 
@@ -81,7 +84,7 @@ mkIsostericityMap = M.fromListWith (\x y -> nub $ x++y) . mkIsostericityList
 mkIsostericityList :: [[[String]]] -> [(ExtPair, [String])]
 mkIsostericityList gs = nubBy ((==) `on` fst) . concatMap turn . concatMap f $ gs where
   f g = map (\e ->  ( ( let [x,y] = fst e
-                        in (mkNuc x, mkNuc y), threeChar bpt
+                        in (charRNA x, charRNA y), threeChar bpt
                       )
                     , nub $ snd e)
             ) $ map entry xs where

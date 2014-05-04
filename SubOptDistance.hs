@@ -51,3 +51,4 @@ getMinimalDistance aq qa q xs = g $ minimumBy (comparing f) xs where
   f (_,a,e) = (length $ aqs ++ qas , e) where
     aqs = if aq then a \\ q else []
     qas = if qa then q \\ a else []
+
