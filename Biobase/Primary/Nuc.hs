@@ -1,4 +1,5 @@
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -11,7 +12,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | The primary structure: interface to efficient encoding of RNA and DNA
 -- sequences. The design aims toward the 'vector' library and repa. In
@@ -30,12 +31,14 @@
 module Biobase.Primary.Nuc where
 
 import           Data.Char (toUpper)
+import           Data.Hashable
 import           Data.Ix (Ix(..))
 import           Data.Primitive.Types
 import           Data.String
 import           Data.Tuple (swap)
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
+import           GHC.Generics (Generic)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Text as T
@@ -63,7 +66,9 @@ data DNA
 data XNA
 
 newtype Nuc t = Nuc { unNuc :: Int }
-                deriving (Eq,Ord,Show)
+                deriving (Eq,Ord,Show,Generic)
+
+instance Hashable (Nuc t)
 
 derivingUnbox "NucRNA"
   [t| Nuc RNA -> Int |] [| unNuc |] [| Nuc |]
@@ -88,6 +93,30 @@ nucXNA = Nuc
 (dA:dC:dG:dT:dN:_) = map nucDNA [0..]
 
 (xA:xC:xG:xT:xU:xN:_) = map nucXNA [0..]
+
+instance Enum (Nuc RNA) where
+    succ x | x==rN = error "succ/Nuc RNA"
+    succ (Nuc x)   = Nuc $ x+1
+    pred x | x==rA = error "pred/Nuc RNA"
+    pred (Nuc x)   = Nuc $ x-1
+    toEnum k | k>=0 && k<=4 = Nuc k
+    toEnum k                = error "toEnum/Nuc RNA"
+    fromEnum (Nuc k) = k
+
+instance Enum (Nuc DNA) where
+    succ x | x==dN = error "succ/Nuc DNA"
+    succ (Nuc x)   = Nuc $ x+1
+    pred x | x==dA = error "pred/Nuc DNA"
+    pred (Nuc x)   = Nuc $ x-1
+    toEnum k | k>=0 && k<=4 = Nuc k
+    toEnum k                = error "toEnum/Nuc RNA"
+    fromEnum (Nuc k) = k
+
+acgu :: [Nuc RNA]
+acgu = [rA..rU]
+
+acgt :: [Nuc DNA]
+acgt = [dA..dT]
 
 charRNA = f . toUpper where
   f x = case x of
@@ -150,35 +179,61 @@ dnaSeq = primary
 xnaSeq :: MkPrimary n XNA => n -> Primary XNA
 xnaSeq = primary
 
--- | Convert from one representation into the other without the
--- complementary step. As of now, this is only to transform between @U@ and
--- @T@.
---
--- TODO this looks a lot like we could just @unsafeCoerce@ (but lets check
--- if the compiler is smart enough to recognize the pattern)
+-- | Transform RNA to DNA. That means change @U@ to @T@ and keep the other
+-- characters as is.
 
-class Transform s t where
-  transform :: s -> t
+rnaTdna z
+  | z==rA     = dA
+  | z==rC     = dC
+  | z==rG     = dG
+  | z==rU     = dT
+  | otherwise = dN
 
-instance Transform (Nuc DNA) (Nuc RNA) where
-    transform z | z==dA     = rA
-                | z==dC     = rC
-                | z==dG     = rG
-                | z==dT     = rU
-                | otherwise = rN
+-- | Transform DNA to RNA. That means change @T@ to @U@ and keep the other
+-- characters as is.
 
-instance Transform (Nuc RNA) (Nuc DNA) where
-    transform z | z==rA     = dA
-                | z==rC     = dC
-                | z==rG     = dG
-                | z==rU     = dT
-                | otherwise = dN
+dnaTrna z
+  | z==dA     = rA
+  | z==dC     = rC
+  | z==dG     = rG
+  | z==dT     = rU
+  | otherwise = rN
 
-instance (Transform s t, VU.Unbox s, VU.Unbox t) => Transform (VU.Vector s) (VU.Vector t) where
-    transform = VU.map transform
+-- | Generalize an RNA character to a XNA character.
 
-instance (Transform s t, Functor f) => Transform (f s) (f t) where
-    transform = fmap transform
+rna2xna x
+  | x==rA     = xA
+  | x==rC     = xC
+  | x==rG     = xG
+  | x==rU     = xU
+  | otherwise = xN
+
+-- | Generalize a DNA character to a XNA character.
+
+dna2xna x
+  | x==dA     = xA
+  | x==dC     = xC
+  | x==dG     = xG
+  | x==dT     = xT
+  | otherwise = xN
+
+-- | Specialize XNA to RNA, @T@ becomes @N@.
+
+xna2rna x
+  | x==xA     = rA
+  | x==xC     = rC
+  | x==xG     = rG
+  | x==xU     = rU
+  | otherwise = rN
+
+-- | Specialize XNA to DNA, @U@ becomes @N@.
+
+xna2dna x
+  | x==xA     = dA
+  | x==xC     = dC
+  | x==xG     = dG
+  | x==xT     = dT
+  | otherwise = dN
 
 -- | Produce the complement of a RNA or DNA sequence. Does intentionally
 -- not work for XNA sequences as it is not possible to uniquely translate
@@ -230,21 +285,6 @@ instance (Complement s t, VU.Unbox s, VU.Unbox t) => Complement (VU.Vector s) (V
 
 instance (Complement s t, Functor f) => Complement (f s) (f t) where
     complement = fmap complement
-
--- |
-
-{-
-transcription :: Primary DNA -> Primary RNA
-transcription = VU.map f where
-  f z | z==dA = rU
-      | z==dC = rG
-      | z==dG = rC
-      | z==dT = rA
-      | z==dN = rN
-
-reverseTranscription :: Primary RNA -> Primary DNA
-reverseTranscription 
--}
 
 -- | Conversion from a large number of sequence-like inputs to primary
 -- sequences.

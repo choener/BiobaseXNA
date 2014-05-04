@@ -44,6 +44,7 @@ library
     containers      >= 0.4            ,
     csv             >= 0.1.2          ,
     file-embed      >= 0.0.4.7        ,
+    hashable        >= 1.2            ,
     mtl             >= 2.1            ,
     primitive       >= 0.5            ,
     PrimitiveArray  >= 0.5.4          ,
@@ -61,7 +62,7 @@ library
     Biobase.Primary.Trans
 --    Biobase.Primary.Bounds
 --    Biobase.Primary.Hashed
---    Biobase.Primary.IUPAC
+    Biobase.Primary.IUPAC
 --    Biobase.Secondary
 --    Biobase.Secondary.Constraint
 --    Biobase.Secondary.Diagrams

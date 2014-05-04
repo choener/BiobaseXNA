@@ -1,23 +1,26 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PatternGuards #-}
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -- | This module has the translation tables for the genetic code.
 
 module Biobase.Primary.AA where
 
 import           Control.Arrow ((***))
+import           Data.Hashable
 import           Data.Ix (Ix(..))
 import           Data.Primitive.Types
 import           Data.Tuple (swap)
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
+import           GHC.Generics (Generic)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Map.Strict as M
@@ -35,7 +38,9 @@ import           Data.Array.Repa.Shape
 -- | The amino acid newtype.
 
 newtype AA = AA { unAA :: Int }
-  deriving (Eq,Ord,Ix)
+  deriving (Eq,Ord,Ix,Generic)
+
+instance Hashable AA
 
 
 

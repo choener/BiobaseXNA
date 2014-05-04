@@ -11,6 +11,8 @@
 
 module Biobase.Primary.Hashed where
 
+{-
+
 import           Control.Exception.Base (assert)
 import           Data.Ix
 import           Data.Primitive.Types
@@ -49,4 +51,6 @@ mkHashedPrimary (l,u) ps = assert (VU.all (\p -> l<=p && p<=u) ps) $ HashedPrima
   f p c = (unNuc p - unNuc l) * (cnst^c)
   cnst = unNuc u - unNuc l + 1
 {-# INLINE mkHashedPrimary #-}
+
+-}
 
