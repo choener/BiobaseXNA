@@ -13,6 +13,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE RankNTypes #-}
 
 -- | The primary structure: interface to efficient encoding of RNA and DNA
 -- sequences. The design aims toward the 'vector' library and repa. In
@@ -68,16 +69,12 @@ data XNA
 newtype Nuc t = Nuc { unNuc :: Int }
                 deriving (Eq,Ord,Generic)
 
+-- ** Instances, helper functions, 'Unbox' instance.
+
 instance Hashable (Nuc t)
 
-derivingUnbox "NucRNA"
-  [t| Nuc RNA -> Int |] [| unNuc |] [| Nuc |]
-
-derivingUnbox "NucDNA"
-  [t| Nuc DNA -> Int |] [| unNuc |] [| Nuc |]
-
-derivingUnbox "NucXNA"
-  [t| Nuc XNA -> Int |] [| unNuc |] [| Nuc |]
+derivingUnbox "Nuc"
+  [t| forall a . Nuc a -> Int |] [| unNuc |] [| Nuc |]
 
 nucRNA :: Int -> Nuc RNA
 nucRNA = Nuc

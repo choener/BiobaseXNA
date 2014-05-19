@@ -6,6 +6,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE RankNTypes #-}
 
 -- | Fast hash functions for 'Primary' sequences. This function maps
 -- primary sequences to a continuous set of Ints @[0 ..]@ where the maximum
@@ -30,15 +31,8 @@ import           Biobase.Primary.Nuc
 newtype HashedPrimary t = HashedPrimary { unHashedPrimary :: Int }
   deriving (Eq,Ord,Ix,Read,Show,Enum,Bounded)
 
-derivingUnbox "HashedPrimaryRNA"
-  [t| HashedPrimary RNA -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
-
-derivingUnbox "HashedPrimaryDNA"
-  [t| HashedPrimary DNA -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
-
-derivingUnbox "HashedPrimaryXNA"
-  [t| HashedPrimary XNA -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
-
+derivingUnbox "HashedPrimary"
+  [t| forall a . HashedPrimary a -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
 
 -- | Given a piece of primary sequence information, reduce it to an index.
 -- The empty input produces an index of 0.
