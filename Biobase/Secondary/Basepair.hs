@@ -209,7 +209,7 @@ type PairIdx = (Int,Int)
 
 -- | A pair as a tuple containing 'Nuc's.
 
-type Pair = (Nuc RNA,Nuc RNA)
+type Pair = (Letter RNA,Letter RNA)
 
 -- | Annotation for a basepair.
 

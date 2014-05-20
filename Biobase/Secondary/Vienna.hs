@@ -28,6 +28,7 @@ import           Data.Array.Repa.ExtShape
 import           Data.PrimitiveArray as PA
 import           Data.PrimitiveArray.Zero as PA
 
+import           Biobase.Primary.Letter
 import           Biobase.Primary.Nuc
 
 
@@ -79,7 +80,7 @@ class MkViennaPair a where
   mkViennaPair :: a -> ViennaPair
   fromViennaPair :: ViennaPair -> a
 
-instance MkViennaPair (Nuc RNA, Nuc RNA) where
+instance MkViennaPair (Letter RNA, Letter RNA) where
   mkViennaPair (b1,b2) -- = viennaPairTable `PA.index` (Z:.b1:.b2)
     | b1==rC&&b2==rG = vpCG
     | b1==rG&&b2==rC = vpGC
@@ -99,7 +100,7 @@ instance MkViennaPair (Nuc RNA, Nuc RNA) where
     | otherwise = error "non-standard pairs can't be backcasted"
   {-# INLINE fromViennaPair #-}
 
-isViennaPair :: Nuc RNA -> Nuc RNA -> Bool
+isViennaPair :: Letter RNA -> Letter RNA -> Bool
 isViennaPair a b = f a b where
   f l r =  l==rC && r==rG
         || l==rG && r==rC
@@ -110,7 +111,7 @@ isViennaPair a b = f a b where
   {-# INLINE f #-}
 {-# INLINE isViennaPair #-}
 
-viennaPairTable :: Unboxed (Z:.Nuc RNA:.Nuc RNA) ViennaPair
+viennaPairTable :: Unboxed (Z:.Letter RNA:.Letter RNA) ViennaPair
 viennaPairTable = fromAssocs (Z:.rN:.rN) (Z:.rU:.rU) vpNS
   [ (Z:.rC:.rG , vpCG)
   , (Z:.rG:.rC , vpGC)

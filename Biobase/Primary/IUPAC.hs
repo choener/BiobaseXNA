@@ -14,6 +14,7 @@ import Data.List (nub,sort)
 import Data.Tuple (swap)
 import Control.Arrow ((***))
 
+import Biobase.Primary.Letter
 import Biobase.Primary.Nuc
 
 
@@ -26,18 +27,18 @@ instance Degenerate Char where
   fromDegenerate = maybe [] id . flip lookup iupacXDNAchars
   toDegenerate   = flip lookup (map swap iupacXDNAchars) . nub . sort
 
-instance Degenerate (Nuc RNA) where
+instance Degenerate (Letter RNA) where
     fromDegenerate 'T' = []
     fromDegenerate x   = map dnaTrna $ fromDegenerate x
     toDegenerate   xs  | xs == [rU] = Just 'U'
                        | otherwise  = toDegenerate $ map rnaTdna xs
 
-instance Degenerate (Nuc DNA) where
+instance Degenerate (Letter DNA) where
     fromDegenerate 'U' = []
     fromDegenerate x   = map charDNA $ fromDegenerate x
     toDegenerate       = toDegenerate . map dnaChar
 
-instance Degenerate (Nuc XNA) where
+instance Degenerate (Letter XNA) where
     fromDegenerate = map charXNA . fromDegenerate
     toDegenerate   = toDegenerate . map xnaChar
 

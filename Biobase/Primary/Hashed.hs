@@ -22,7 +22,7 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
-import           Biobase.Primary.Nuc
+import           Biobase.Primary.Letter
 
 
 
@@ -37,17 +37,17 @@ derivingUnbox "HashedPrimary"
 -- | Given a piece of primary sequence information, reduce it to an index.
 -- The empty input produces an index of 0.
 
-mkHashedPrimary :: forall t . (VU.Unbox (Nuc t), Bounded (Nuc t), Enum (Nuc t)) => Primary t -> HashedPrimary t
+mkHashedPrimary :: forall t . (VU.Unbox (Letter t), Bounded (Letter t), Enum (Letter t)) => Primary t -> HashedPrimary t
 mkHashedPrimary = HashedPrimary . fst . VU.foldl' f (0, 1) where
-  f (z, c) n = (z + c * (fromEnum n +1), c * (fromEnum (maxBound :: Nuc t) + 1))
+  f (z, c) n = (z + c * (fromEnum n +1), c * (fromEnum (maxBound :: Letter t) + 1))
 {-# INLINE mkHashedPrimary #-}
 
 -- | Turn a hash back into a sequence. Will fail if the resulting sequence
 -- has more than 100 elements.
 
-hash2primary :: forall t . (VU.Unbox (Nuc t), Bounded (Nuc t), Enum (Nuc t)) => HashedPrimary t -> Primary t
+hash2primary :: forall t . (VU.Unbox (Letter t), Bounded (Letter t), Enum (Letter t)) => HashedPrimary t -> Primary t
 hash2primary (HashedPrimary h) = VU.unfoldrN l f h where
-  m = fromEnum (maxBound :: Nuc t) +1
+  m = fromEnum (maxBound :: Letter t) +1
   l = VU.length . VU.takeWhile (>0) . VU.iterateN 100 (`div` m) $ h
   f k = if k>0 then Just (toEnum $ ((k-1) `mod` m) , (k-1) `div` m)
                else Nothing

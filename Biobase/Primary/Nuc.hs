@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -8,12 +7,8 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
-{-# LANGUAGE RankNTypes #-}
 
 -- | The primary structure: interface to efficient encoding of RNA and DNA
 -- sequences. The design aims toward the 'vector' library and repa. In
@@ -21,25 +16,15 @@
 -- 'text' or lazy 'bytestring's instead and cast to Biobase.Primary definitions
 -- only at the last moment.
 --
--- NOTE individual nucleotides are encoded is 'Int's internally without any
--- tagging. This means that we have no way of deciding if we are dealing with
--- RNA or DNA on this level.
---
 -- TODO enable OverloadedLists
---
--- TODO can we have derivingUnbox for all (Nuc t)?
 
 module Biobase.Primary.Nuc where
 
 import           Data.Char (toUpper)
-import           Data.Hashable
 import           Data.Ix (Ix(..))
 import           Data.Primitive.Types
 import           Data.String
 import           Data.Tuple (swap)
-import           Data.Vector.Unboxed.Deriving
-import           GHC.Base (remInt,quotInt)
-import           GHC.Generics (Generic)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Text as T
@@ -48,15 +33,12 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
-import           Data.Array.Repa.ExtShape
-import           Data.Array.Repa.Index
-import           Data.Array.Repa.Shape
-
 import           Biobase.Primary.Bounds
+import           Biobase.Primary.Letter
 
 
 
--- * The three different sequence representations. We use the same 'Nuc'
+-- * The three different sequence representations. We use the same 'Letter'
 -- representation for all representation, but tag the representations with
 -- a phantom type.
 
@@ -66,24 +48,16 @@ data DNA
 
 data XNA
 
-newtype Nuc t = Nuc { unNuc :: Int }
-                deriving (Eq,Ord,Generic)
-
 -- ** Instances, helper functions, 'Unbox' instance.
 
-instance Hashable (Nuc t)
+nucRNA :: Int -> Letter RNA
+nucRNA = Letter
 
-derivingUnbox "Nuc"
-  [t| forall a . Nuc a -> Int |] [| unNuc |] [| Nuc |]
+nucDNA :: Int -> Letter DNA
+nucDNA = Letter
 
-nucRNA :: Int -> Nuc RNA
-nucRNA = Nuc
-
-nucDNA :: Int -> Nuc DNA
-nucDNA = Nuc
-
-nucXNA :: Int -> Nuc XNA
-nucXNA = Nuc
+nucXNA :: Int -> Letter XNA
+nucXNA = Letter
 
 (rA:rC:rG:rU:rN:_) = map nucRNA [0..]
 
@@ -91,49 +65,49 @@ nucXNA = Nuc
 
 (xA:xC:xG:xT:xU:xN:_) = map nucXNA [0..]
 
-instance Bounded (Nuc RNA) where
+instance Bounded (Letter RNA) where
     minBound = rA
     maxBound = rN
 
-instance Bounded (Nuc DNA) where
+instance Bounded (Letter DNA) where
     minBound = dA
     maxBound = dN
 
-instance Bounded (Nuc XNA) where
+instance Bounded (Letter XNA) where
     minBound = xA
     maxBound = xN
 
-instance Enum (Nuc RNA) where
-    succ x | x==rN = error "succ/Nuc RNA"
-    succ (Nuc x)   = Nuc $ x+1
-    pred x | x==rA = error "pred/Nuc RNA"
-    pred (Nuc x)   = Nuc $ x-1
-    toEnum k | k>=0 && k<=4 = Nuc k
-    toEnum k                = error $ "toEnum/Nuc RNA " ++ show k
-    fromEnum (Nuc k) = k
+instance Enum (Letter RNA) where
+    succ x | x==rN = error "succ/Letter RNA"
+    succ (Letter x)   = Letter $ x+1
+    pred x | x==rA = error "pred/Letter RNA"
+    pred (Letter x)   = Letter $ x-1
+    toEnum k | k>=0 && k<=4 = Letter k
+    toEnum k                = error $ "toEnum/Letter RNA " ++ show k
+    fromEnum (Letter k) = k
 
-instance Enum (Nuc DNA) where
-    succ x | x==dN = error "succ/Nuc DNA"
-    succ (Nuc x)   = Nuc $ x+1
-    pred x | x==dA = error "pred/Nuc DNA"
-    pred (Nuc x)   = Nuc $ x-1
-    toEnum k | k>=0 && k<=4 = Nuc k
-    toEnum k                = error $ "toEnum/Nuc DNA " ++ show k
-    fromEnum (Nuc k) = k
+instance Enum (Letter DNA) where
+    succ x | x==dN = error "succ/Letter DNA"
+    succ (Letter x)   = Letter $ x+1
+    pred x | x==dA = error "pred/Letter DNA"
+    pred (Letter x)   = Letter $ x-1
+    toEnum k | k>=0 && k<=4 = Letter k
+    toEnum k                = error $ "toEnum/Letter DNA " ++ show k
+    fromEnum (Letter k) = k
 
-instance Enum (Nuc XNA) where
-    succ x | x==xN = error "succ/Nuc XNA"
-    succ (Nuc x)   = Nuc $ x+1
-    pred x | x==xA = error "pred/Nuc XNA"
-    pred (Nuc x)   = Nuc $ x-1
-    toEnum k | k>=0 && k<=5 = Nuc k
-    toEnum k                = error $ "toEnum/Nuc XNA " ++ show k
-    fromEnum (Nuc k) = k
+instance Enum (Letter XNA) where
+    succ x | x==xN = error "succ/Letter XNA"
+    succ (Letter x)   = Letter $ x+1
+    pred x | x==xA = error "pred/Letter XNA"
+    pred (Letter x)   = Letter $ x-1
+    toEnum k | k>=0 && k<=5 = Letter k
+    toEnum k                = error $ "toEnum/Letter XNA " ++ show k
+    fromEnum (Letter k) = k
 
-acgu :: [Nuc RNA]
+acgu :: [Letter RNA]
 acgu = [rA..rU]
 
-acgt :: [Nuc DNA]
+acgt :: [Letter DNA]
 acgt = [dA..dT]
 
 charRNA = f . toUpper where
@@ -186,16 +160,14 @@ xnaChar x | x==xA = 'A'
           | x==xN = 'N'
 {-# INLINE xnaChar #-}            
 
-instance Show (Nuc RNA) where
+instance Show (Letter RNA) where
     show c = [rnaChar c]
 
-instance Show (Nuc DNA) where
+instance Show (Letter DNA) where
     show c = [dnaChar c]
 
-instance Show (Nuc XNA) where
+instance Show (Letter XNA) where
     show c = [xnaChar c]
-
-type Primary t = VU.Vector (Nuc t)
 
 rnaSeq :: MkPrimary n RNA => n -> Primary RNA
 rnaSeq = primary
@@ -275,7 +247,7 @@ class Complement s t where
 transcribe :: Primary DNA -> Primary RNA
 transcribe = VU.reverse . complement
 
-instance Complement (Nuc RNA) (Nuc RNA) where
+instance Complement (Letter RNA) (Letter RNA) where
     complement z
       | z==rA = rU
       | z==rC = rG
@@ -283,7 +255,7 @@ instance Complement (Nuc RNA) (Nuc RNA) where
       | z==rU = rA
       | z==rN = rN
 
-instance Complement (Nuc DNA) (Nuc DNA) where
+instance Complement (Letter DNA) (Letter DNA) where
     complement z
       | z==dA = dT
       | z==dC = dG
@@ -291,7 +263,7 @@ instance Complement (Nuc DNA) (Nuc DNA) where
       | z==dT = dA
       | z==dN = dN
 
-instance Complement (Nuc DNA) (Nuc RNA) where
+instance Complement (Letter DNA) (Letter RNA) where
     complement z
       | z==dA = rU
       | z==dC = rG
@@ -299,7 +271,7 @@ instance Complement (Nuc DNA) (Nuc RNA) where
       | z==dT = rA
       | z==dN = rN
 
-instance Complement (Nuc RNA) (Nuc DNA) where
+instance Complement (Letter RNA) (Letter DNA) where
     complement z
       | z==rA = dT
       | z==rC = dG
@@ -312,12 +284,6 @@ instance (Complement s t, VU.Unbox s, VU.Unbox t) => Complement (VU.Vector s) (V
 
 instance (Complement s t, Functor f) => Complement (f s) (f t) where
     complement = fmap complement
-
--- | Conversion from a large number of sequence-like inputs to primary
--- sequences.
-
-class MkPrimary n t where
-    primary :: n -> Primary t
 
 instance MkPrimary String RNA where
     primary = primary . VU.fromList
@@ -349,57 +315,19 @@ instance MkPrimary (VU.Vector Char) t => MkPrimary BS.ByteString t where
 instance MkPrimary (VU.Vector Char) t => MkPrimary BSL.ByteString t where
     primary = primary . VU.fromList . BSL.unpack
 
-
-
-instance IsString [Nuc RNA] where
+instance IsString [Letter RNA] where
     fromString = map charRNA
 
-instance IsString [Nuc DNA] where
+instance IsString [Letter DNA] where
     fromString = map charDNA
 
-instance IsString [Nuc XNA] where
+instance IsString [Letter XNA] where
     fromString = map charXNA
 
-instance (VU.Unbox (Nuc t), IsString [Nuc t]) => IsString (VU.Vector (Nuc t)) where
+instance (VU.Unbox (Letter t), IsString [Letter t]) => IsString (VU.Vector (Letter t)) where
     fromString = VU.fromList . fromString
 
 
-
-instance (Shape sh,Show sh) => Shape (sh :. Nuc z) where
-  rank (sh:._) = rank sh + 1
-  zeroDim = zeroDim:.Nuc 0
-  unitDim = unitDim:.Nuc 1 -- TODO does this one make sense?
-  intersectDim (sh1:.n1) (sh2:.n2) = intersectDim sh1 sh2 :. min n1 n2
-  addDim (sh1:.Nuc n1) (sh2:.Nuc n2) = addDim sh1 sh2 :. Nuc (n1+n2) -- TODO will not necessarily yield a valid Nuc
-  size (sh1:.Nuc n) = size sh1 * n
-  sizeIsValid (sh1:.Nuc n) = sizeIsValid (sh1:.n)
-  toIndex (sh1:.Nuc sh2) (sh1':.Nuc sh2') = toIndex (sh1:.sh2) (sh1':.sh2')
-  fromIndex (ds:.Nuc d) n = fromIndex ds (n `quotInt` d) :. Nuc r where
-                              r | rank ds == 0 = n
-                                | otherwise    = n `remInt` d
-  inShapeRange (sh1:.n1) (sh2:.n2) (idx:.i) = i>=n1 && i<n2 && inShapeRange sh1 sh2 idx
-  listOfShape (sh:.Nuc n) = n : listOfShape sh
-  shapeOfList xx = case xx of
-    []   -> error "empty list in shapeOfList/Primary"
-    x:xs -> shapeOfList xs :. Nuc x
-  deepSeq (sh:.n) x = deepSeq sh (n `seq` x)
-  {-# INLINE rank #-}
-  {-# INLINE zeroDim #-}
-  {-# INLINE unitDim #-}
-  {-# INLINE intersectDim #-}
-  {-# INLINE addDim #-}
-  {-# INLINE size #-}
-  {-# INLINE sizeIsValid #-}
-  {-# INLINE toIndex #-}
-  {-# INLINE fromIndex #-}
-  {-# INLINE inShapeRange #-}
-  {-# INLINE listOfShape #-}
-  {-# INLINE shapeOfList #-}
-  {-# INLINE deepSeq #-}
-
-instance (Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. Nuc z) where
-  subDim (sh1:.Nuc n1) (sh2:.Nuc n2) = subDim sh1 sh2 :. Nuc (n1-n2)
-  rangeList (sh1:.Nuc n1) (sh2:.Nuc n2) = [ sh:.Nuc n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
 
 
 

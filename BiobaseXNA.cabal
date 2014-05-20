@@ -59,6 +59,7 @@ library
     Biobase.Primary.AA
     Biobase.Primary.Hashed
     Biobase.Primary.IUPAC
+    Biobase.Primary.Letter
     Biobase.Primary.Nuc
     Biobase.Primary.Trans
     Biobase.Secondary
