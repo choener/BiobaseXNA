@@ -39,20 +39,19 @@ extra-source-files:
 
 library
   build-depends:
-    base >3 && <5,
-    bytestring      >= 0.10           ,
-    containers      >= 0.4            ,
-    csv             >= 0.1.2          ,
-    file-embed      >= 0.0.4.7        ,
-    hashable        >= 1.2            ,
-    mtl             >= 2.1            ,
-    primitive       >= 0.5            ,
-    PrimitiveArray  >= 0.5.4          ,
-    repa            >= 3.2            ,
-    text            >= 0.11           ,
-    tuple           >= 0.2            ,
-    vector          >= 0.10           ,
-    vector-th-unbox >= 0.2
+    bytestring                  ,
+    containers                  ,
+    csv             == 0.1.*    ,
+    file-embed      == 0.0.6.*  ,
+    hashable        == 1.2.*    ,
+    primitive       == 0.5.*    ,
+    PrimitiveArray  == 0.5.5.*  ,
+    repa            == 3.2.*    ,
+    text                        ,
+    tuple           == 0.2.*    ,
+    vector          == 0.10.*   ,
+    vector-th-unbox == 0.2.*    ,
+    base            == 4.*
 
   exposed-modules:
     Biobase.Primary
@@ -75,7 +74,7 @@ library
 
 executable SubOptDistance
   build-depends:
-    cmdargs >= 0.10
+    cmdargs == 0.10.*
   main-is:
     SubOptDistance.hs
   ghc-options:
