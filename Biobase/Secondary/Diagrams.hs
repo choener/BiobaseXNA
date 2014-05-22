@@ -161,6 +161,10 @@ instance MkD1Secondary (VU.Vector Char) where
 
 
 
+-- * High-level parsing functionality for secondary structures
+
+-- TODO rename dotBracket and use that name as standard?
+
 -- * Helper functions
 
 -- | Secondary structure parser which allows pseudoknots, if they use different

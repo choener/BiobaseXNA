@@ -35,7 +35,8 @@ extra-source-files:
   sources/isostericity-matrices.csv
   sources/isostericity-detailed.csv
   sources/iupac-nucleotides
-  changelog
+  sources/codontable
+  changelog.md
 
 library
   build-depends:

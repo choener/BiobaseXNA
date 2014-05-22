@@ -2,13 +2,14 @@
 -------
 
 - major cleanup of the XNA library: explicit encoding of RNA,DNA, or XNA (XNA
-contains both U and T)
+  contains both U and T)
 - translation between XNA and protein (Biobase.Primary.Trans)
 - import Biobase.Primary to get everything under Primary.*
 - import Biobase.Secondary to get everything under Secondary.*
-
 - SubOptDistance now extends all structure lines of RNAsubopt with a third
-field, the distance
+  field, the distance
+- Diagrams provide methods to validate folding and cofolding secondary
+  structure strings.
 
 0.8.3.0
 -------
