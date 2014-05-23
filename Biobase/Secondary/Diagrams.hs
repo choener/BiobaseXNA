@@ -10,7 +10,9 @@ module Biobase.Secondary.Diagrams where
 
 import           Control.Applicative
 import           Control.Arrow
-import           Data.List (sort,groupBy,sortBy)
+import           Control.Lens
+import           Data.List (sort,groupBy,sortBy,intersperse)
+import           Data.List.Split (splitOn)
 import           Data.Tuple.Select (sel1,sel2)
 import           Data.Tuple (swap)
 import qualified Data.Vector.Unboxed as VU
@@ -163,29 +165,41 @@ instance MkD1Secondary (VU.Vector Char) where
 
 -- * High-level parsing functionality for secondary structures
 
--- | Structure representation.
+-- | Completely canonical structure.
+--
+-- TODO Check size of hairpins and interior loops?
 
-data Structure = Structure
+isCanonicalStructure :: String -> Bool
+isCanonicalStructure = all (`elem` "().")
 
--- | generic dot-bracket parser.
+-- | Is constraint type structure, i.e. there can also be symbols present
+-- that denote up- or downstream pairing.
 
-dotBracketG
-  :: [String] -- ^ structure character dictionary
-  -> [String] -- ^ split character dictionary
-  -> [String] -- ^ constraint character dictionary
-  -> String   -- ^ input string
-  -> Either String Structure  -- ^ return either an error message, or a structure representation.
-dotBracketG strc splt cnst xs = undefined
+isConstraintStructure :: String -> Bool
+isConstraintStructure = all (`elem` "().<>{}|")
 
--- | Parses a canonical secondary structure.
+-- | Take a structural string and split it into its constituents.
 
-dotBracket = dotBracketG "()." "&" "<>{}|"
+structures :: Iso' String [String]
+structures = iso (splitOn "&") (concat . intersperse "&")
 
--- |
+-- | A fold structure is a single structure
 
-constraint :: dotBracket "().<>|{}"
+foldStructure :: Prism' String String
+foldStructure = prism id to where
+  to s = case s^.structures of
+           [t] -> Right t
+           _   -> Left  s
 
+-- | A cofold structure has exactly two structures split by @&@ (which the
+-- prism removes).
 
+cofoldStructure :: Prism' String (String,String)
+cofoldStructure = prism from to where
+  from (l,r) = l ++ '&' : r
+  to   s     = case s^.structures of
+                 [l,r] -> Right (l,r)
+                 _     -> Left  s
 
 -- * Helper functions
 
