@@ -136,7 +136,7 @@ instance MkD2Secondary (Int,[ExtPairIdx]) where
 instance MkD1Secondary ([String],String) where
   mkD1S (dict,xs) = mkD1S (length xs,ps) where
     ps :: [(Int,Int)]
-    ps = unsafeDotBracket dict xs
+    ps = unsafeDotBracket2pairlist dict xs
   fromD1S (D1S s) = (["()"], zipWith f [0..] $ VU.toList s) where
     f k (-1) = '.'
     f k p
@@ -163,15 +163,37 @@ instance MkD1Secondary (VU.Vector Char) where
 
 -- * High-level parsing functionality for secondary structures
 
--- TODO rename dotBracket and use that name as standard?
+-- | Structure representation.
+
+data Structure = Structure
+
+-- | generic dot-bracket parser.
+
+dotBracketG
+  :: [String] -- ^ structure character dictionary
+  -> [String] -- ^ split character dictionary
+  -> [String] -- ^ constraint character dictionary
+  -> String   -- ^ input string
+  -> Either String Structure  -- ^ return either an error message, or a structure representation.
+dotBracketG strc splt cnst xs = undefined
+
+-- | Parses a canonical secondary structure.
+
+dotBracket = dotBracketG "()." "&" "<>{}|"
+
+-- |
+
+constraint :: dotBracket "().<>|{}"
+
+
 
 -- * Helper functions
 
 -- | Secondary structure parser which allows pseudoknots, if they use different
 -- kinds of brackets.
 
-unsafeDotBracket :: [String] -> String -> [(Int,Int)]
-unsafeDotBracket dict xs = sort . concatMap (f xs) $ dict where
+unsafeDotBracket2pairlist :: [String] -> String -> [(Int,Int)]
+unsafeDotBracket2pairlist dict xs = sort . concatMap (f xs) $ dict where
   f xs [l,r] = g 0 [] . map (\x -> if x `elem` [l,r] then x else '.') $ xs where
     g :: Int -> [Int] -> String -> [(Int,Int)]
     g _ st [] = []
@@ -185,8 +207,8 @@ unsafeDotBracket dict xs = sort . concatMap (f xs) $ dict where
 -- | Secondary structure parser with a notion of errors. We either return a
 -- @Right@ structure, including flags, or a @Left@ error.
 
-dotBracket :: [String] -> String -> Either String ( [(Int,Int)] )
-dotBracket dict str = fmap (sort . concat) . sequence . map (f str) $ dict where
+dotBracket2pairlist :: [String] -> String -> Either String ( [(Int,Int)] )
+dotBracket2pairlist dict str = fmap (sort . concat) . sequence . map (f str) $ dict where
   f ys [l,r] = g 0 [] . map (\x -> if x `elem` [l,r] then x else '.') $ ys where
     g :: Int -> [Int] -> String -> Either String ( [(Int,Int)] )
     g _ [] [] = pure []
