@@ -16,6 +16,8 @@
 -- 'text' or lazy 'bytestring's instead and cast to Biobase.Primary definitions
 -- only at the last moment.
 --
+-- Degenerate encoding can be found in the @IUPAC@ module.
+--
 -- TODO enable OverloadedLists
 
 module Biobase.Primary.Nuc where
@@ -42,9 +44,15 @@ import           Biobase.Primary.Letter
 -- representation for all representation, but tag the representations with
 -- a phantom type.
 
+-- | RNA nucleotides.
+
 data RNA
 
+-- | DNA nucleotides.
+
 data DNA
+
+-- | Combine both, RNA and DNA.
 
 data XNA
 
@@ -65,6 +73,8 @@ nucXNA = Letter
 
 (xA:xC:xG:xT:xU:xN:_) = map nucXNA [0..]
 
+
+
 instance Bounded (Letter RNA) where
     minBound = rA
     maxBound = rN
@@ -78,28 +88,28 @@ instance Bounded (Letter XNA) where
     maxBound = xN
 
 instance Enum (Letter RNA) where
-    succ x | x==rN = error "succ/Letter RNA"
-    succ (Letter x)   = Letter $ x+1
-    pred x | x==rA = error "pred/Letter RNA"
-    pred (Letter x)   = Letter $ x-1
+    succ x | x==rN  = error "succ/Letter RNA"
+    succ (Letter x) = Letter $ x+1
+    pred x | x==rA  = error "pred/Letter RNA"
+    pred (Letter x) = Letter $ x-1
     toEnum k | k>=0 && k<=4 = Letter k
     toEnum k                = error $ "toEnum/Letter RNA " ++ show k
     fromEnum (Letter k) = k
 
 instance Enum (Letter DNA) where
-    succ x | x==dN = error "succ/Letter DNA"
-    succ (Letter x)   = Letter $ x+1
-    pred x | x==dA = error "pred/Letter DNA"
-    pred (Letter x)   = Letter $ x-1
+    succ x | x==dN  = error "succ/Letter DNA"
+    succ (Letter x) = Letter $ x+1
+    pred x | x==dA  = error "pred/Letter DNA"
+    pred (Letter x) = Letter $ x-1
     toEnum k | k>=0 && k<=4 = Letter k
     toEnum k                = error $ "toEnum/Letter DNA " ++ show k
     fromEnum (Letter k) = k
 
 instance Enum (Letter XNA) where
-    succ x | x==xN = error "succ/Letter XNA"
-    succ (Letter x)   = Letter $ x+1
-    pred x | x==xA = error "pred/Letter XNA"
-    pred (Letter x)   = Letter $ x-1
+    succ x | x==xN  = error "succ/Letter XNA"
+    succ (Letter x) = Letter $ x+1
+    pred x | x==xA  = error "pred/Letter XNA"
+    pred (Letter x) = Letter $ x-1
     toEnum k | k>=0 && k<=5 = Letter k
     toEnum k                = error $ "toEnum/Letter XNA " ++ show k
     fromEnum (Letter k) = k
@@ -285,13 +295,7 @@ instance (Complement s t, VU.Unbox s, VU.Unbox t) => Complement (VU.Vector s) (V
 instance (Complement s t, Functor f) => Complement (f s) (f t) where
     complement = fmap complement
 
-instance MkPrimary String RNA where
-    primary = primary . VU.fromList
-
-instance MkPrimary String DNA where
-    primary = primary . VU.fromList
-
-instance MkPrimary String XNA where
+instance (MkPrimary (VU.Vector Char) z) => MkPrimary String z where
     primary = primary . VU.fromList
 
 instance MkPrimary (VU.Vector Char) RNA where

@@ -3,6 +3,7 @@
 
 - major cleanup of the XNA library: explicit encoding of RNA,DNA, or XNA (XNA
   contains both U and T)
+- IUPAC notation (degenerate nucleotides) has an efficient encoding as well
 - translation between XNA and protein (Biobase.Primary.Trans)
 - import Biobase.Primary to get everything under Primary.*
 - import Biobase.Secondary to get everything under Secondary.*
