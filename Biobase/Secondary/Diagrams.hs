@@ -11,6 +11,7 @@ module Biobase.Secondary.Diagrams where
 import           Control.Applicative
 import           Control.Arrow
 import           Control.Lens
+import           Data.List ((\\))
 import           Data.List (sort,groupBy,sortBy,intersperse)
 import           Data.List.Split (splitOn)
 import           Data.Tuple.Select (sel1,sel2)
@@ -179,11 +180,19 @@ isConstraintStructure :: String -> Bool
 isConstraintStructure = all (`elem` "().<>{}|")
 
 -- | Take a structural string and split it into its constituents.
+--
+-- If we decide to /NOT/ depend on @lens@ explicitly, another way to write
+-- this is:
+--
+-- @
+-- structures :: forall p f . (Profunctor p, Functor f) => p [String] (f [String]) -> p String (f String)
+-- structures = dimap (splitOn "&") (fmap (concat . intersperse "&"))
+-- @
 
 structures :: Iso' String [String]
 structures = iso (splitOn "&") (concat . intersperse "&")
 
--- | A fold structure is a single structure
+-- | A @fold@ structure is a single structure
 
 foldStructure :: Prism' String String
 foldStructure = prism id to where
@@ -191,7 +200,7 @@ foldStructure = prism id to where
            [t] -> Right t
            _   -> Left  s
 
--- | A cofold structure has exactly two structures split by @&@ (which the
+-- | A @cofold@ structure has exactly two structures split by @&@ (which the
 -- prism removes).
 
 cofoldStructure :: Prism' String (String,String)
@@ -234,4 +243,13 @@ dotBracket2pairlist dict str = fmap (sort . concat) . sequence . map (f str) $ d
     g a b c   = fail $ printf "unspecified error: %s (dot-bracket: %s)" (show (a,b,c)) str
   f xs lr@(_:_:_:_) = fail $ printf "unsound dictionary: %s (dot-bracket: %s)" lr str
   f xs lr     = fail $ printf "unspecified error: dict: %s, input: %s (dot-bracket: %s)" lr xs str
+
+-- | Calculates the distance between two vienna strings.
+
+viennaStringDistance :: Bool -> Bool -> String -> String -> (String,Int)
+viennaStringDistance sPairs tPairs s t = (t,length $ ss++tt) where
+  s' = either error id . dotBracket2pairlist ["()"] $ s
+  t' = either error id . dotBracket2pairlist ["()"] $ t
+  ss = if sPairs then s' \\ t' else []
+  tt = if tPairs then t' \\ s' else []
 

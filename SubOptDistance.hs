@@ -3,12 +3,15 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
+-- | A very simple program that calculates base pair distances given
+-- a secondary structure as argument and a Vienna RNAsubopt output via
+-- stdin.
+
 module Main where
 
 import Control.Arrow
 import Data.Char (isSpace)
 import Data.Either (either)
-import Data.List
 import Data.Ord
 import System.Console.CmdArgs
 import Text.Printf
@@ -31,7 +34,7 @@ options = Options
   } &= help helpLines
 
 helpLines = unlines
-  [ "This program reads a bunch of RNAsubopt lines on STDIN. Provide an"
+  [ "This program reads RNAsubopt output on STDIN. Provide an"
   , "additional structure as the argument line. The result will be the"
   , "sub-optimal line with lowest base pair distance to the query line."
   ]
@@ -40,30 +43,7 @@ main = do
   Options{..} <- cmdArgs options
   (sqn:xs') <- fmap lines $ getContents
   putStrLn sqn
-  let xs = map (extendStructure structure aq qa) xs'
+  let s' = fst . break isSpace $ structure
+  let xs = map (viennaStringDistance aq qa s') xs'
   mapM_ (\(s,d) -> printf "%s %6d\n" s d) xs
-  {-
-  let xs = map (\(s,e) -> (s,either error id $ dotBracket ["()"] s,read e)) $ map (break isSpace) xs'
-  let q = either error id $ dotBracket ["()"] structure
-  let (d,x,e) = getMinimalDistance aq qa q xs
-  let distance :: Double = e - ((/100) . read $ words sqn !! 1)
-  printf "%4d %s %8.2f %8.2f\n" d x e distance
-  -}
-
-extendStructure :: String -> Bool -> Bool -> String -> (String,Int)
-extendStructure strq aq qa s = (s,length $ aqs++qas) where
-  (s',_) = break isSpace s
-  t = either error id $ dotBracket2pairlist ["()"] s'
-  q = either error id $ dotBracket2pairlist ["()"] strq
-  aqs = if aq then t \\ q else []
-  qas = if qa then q \\ t else []
-
-{-
-getMinimalDistance :: Bool -> Bool -> [PairIdx] -> [(String,[PairIdx],Double)] -> (Int,String,Double)
-getMinimalDistance aq qa q xs = g $ minimumBy (comparing f) xs where
-  g (a,b,c) = ( fst $ f (a,b,c) , a, c)
-  f (_,a,e) = (length $ aqs ++ qas , e) where
-    aqs = if aq then a \\ q else []
-    qas = if qa then q \\ a else []
--}
 
