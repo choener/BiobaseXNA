@@ -53,8 +53,8 @@ main = do
 extendStructure :: String -> Bool -> Bool -> String -> (String,Int)
 extendStructure strq aq qa s = (s,length $ aqs++qas) where
   (s',_) = break isSpace s
-  t = either error id $ dotBracket ["()"] s'
-  q = either error id $ dotBracket ["()"] strq
+  t = either error id $ dotBracket2pairlist ["()"] s'
+  q = either error id $ dotBracket2pairlist ["()"] strq
   aqs = if aq then t \\ q else []
   qas = if qa then q \\ t else []
 
