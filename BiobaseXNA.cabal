@@ -47,7 +47,7 @@ library
     hashable        == 1.2.*    ,
     lens            == 4.*      ,
     primitive       == 0.5.*    ,
-    PrimitiveArray  == 0.5.5.*  ,
+    PrimitiveArray  == 0.6.*    ,
     repa            == 3.2.*    ,
     split           == 0.2.*    ,
     text                        ,
