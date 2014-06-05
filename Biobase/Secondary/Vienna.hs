@@ -17,9 +17,11 @@ import           Data.Array.Repa.Shape
 import           Data.Ix
 import           Data.Primitive.Types
 import           Data.Tuple (swap)
+import           Data.Vector.Fusion.Stream.Size (Size (Unknown))
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           Prelude as P
+import qualified Data.Vector.Fusion.Stream.Monadic as VM
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
@@ -73,6 +75,14 @@ instance (Shape sh,Show sh) => Shape (sh :. ViennaPair) where
 instance (Eq sh, Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. ViennaPair) where
   subDim (sh1:.ViennaPair n1) (sh2:.ViennaPair n2) = subDim sh1 sh2 :. (ViennaPair $ n1-n2)
   rangeList (sh1:.ViennaPair n1) (sh2:.ViennaPair n2) = [sh:.ViennaPair n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
+  rangeStream (fs:.ViennaPair f) (ts:.ViennaPair t) = VM.flatten mk step Unknown $ rangeStream fs ts where
+    mk sh = return (sh :. f)
+    step (sh :. k)
+      | k>t       = return $ VM.Done
+      | otherwise = return $ VM.Yield (sh :. ViennaPair k) (sh :. k +1)
+    {-# INLINE [1] mk #-}
+    {-# INLINE [1] step #-}
+  {-# INLINE rangeStream #-}
 
 (vpNP:vpCG:vpGC:vpGU:vpUG:vpAU:vpUA:vpNS:vpUndefined:_) = P.map ViennaPair [0..]
 

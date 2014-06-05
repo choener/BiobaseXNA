@@ -18,6 +18,8 @@ import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           GHC.Generics (Generic)
 import qualified Data.Vector.Unboxed as VU
+import qualified Data.Vector.Fusion.Stream.Monadic as VM
+import           Data.Vector.Fusion.Stream.Size (Size (Unknown))
 
 import           Data.Array.Repa.ExtShape
 import           Data.Array.Repa.Index
@@ -82,4 +84,12 @@ instance (Shape sh,Show sh) => Shape (sh :. Letter z) where
 instance (Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. Letter z) where
   subDim (sh1:.Letter n1) (sh2:.Letter n2) = subDim sh1 sh2 :. Letter (n1-n2)
   rangeList (sh1:.Letter n1) (sh2:.Letter n2) = [ sh:.Letter n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
+  rangeStream (fs:.Letter f) (ts:.Letter t) = VM.flatten mk step Unknown $ rangeStream fs ts where
+    mk sh = return (sh :. f)
+    step (sh :. k)
+      | k>t       = return $ VM.Done
+      | otherwise = return $ VM.Yield (sh :. Letter k) (sh :. k +1)
+    {-# INLINE [1] mk #-}
+    {-# INLINE [1] step #-}
+  {-# INLINE rangeStream #-}
 
