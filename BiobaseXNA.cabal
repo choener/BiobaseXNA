@@ -40,21 +40,27 @@ extra-source-files:
 
 library
   build-depends:
-    bytestring                  ,
-    containers                  ,
-    csv             == 0.1.*    ,
-    file-embed      == 0.0.6.*  ,
-    hashable        == 1.2.*    ,
-    lens            == 4.*      ,
-    primitive       == 0.5.*    ,
-    PrimitiveArray  == 0.6.*    ,
-    repa            == 3.2.*    ,
-    split           == 0.2.*    ,
-    text                        ,
-    tuple           == 0.2.*    ,
-    vector          == 0.10.*   ,
-    vector-th-unbox == 0.2.*    ,
-    base            == 4.*
+    aeson                   == 0.8.*    ,
+    binary                  == 0.7.*    ,
+    bytes                   == 0.14.*   ,
+    bytestring              == 0.10.*   ,
+    cereal                  == 0.4.*    ,
+    cereal-vector           == 0.2.*    ,
+    containers              == 0.5.*    ,
+    csv                     == 0.1.*    ,
+    file-embed              == 0.0.7.*  ,
+    hashable                == 1.2.*    ,
+    lens                    == 4.*      ,
+    primitive               == 0.5.*    ,
+    PrimitiveArray          == 0.6.*    ,
+    repa                    == 3.2.*    ,
+    split                   == 0.2.*    ,
+    text                    == 1.1.*    ,
+    tuple                   == 0.2.*    ,
+    vector                  == 0.10.*   ,
+    vector-binary-instances == 0.2.*    ,
+    vector-th-unbox         == 0.2.*    ,
+    base                    == 4.*
 
   exposed-modules:
     Biobase.Primary
@@ -70,6 +76,7 @@ library
     Biobase.Secondary.Diagrams
     Biobase.Secondary.Isostericity
     Biobase.Secondary.Pseudoknots
+    Biobase.Secondary.Structure
     Biobase.Secondary.Vienna
 
   ghc-options:
