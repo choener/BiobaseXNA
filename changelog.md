@@ -11,6 +11,7 @@
   field, the distance
 - Diagrams provide methods to validate folding and cofolding secondary
   structure strings.
+- serialization capabilities for 'Letter's
 
 0.8.3.0
 -------
