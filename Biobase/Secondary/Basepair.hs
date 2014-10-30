@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -19,15 +20,19 @@
 
 module Biobase.Secondary.Basepair where
 
+import           Data.Aeson
 import           Data.Array.Repa.Index
 import           Data.Array.Repa.Shape
+import           Data.Binary
 import           Data.Char (toLower, toUpper)
 import           Data.Ix (Ix(..))
 import           Data.List as L
 import           Data.Primitive.Types
+import           Data.Serialize
 import           Data.Tuple (swap)
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
+import           GHC.Generics
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
@@ -51,7 +56,12 @@ threeChar s@[c,x,y]
 -- watson-crick, sugar, or hoogsteen.
 
 newtype Edge = Edge {unEdge :: Int}
-  deriving (Eq,Ord,Ix)
+  deriving (Eq,Ord,Ix,Generic)
+
+instance Binary    Edge
+instance Serialize Edge
+instance FromJSON  Edge
+instance ToJSON    Edge
 
 instance (Shape sh,Show sh) => Shape (sh :. Edge) where
   rank (sh:._) = rank sh + 1
@@ -115,7 +125,12 @@ instance Read Edge where
 -- | Nucleotides in a pairing may be in the cis(==?) or trans(==?) state.
 
 newtype CTisomerism = CT {unCT :: Int}
-  deriving (Eq,Ord,Ix)
+  deriving (Eq,Ord,Ix,Generic)
+
+instance Binary    CTisomerism
+instance Serialize CTisomerism
+instance FromJSON  CTisomerism
+instance ToJSON    CTisomerism
 
 instance (Shape sh,Show sh) => Shape (sh :. CTisomerism) where
   rank (sh:._) = rank sh + 1

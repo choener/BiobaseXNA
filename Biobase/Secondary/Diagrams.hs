@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -11,11 +12,17 @@ module Biobase.Secondary.Diagrams where
 import           Control.Applicative
 import           Control.Arrow
 import           Control.Lens
+import           Data.Aeson
+import           Data.Binary
 import           Data.List ((\\))
 import           Data.List (sort,groupBy,sortBy,intersperse)
 import           Data.List.Split (splitOn)
+import           Data.Serialize
 import           Data.Tuple.Select (sel1,sel2)
 import           Data.Tuple (swap)
+import           Data.Vector.Binary
+import           Data.Vector.Cereal
+import           GHC.Generics
 import qualified Data.Vector.Unboxed as VU
 import           Text.Printf
 
@@ -29,13 +36,23 @@ import           Biobase.Secondary.Basepair
 -- paired if @unD1S VU.! k >=0 0@ Unpaired status is @-1@.
 
 newtype D1Secondary = D1S {unD1S :: VU.Vector Int}
-  deriving (Read,Show,Eq)
+  deriving (Read,Show,Eq,Generic)
+
+instance Binary    D1Secondary
+instance Serialize D1Secondary
+instance FromJSON  D1Secondary
+instance ToJSON    D1Secondary
 
 -- RNA secondary structure with 2-diagrams. Each nucleotide is paired with up
 -- to two other nucleotides.
 
 newtype D2Secondary = D2S {unD2S :: VU.Vector ( (Int,Edge,CTisomerism), (Int,Edge,CTisomerism) )}
-  deriving (Read,Show,Eq)
+  deriving (Read,Show,Eq,Generic)
+
+instance Binary    D2Secondary
+instance Serialize D2Secondary
+instance FromJSON  D2Secondary
+instance ToJSON    D2Secondary
 
 -- | Conversion to and from 1-diagrams.
 
@@ -59,7 +76,7 @@ class MkD2Secondary a where
 
 data SSTree idx a = SSTree   idx a [SSTree idx a]
                   | SSExtern Int a [SSTree idx a]
-  deriving (Read,Show,Eq)
+  deriving (Read,Show,Eq,Generic)
 
 -- | Create a tree from (pseudoknot-free [not checked]) 1-diagrams.
 
