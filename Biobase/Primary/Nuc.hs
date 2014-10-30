@@ -173,11 +173,29 @@ xnaChar x | x==xA = 'A'
 instance Show (Letter RNA) where
     show c = [rnaChar c]
 
+instance Read (Letter RNA) where
+  readsPrec p [] = []
+  readsPrec p (x:xs)
+    | x==' ' = readsPrec p xs
+    | otherwise = [(charRNA x, xs)]
+
 instance Show (Letter DNA) where
     show c = [dnaChar c]
 
+instance Read (Letter DNA) where
+  readsPrec p [] = []
+  readsPrec p (x:xs)
+    | x==' ' = readsPrec p xs
+    | otherwise = [(charDNA x, xs)]
+
 instance Show (Letter XNA) where
     show c = [xnaChar c]
+
+instance Read (Letter XNA) where
+  readsPrec p [] = []
+  readsPrec p (x:xs)
+    | x==' ' = readsPrec p xs
+    | otherwise = [(charXNA x, xs)]
 
 rnaSeq :: MkPrimary n RNA => n -> Primary RNA
 rnaSeq = primary
