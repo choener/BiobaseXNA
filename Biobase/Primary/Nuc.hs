@@ -48,10 +48,6 @@ import           Biobase.Primary.Letter
 
 data RNA
 
--- | DNA nucleotides.
-
-data DNA
-
 -- | Combine both, RNA and DNA.
 
 data XNA
@@ -61,15 +57,10 @@ data XNA
 nucRNA :: Int -> Letter RNA
 nucRNA = Letter
 
-nucDNA :: Int -> Letter DNA
-nucDNA = Letter
-
 nucXNA :: Int -> Letter XNA
 nucXNA = Letter
 
 (rA:rC:rG:rU:rN:_) = map nucRNA [0..]
-
-(dA:dC:dG:dT:dN:_) = map nucDNA [0..]
 
 (xA:xC:xG:xT:xU:xN:_) = map nucXNA [0..]
 
@@ -78,10 +69,6 @@ nucXNA = Letter
 instance Bounded (Letter RNA) where
     minBound = rA
     maxBound = rN
-
-instance Bounded (Letter DNA) where
-    minBound = dA
-    maxBound = dN
 
 instance Bounded (Letter XNA) where
     minBound = xA
@@ -96,15 +83,6 @@ instance Enum (Letter RNA) where
     toEnum k                = error $ "toEnum/Letter RNA " ++ show k
     fromEnum (Letter k) = k
 
-instance Enum (Letter DNA) where
-    succ x | x==dN  = error "succ/Letter DNA"
-    succ (Letter x) = Letter $ x+1
-    pred x | x==dA  = error "pred/Letter DNA"
-    pred (Letter x) = Letter $ x-1
-    toEnum k | k>=0 && k<=4 = Letter k
-    toEnum k                = error $ "toEnum/Letter DNA " ++ show k
-    fromEnum (Letter k) = k
-
 instance Enum (Letter XNA) where
     succ x | x==xN  = error "succ/Letter XNA"
     succ (Letter x) = Letter $ x+1
@@ -116,9 +94,6 @@ instance Enum (Letter XNA) where
 
 acgu :: [Letter RNA]
 acgu = [rA..rU]
-
-acgt :: [Letter DNA]
-acgt = [dA..dT]
 
 charRNA = f . toUpper where
   f x = case x of
@@ -135,22 +110,6 @@ rnaChar x | x==rA = 'A'
           | x==rU = 'U'
           | x==rN = 'N'
 {-# INLINE rnaChar #-}            
-
-charDNA = f . toUpper where
-  f x = case x of
-    'A' -> dA
-    'C' -> dC
-    'G' -> dG
-    'T' -> dT
-    _   -> dN
-{-# INLINE charDNA #-}
-
-dnaChar x | x==dA = 'A'
-          | x==dC = 'C'
-          | x==dG = 'G'
-          | x==dT = 'T'
-          | x==dN = 'N'
-{-# INLINE dnaChar #-}            
 
 charXNA = f . toUpper where
   f x = case x of
@@ -179,15 +138,6 @@ instance Read (Letter RNA) where
     | x==' ' = readsPrec p xs
     | otherwise = [(charRNA x, xs)]
 
-instance Show (Letter DNA) where
-    show c = [dnaChar c]
-
-instance Read (Letter DNA) where
-  readsPrec p [] = []
-  readsPrec p (x:xs)
-    | x==' ' = readsPrec p xs
-    | otherwise = [(charDNA x, xs)]
-
 instance Show (Letter XNA) where
     show c = [xnaChar c]
 
@@ -199,9 +149,6 @@ instance Read (Letter XNA) where
 
 rnaSeq :: MkPrimary n RNA => n -> Primary RNA
 rnaSeq = primary
-
-dnaSeq :: MkPrimary n DNA => n -> Primary DNA
-dnaSeq = primary
 
 xnaSeq :: MkPrimary n XNA => n -> Primary XNA
 xnaSeq = primary

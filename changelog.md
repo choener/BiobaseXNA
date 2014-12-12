@@ -1,3 +1,8 @@
+0.9.1.0
+-------
+
+- introduction of pattern synonyms for letters in molecular alphabets
+
 0.9.0.0
 -------
 
