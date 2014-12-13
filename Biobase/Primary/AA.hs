@@ -14,7 +14,7 @@
 
 module Biobase.Primary.AA where
 
-import           Control.Arrow ((***))
+import           Control.Arrow ((***),first)
 import           Data.Hashable
 import           Data.Ix (Ix(..))
 import           Data.Map.Strict (Map)
@@ -42,8 +42,6 @@ import           Biobase.Primary.Letter
 -- | Amino acid phantom type.
 
 data AA
-
---(aStop:aA:aB:aC:aD:aE:aF:aG:aH:aI:aK:aL:aM:aN:aP:aQ:aR:aS:aT:aV:aW:aX:aY:aZ:aUndefined:_) = map aa [0..]
 
 pattern  Stop = Letter  0 :: Letter AA
 pattern     A = Letter  1 :: Letter AA
@@ -82,20 +80,26 @@ aaRange = [Stop .. pred Undef]
 -- | Translate 'Char' amino acid representation into efficient 'AA' newtype.
 
 charAA :: Char -> Letter AA
-charAA ((`lookup` charAAList) -> Just aa) = aa
-charAA c = error $ "unknown AA: " ++ show c
+charAA c
+  | c>='/' && c<='Z' = charAaTable `VU.unsafeIndex` i
+  where i = fromEnum c
+charAA _ = Undef
+{-# INLINE charAA #-}
 
 -- | 'Char' representation of an 'AA'.
 
 aaChar :: Letter AA -> Char
-aaChar ((`lookup` aaCharList) -> Just c) = c
-aaChar (Letter aa) = error $ "unknown AA: " ++ (show aa)
-
-
+aaChar = VU.unsafeIndex aaCharTable . unLetter
+{-# INLINE aaChar #-}
 
 -- * lookup tables
 
-charAAList =
+charAaTable :: VU.Vector (Letter AA)
+charAaTable = VU.replicate (1 + fromEnum 'Z') Undef VU.// xs
+  where xs = map (first fromEnum) charAaList
+{-# NOINLINE charAaTable #-}
+
+charAaList =
   [ ('/',Stop)
   , ('A',A)
   , ('B',B)
@@ -120,9 +124,13 @@ charAAList =
   , ('X',X)
   , ('Y',Y)
   , ('Z',Z)
+  , ('?',Undef)
   ]
+{-# NOINLINE charAaList #-}
 
-aaCharList = map swap charAAList
+aaCharTable :: VU.Vector Char
+aaCharTable = VU.fromList $ map (snd . swap) charAaList
+{-# NOINLINE aaCharTable #-}
 
 
 
@@ -135,7 +143,7 @@ instance Read (Letter AA) where
   readsPrec p [] = []
   readsPrec p (x:xs)
     | x==' ' = readsPrec p xs
-    | Just aa <- x `lookup` charAAList = [(aa,xs)]
+    | aa <- charAA x, aa /= Undef = [(aa,xs)]
     | otherwise = []
 
 instance Enum (Letter AA) where
