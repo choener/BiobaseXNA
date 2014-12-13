@@ -69,6 +69,10 @@ library
     Biobase.Primary.IUPAC
     Biobase.Primary.Letter
     Biobase.Primary.Nuc
+    Biobase.Primary.Nuc.Conversion
+    Biobase.Primary.Nuc.DNA
+    Biobase.Primary.Nuc.RNA
+    Biobase.Primary.Nuc.XNA
     Biobase.Primary.Trans
     Biobase.Secondary
     Biobase.Secondary.Basepair

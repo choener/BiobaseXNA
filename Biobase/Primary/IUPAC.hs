@@ -1,7 +1,11 @@
+
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | Degenerate base symbol representation. We use the same conventions as in
@@ -21,71 +25,83 @@ import           Data.List (nub,sort)
 import           Data.String
 import           Data.Tuple (swap)
 import qualified Data.Vector.Unboxed as VU
+import           Control.Category ((>>>))
 
 import           Biobase.Primary.Letter
 import           Biobase.Primary.Nuc
+import qualified Biobase.Primary.Nuc.RNA as R
 
 
 -- | Allow the full, including degenerates, alphabet.
 
 data DEG
 
-nucDEG :: Int -> Letter DEG
-nucDEG = Letter
-
--- NOTE keep this in sync with @sources/iupac-nucleotides@
-
-(degA:degC:degG:degT:degU:degW:degS:degM:degK:degR:degY:degB:degD:degH:degV:degN:_) = map nucDEG [0..]
+pattern A = Letter  0 :: Letter DEG
+pattern C = Letter  1 :: Letter DEG
+pattern G = Letter  2 :: Letter DEG
+pattern T = Letter  3 :: Letter DEG
+pattern U = Letter  4 :: Letter DEG
+pattern W = Letter  5 :: Letter DEG
+pattern S = Letter  6 :: Letter DEG
+pattern M = Letter  7 :: Letter DEG
+pattern K = Letter  8 :: Letter DEG
+pattern R = Letter  9 :: Letter DEG
+pattern Y = Letter 10 :: Letter DEG
+pattern B = Letter 11 :: Letter DEG
+pattern D = Letter 12 :: Letter DEG
+pattern H = Letter 13 :: Letter DEG
+pattern V = Letter 14 :: Letter DEG
+pattern N = Letter 15 :: Letter DEG
 
 instance Bounded (Letter DEG) where
-    minBound = degA
-    maxBound = degN
+    minBound = A
+    maxBound = N
 
 instance Enum (Letter DEG) where
-    succ x | x==degN = error "succ/Letter DEG"
+    succ N           = error "succ/N:DEG"
     succ (Letter x)  = Letter $ x+1
-    pred x | x==degA = error "pred/Letter DEG"
+    pred A           = error "pred/A:DEG"
     pred (Letter x)  = Letter $ x-1
     toEnum k | k>=0 && k<=15 = Letter k
     toEnum k                 = error $ "toEnum/Letter DEG " ++ show k
     fromEnum (Letter k) = k
 
-charDEG = f . toUpper where
-  f x = case x of
-    'A' -> degA
-    'C' -> degC
-    'G' -> degG
-    'T' -> degT
-    'U' -> degU
-    'W' -> degW
-    'S' -> degS
-    'M' -> degM
-    'K' -> degK
-    'R' -> degR
-    'Y' -> degY
-    'B' -> degB
-    'D' -> degD
-    'H' -> degH
-    'V' -> degV
-    _   -> degN
+charDEG = toUpper >>> \case
+  'A' -> A
+  'C' -> C
+  'G' -> G
+  'T' -> T
+  'U' -> U
+  'W' -> W
+  'S' -> S
+  'M' -> M
+  'K' -> K
+  'R' -> R
+  'Y' -> Y
+  'B' -> B
+  'D' -> D
+  'H' -> H
+  'V' -> V
+  _   -> N
 {-# INLINE charDEG #-}
 
-degChar x | x==degA = 'A'
-          | x==degC = 'C'
-          | x==degG = 'G'
-          | x==degT = 'T'
-          | x==degU = 'U'
-          | x==degW = 'W'
-          | x==degS = 'S'
-          | x==degM = 'M'
-          | x==degK = 'K'
-          | x==degR = 'R'
-          | x==degY = 'Y'
-          | x==degB = 'B'
-          | x==degD = 'D'
-          | x==degH = 'H'
-          | x==degV = 'V'
-          | x==degN = 'N'
+degChar = \case
+  A -> 'A'
+  C -> 'C'
+  G -> 'G'
+  T -> 'T'
+  U -> 'U'
+  W -> 'W'
+  S -> 'S'
+  M -> 'M'
+  K -> 'K'
+  R -> 'R'
+  Y -> 'Y'
+  B -> 'B'
+  D -> 'D'
+  H -> 'H'
+  V -> 'V'
+  N -> 'N'
 {-# INLINE degChar #-}            
 
 instance Show (Letter DEG) where
@@ -115,7 +131,7 @@ instance Degenerate Char where
 instance Degenerate (Letter RNA) where
     fromDegenerate 'T' = []
     fromDegenerate x   = map dnaTrna $ fromDegenerate x
-    toDegenerate   xs  | xs == [rU] = Just 'U'
+    toDegenerate   xs  | xs == [R.U] = Just 'U'
                        | otherwise  = toDegenerate $ map rnaTdna xs
 
 instance Degenerate (Letter DNA) where
@@ -126,6 +142,8 @@ instance Degenerate (Letter DNA) where
 instance Degenerate (Letter XNA) where
     fromDegenerate = map charXNA . fromDegenerate
     toDegenerate   = toDegenerate . map xnaChar
+
+
 
 -- * Raw embeddings
 

@@ -1,12 +1,16 @@
-{-# LANGUAGE PackageImports #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE PatternGuards #-}
+
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PackageImports #-}
+{-# LANGUAGE PatternGuards #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 -- | Encoding of Watson-Crick and Wobble Pairs in the Vienna RNA package style.
 
@@ -32,6 +36,7 @@ import           Data.PrimitiveArray.Zero as PA
 
 import           Biobase.Primary.Letter
 import           Biobase.Primary.Nuc
+import           Biobase.Primary.Nuc.RNA
 
 
 
@@ -84,51 +89,57 @@ instance (Eq sh, Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. ViennaPair) 
     {-# INLINE [1] step #-}
   {-# INLINE rangeStream #-}
 
-(vpNP:vpCG:vpGC:vpGU:vpUG:vpAU:vpUA:vpNS:vpUndefined:_) = P.map ViennaPair [0..]
+pattern    NP = ViennaPair 0 :: ViennaPair
+pattern    CG = ViennaPair 1 :: ViennaPair
+pattern    GC = ViennaPair 2 :: ViennaPair
+pattern    GU = ViennaPair 3 :: ViennaPair
+pattern    UG = ViennaPair 4 :: ViennaPair
+pattern    AU = ViennaPair 5 :: ViennaPair
+pattern    UA = ViennaPair 6 :: ViennaPair
+pattern    NS = ViennaPair 7 :: ViennaPair
+pattern Undef = ViennaPair 8 :: ViennaPair
 
 class MkViennaPair a where
   mkViennaPair :: a -> ViennaPair
   fromViennaPair :: ViennaPair -> a
 
 instance MkViennaPair (Letter RNA, Letter RNA) where
-  mkViennaPair (b1,b2) -- = viennaPairTable `PA.index` (Z:.b1:.b2)
-    | b1==rC&&b2==rG = vpCG
-    | b1==rG&&b2==rC = vpGC
-    | b1==rG&&b2==rU = vpGU
-    | b1==rU&&b2==rG = vpUG
-    | b1==rA&&b2==rU = vpAU
-    | b1==rU&&b2==rA = vpUA
-    | otherwise = vpNS
+  mkViennaPair = \case
+    (C,G) -> CG
+    (G,C) -> GC
+    (G,U) -> GU
+    (U,G) -> UG
+    (A,U) -> AU
+    (U,A) -> UA
+    _     -> NS
   {-# INLINE mkViennaPair #-}
-  fromViennaPair p
-    | p==vpCG = (rC,rG)
-    | p==vpGC = (rG,rC)
-    | p==vpGU = (rG,rU)
-    | p==vpUG = (rU,rG)
-    | p==vpAU = (rA,rU)
-    | p==vpUA = (rU,rA)
-    | otherwise = error "non-standard pairs can't be backcasted"
+  fromViennaPair = \case
+    CG -> (C,G)
+    GC -> (G,C)
+    GU -> (G,U)
+    UG -> (U,G)
+    AU -> (A,U)
+    UA -> (U,A)
+    _  -> error "non-standard pairs can't be backcasted"
   {-# INLINE fromViennaPair #-}
 
 isViennaPair :: Letter RNA -> Letter RNA -> Bool
-isViennaPair a b = f a b where
-  f l r =  l==rC && r==rG
-        || l==rG && r==rC
-        || l==rA && r==rU
-        || l==rU && r==rA
-        || l==rG && r==rU
-        || l==rU && r==rG
-  {-# INLINE f #-}
+isViennaPair l r =  l==C && r==G
+                 || l==G && r==C
+                 || l==A && r==U
+                 || l==U && r==A
+                 || l==G && r==U
+                 || l==U && r==G
 {-# INLINE isViennaPair #-}
 
 viennaPairTable :: Unboxed (Z:.Letter RNA:.Letter RNA) ViennaPair
-viennaPairTable = fromAssocs (Z:.rN:.rN) (Z:.rU:.rU) vpNS
-  [ (Z:.rC:.rG , vpCG)
-  , (Z:.rG:.rC , vpGC)
-  , (Z:.rG:.rU , vpGU)
-  , (Z:.rU:.rG , vpUG)
-  , (Z:.rA:.rU , vpAU)
-  , (Z:.rU:.rA , vpUA)
+viennaPairTable = fromAssocs (Z:.N:.N) (Z:.U:.U) NS
+  [ (Z:.C:.G , CG)
+  , (Z:.G:.C , GC)
+  , (Z:.G:.U , GU)
+  , (Z:.U:.G , UG)
+  , (Z:.A:.U , AU)
+  , (Z:.U:.A , UA)
   ]
 {-# NOINLINE viennaPairTable #-}
 
@@ -141,8 +152,8 @@ instance Enum ViennaPair where
   {-# INLINE fromEnum #-}
 
 instance Bounded ViennaPair where
-  minBound = vpNP
-  maxBound = vpNS
+  minBound = NP
+  maxBound = NS
 
 instance Show ViennaPair where
   show x
@@ -163,23 +174,23 @@ instance Read ViennaPair where
 -- | reverse a vienna pair
 
 revPair :: ViennaPair -> ViennaPair
-revPair p
-  | p==vpCG = vpGC
-  | p==vpGC = vpCG
-  | p==vpGU = vpUG
-  | p==vpUG = vpGU
-  | p==vpAU = vpUA
-  | p==vpUA = vpAU
-  | p==vpNP = vpNP
-  | p==vpNS = vpNS
+revPair = \case
+  CG -> GC
+  GC -> CG
+  GU -> UG
+  UG -> GU
+  AU -> UA
+  UA -> AU
+  NP -> NP
+  NS -> NS
 
 
 
 -- * Convenience structures
 
-cguaP = [vpCG..vpUA]
-cgnsP = [vpCG..vpNS]
-pairToString = [(vpCG,"CG"),(vpGC,"GC"),(vpUA,"UA"),(vpAU,"AU"),(vpGU,"GU"),(vpUG,"UG"),(vpNS,"NS"),(vpNP,"NP")]
+cguaP = [CG .. UA]
+cgnsP = [CG .. NS]
+pairToString = [(CG,"CG"),(GC,"GC"),(UA,"UA"),(AU,"AU"),(GU,"GU"),(UG,"UG"),(NS,"NS"),(NP,"NP")]
 
 derivingUnbox "ViennaPair"
   [t| ViennaPair -> Int |] [| unViennaPair |] [| ViennaPair |]

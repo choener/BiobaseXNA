@@ -2,16 +2,9 @@
 {-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverlappingInstances #-}
-{-# LANGUAGE PackageImports #-}
-{-# LANGUAGE PatternGuards #-}
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Biobase.Primary.Nuc.DNA where
@@ -38,6 +31,8 @@ import           Biobase.Primary.Letter
 -- | DNA nucleotides.
 
 data DNA
+
+-- Single-character names for nucleotides.
 
 pattern A = Letter 0 :: Letter DNA
 pattern C = Letter 1 :: Letter DNA
@@ -88,4 +83,10 @@ dnaSeq = primary
 instance Bounded (Letter DNA) where
     minBound = A
     maxBound = N
+
+instance MkPrimary (VU.Vector Char) DNA where
+    primary = VU.map charDNA
+
+instance IsString [Letter DNA] where
+    fromString = map charDNA
 

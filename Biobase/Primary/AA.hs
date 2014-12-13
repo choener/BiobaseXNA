@@ -1,12 +1,13 @@
-{-# LANGUAGE DeriveGeneric #-}
+
 {-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PatternGuards #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ViewPatterns #-}
 
 -- | This module has the translation tables for the genetic code.
@@ -30,9 +31,9 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
-import           Data.Array.Repa.ExtShape
-import           Data.Array.Repa.Index
-import           Data.Array.Repa.Shape
+--import           Data.Array.Repa.ExtShape
+--import           Data.Array.Repa.Index
+--import           Data.Array.Repa.Shape
 
 import           Biobase.Primary.Letter
 
@@ -42,16 +43,41 @@ import           Biobase.Primary.Letter
 
 data AA
 
+--(aStop:aA:aB:aC:aD:aE:aF:aG:aH:aI:aK:aL:aM:aN:aP:aQ:aR:aS:aT:aV:aW:aX:aY:aZ:aUndefined:_) = map aa [0..]
+
+pattern  Stop = Letter  0 :: Letter AA
+pattern     A = Letter  1 :: Letter AA
+pattern     B = Letter  2 :: Letter AA
+pattern     C = Letter  3 :: Letter AA
+pattern     D = Letter  4 :: Letter AA
+pattern     E = Letter  5 :: Letter AA
+pattern     F = Letter  6 :: Letter AA
+pattern     G = Letter  7 :: Letter AA
+pattern     H = Letter  8 :: Letter AA
+pattern     I = Letter  9 :: Letter AA
+pattern     K = Letter 10 :: Letter AA
+pattern     L = Letter 11 :: Letter AA
+pattern     M = Letter 12 :: Letter AA
+pattern     N = Letter 13 :: Letter AA
+pattern     P = Letter 14 :: Letter AA
+pattern     Q = Letter 15 :: Letter AA
+pattern     R = Letter 16 :: Letter AA
+pattern     S = Letter 17 :: Letter AA
+pattern     T = Letter 18 :: Letter AA
+pattern     V = Letter 19 :: Letter AA
+pattern     W = Letter 20 :: Letter AA
+pattern     X = Letter 21 :: Letter AA
+pattern     Y = Letter 22 :: Letter AA
+pattern     Z = Letter 23 :: Letter AA
+pattern Undef = Letter 24 :: Letter AA
 
 
 -- * Creating functions and aa data.
 
-(aStop:aA:aB:aC:aD:aE:aF:aG:aH:aI:aK:aL:aM:aN:aP:aQ:aR:aS:aT:aV:aW:aX:aY:aZ:aUndefined:_) = map aa [0..]
-
 aa :: Int -> Letter AA
 aa = Letter
 
-aaRange = [aStop .. pred aUndefined]
+aaRange = [Stop .. pred Undef]
 
 -- | Translate 'Char' amino acid representation into efficient 'AA' newtype.
 
@@ -70,30 +96,30 @@ aaChar (Letter aa) = error $ "unknown AA: " ++ (show aa)
 -- * lookup tables
 
 charAAList =
-  [ ('/',aStop)
-  , ('A',aA)
-  , ('B',aB)
-  , ('C',aC)
-  , ('D',aD)
-  , ('E',aE)
-  , ('F',aF)
-  , ('G',aG)
-  , ('H',aH)
-  , ('I',aI)
-  , ('K',aK)
-  , ('L',aL)
-  , ('M',aM)
-  , ('N',aN)
-  , ('P',aP)
-  , ('Q',aQ)
-  , ('R',aR)
-  , ('S',aS)
-  , ('T',aT)
-  , ('V',aV)
-  , ('W',aW)
-  , ('X',aX)
-  , ('Y',aY)
-  , ('Z',aZ)
+  [ ('/',Stop)
+  , ('A',A)
+  , ('B',B)
+  , ('C',C)
+  , ('D',D)
+  , ('E',E)
+  , ('F',F)
+  , ('G',G)
+  , ('H',H)
+  , ('I',I)
+  , ('K',K)
+  , ('L',L)
+  , ('M',M)
+  , ('N',N)
+  , ('P',P)
+  , ('Q',Q)
+  , ('R',R)
+  , ('S',S)
+  , ('T',T)
+  , ('V',V)
+  , ('W',W)
+  , ('X',X)
+  , ('Y',Y)
+  , ('Z',Z)
   ]
 
 aaCharList = map swap charAAList
@@ -113,12 +139,12 @@ instance Read (Letter AA) where
     | otherwise = []
 
 instance Enum (Letter AA) where
-    succ x | x==aUndefined = error "succ/Letter RNA"
-    succ (Letter x)        = Letter $ x+1
-    pred x | x==aStop      = error "pred/Letter RNA"
-    pred (Letter x)        = Letter $ x-1
-    toEnum k | k>=0 && k<=(unLetter aUndefined) = Letter k
-    toEnum k                                    = error $ "toEnum/Letter RNA " ++ show k
+    succ Undef      = error "succ/Undef:AA"
+    succ (Letter x) = Letter $ x+1
+    pred Stop       = error "pred/Stop:AA"
+    pred (Letter x) = Letter $ x-1
+    toEnum k | k>=0 && k<=(unLetter Undef) = Letter k
+    toEnum k                               = error $ "toEnum/Letter RNA " ++ show k
     fromEnum (Letter k) = k
 
 instance MkPrimary [Char] AA  where

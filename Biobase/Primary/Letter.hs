@@ -1,10 +1,14 @@
+
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | A newtype with an attached phenotype which allows us to encode
 -- nucleotides and amino acids. Actual seqence-specific functions can be
@@ -17,10 +21,15 @@ import           Data.Binary
 import           Data.Hashable (Hashable)
 import           Data.Ix (Ix(..))
 import           Data.Serialize
+import           Data.String (IsString(..))
 import           Data.Vector.Fusion.Stream.Size (Size (Unknown))
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           GHC.Generics (Generic)
+import qualified Data.ByteString.Char8 as BS
+import qualified Data.ByteString.Lazy.Char8 as BSL
+import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import qualified Data.Vector.Fusion.Stream.Monadic as VM
 import qualified Data.Vector.Unboxed as VU
 
@@ -47,6 +56,24 @@ type Primary t = VU.Vector (Letter t)
 
 class MkPrimary n t where
     primary :: n -> Primary t
+
+instance (MkPrimary (VU.Vector Char) t) => MkPrimary String t where
+    primary = primary . VU.fromList
+
+instance MkPrimary (VU.Vector Char) t =>  MkPrimary T.Text t where
+    primary = primary . VU.fromList . T.unpack
+
+instance MkPrimary (VU.Vector Char) t => MkPrimary TL.Text t where
+    primary = primary . VU.fromList . TL.unpack
+
+instance MkPrimary (VU.Vector Char) t => MkPrimary BS.ByteString t where
+    primary = primary . VU.fromList . BS.unpack
+
+instance MkPrimary (VU.Vector Char) t => MkPrimary BSL.ByteString t where
+    primary = primary . VU.fromList . BSL.unpack
+
+instance (VU.Unbox (Letter t), IsString [Letter t]) => IsString (VU.Vector (Letter t)) where
+    fromString = VU.fromList . fromString
 
 
 
