@@ -41,6 +41,7 @@ extra-source-files:
 library
   build-depends:
     aeson                   == 0.8.*    ,
+    bimaps                  == 0.0.0.*  ,
     binary                  == 0.7.*    ,
     bytes                   == 0.14.*   ,
     bytestring              == 0.10.*   ,

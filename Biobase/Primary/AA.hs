@@ -10,7 +10,9 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ViewPatterns #-}
 
--- | This module has the translation tables for the genetic code.
+-- | This module has the translation tables for the genetic code. We do
+-- have a symbol 'Undef' for undefined amino acids (say because of @N@s in
+-- the nucleotide code).
 
 module Biobase.Primary.AA where
 
@@ -30,6 +32,7 @@ import qualified Data.Text as T
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
+import qualified Data.Bijection.Map as B
 
 --import           Data.Array.Repa.ExtShape
 --import           Data.Array.Repa.Index
@@ -80,26 +83,19 @@ aaRange = [Stop .. pred Undef]
 -- | Translate 'Char' amino acid representation into efficient 'AA' newtype.
 
 charAA :: Char -> Letter AA
-charAA c
-  | c>='/' && c<='Z' = charAaTable `VU.unsafeIndex` i
-  where i = fromEnum c
-charAA _ = Undef
+charAA = B.findWithDefaultL Undef charBaa
 {-# INLINE charAA #-}
 
 -- | 'Char' representation of an 'AA'.
 
 aaChar :: Letter AA -> Char
-aaChar = VU.unsafeIndex aaCharTable . unLetter
+aaChar = B.findWithDefaultR '?' charBaa
 {-# INLINE aaChar #-}
 
 -- * lookup tables
 
-charAaTable :: VU.Vector (Letter AA)
-charAaTable = VU.replicate (1 + fromEnum 'Z') Undef VU.// xs
-  where xs = map (first fromEnum) charAaList
-{-# NOINLINE charAaTable #-}
-
-charAaList =
+charBaa :: B.Bimap Char (Letter AA)
+charBaa = B.fromList
   [ ('/',Stop)
   , ('A',A)
   , ('B',B)
@@ -126,11 +122,7 @@ charAaList =
   , ('Z',Z)
   , ('?',Undef)
   ]
-{-# NOINLINE charAaList #-}
-
-aaCharTable :: VU.Vector Char
-aaCharTable = VU.fromList $ map (snd . swap) charAaList
-{-# NOINLINE aaCharTable #-}
+{-# NOINLINE charBaa #-}
 
 
 
@@ -143,7 +135,7 @@ instance Read (Letter AA) where
   readsPrec p [] = []
   readsPrec p (x:xs)
     | x==' ' = readsPrec p xs
-    | aa <- charAA x, aa /= Undef = [(aa,xs)]
+    | aa <- charAA x = [(aa,xs)]
     | otherwise = []
 
 instance Enum (Letter AA) where
