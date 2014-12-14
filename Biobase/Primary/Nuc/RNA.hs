@@ -51,6 +51,9 @@ instance Enum (Letter RNA) where
     toEnum k                = error $ "toEnum/Letter RNA " ++ show k
     fromEnum (Letter k) = k
 
+acgu :: [Letter RNA]
+acgu = [A .. U]
+
 charRNA = toUpper >>> \case
     'A' -> A
     'C' -> C
