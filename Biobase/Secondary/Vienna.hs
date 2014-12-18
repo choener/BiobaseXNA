@@ -1,29 +1,34 @@
 
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
 -- | Encoding of Watson-Crick and Wobble Pairs in the Vienna RNA package style.
 
 module Biobase.Secondary.Vienna where
 
+import           Data.Aeson
 import           Data.Array.Repa.Index
 import           Data.Array.Repa.Shape
+import           Data.Binary
 import           Data.Ix
 import           Data.Primitive.Types
+import           Data.Serialize
 import           Data.Tuple (swap)
 import           Data.Vector.Fusion.Stream.Size (Size (Unknown))
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
+import           GHC.Generics (Generic)
 import           Prelude as P
 import qualified Data.Vector.Fusion.Stream.Monadic as VM
 import qualified Data.Vector.Generic as VG
@@ -43,7 +48,12 @@ import           Biobase.Primary.Nuc.RNA
 -- | Use machine Ints internally
 
 newtype ViennaPair = ViennaPair { unViennaPair :: Int }
-  deriving (Eq,Ord,Ix)
+  deriving (Eq,Ord,Generic,Ix)
+
+instance Binary    (ViennaPair)
+instance Serialize (ViennaPair)
+instance FromJSON  (ViennaPair)
+instance ToJSON    (ViennaPair)
 
 instance (Shape sh,Show sh) => Shape (sh :. ViennaPair) where
   rank (sh:._) = rank sh + 1
