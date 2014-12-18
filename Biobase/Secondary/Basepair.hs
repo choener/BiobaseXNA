@@ -1,3 +1,4 @@
+
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
@@ -10,6 +11,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 -- | Secondary structure: define basepairs as Int-tuples, the three edges, a
 -- nucleotide can use for pairing and the cis/trans isomerism. Both edges and
@@ -36,27 +38,25 @@ import           GHC.Generics
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
+import           Text.Read
 
 import           Biobase.Primary
 
 
 
--- | Easy reading of a three-Char string into a triple.
+-- * Newtypes for extended secondary structures
 
-threeChar :: String -> ExtPairAnnotation
-threeChar s@[c,x,y]
-  | Just c' <- L.lookup (toLower c) charCTList
-  , Just x' <- L.lookup (toUpper x) charEdgeList
-  , Just y' <- L.lookup (toUpper y) charEdgeList
-  = (c',x',y')
-  | map toLower s == "bif" = (unknownCT,unknownEdge,unknownEdge)
-  | otherwise = error $ "can't convert string: " ++ s
+-- ** Encode which of three edges is engaged in base pairing
 
 -- | Each nucleotide in a pair may be paired using one of three edges:
 -- watson-crick, sugar, or hoogsteen.
 
 newtype Edge = Edge {unEdge :: Int}
   deriving (Eq,Ord,Ix,Generic)
+
+pattern W = Edge 0
+pattern S = Edge 1
+pattern H = Edge 2
 
 instance Binary    Edge
 instance Serialize Edge
@@ -95,37 +95,44 @@ instance (Shape sh,Show sh) => Shape (sh :. Edge) where
   {-# INLINE shapeOfList #-}
   {-# INLINE deepSeq #-}
 
-(wc : sugar : hoogsteen : unknownEdge : _) = map Edge [0..]
-
-charEdgeList =
-  [ ('W',wc)
-  , ('S',sugar)
-  , ('H',hoogsteen)
-  , ('?',unknownEdge)
-  ]
-
-edgeCharList = map swap charEdgeList
-
 -- | Human-readable Show instance.
 
 instance Show Edge where
-  show k
-    | Just v <- k `lookup` edgeCharList = [v]
-    | otherwise = "?"
+  show H = "H"
+  show S = "S"
+  show W = "W"
 
 -- | Human-readable Read instance.
 
 instance Read Edge where
-  readsPrec p [] = []
-  readsPrec p (x:xs)
-    | x ==' ' = readsPrec p xs
-    | Just n <- x `lookup` charEdgeList = [(n,xs)]
-    | otherwise = []
+  readPrec = parens $ do
+    Ident s <- lexP
+    return $ case s of
+      "H" -> H
+      "S" -> S
+      "W" -> W
+      _   -> error $ "read Edge: " ++ s
+
+instance Bounded Edge where
+  minBound = W
+  maxBound = H
+
+instance Enum Edge where
+  toEnum   = Edge
+  fromEnum = unEdge
+
+derivingUnbox "Edge"
+  [t| Edge -> Int |] [| unEdge |] [| Edge |]
+
+-- ** Is the base pair in cis or trans configuration
 
 -- | Nucleotides in a pairing may be in the cis(==?) or trans(==?) state.
 
 newtype CTisomerism = CT {unCT :: Int}
   deriving (Eq,Ord,Ix,Generic)
+
+pattern Cis = CT 0
+pattern Trn = CT 1
 
 instance Binary    CTisomerism
 instance Serialize CTisomerism
@@ -164,55 +171,32 @@ instance (Shape sh,Show sh) => Shape (sh :. CTisomerism) where
   {-# INLINE shapeOfList #-}
   {-# INLINE deepSeq #-}
 
-(cis : trans : unknownCT : _) = map CT [0..]
-
-charCTList =
-  [ ('c',cis)
-  , ('t',trans)
-  , ('?',unknownCT)
-  ]
-
-ctCharList = map swap charCTList
-
 -- | Human-readable Show instance.
 
 instance Show CTisomerism where
-  show k
-    | Just v <- k `lookup` ctCharList = [v]
-    | otherwise = "?"
+  show Cis = "C"
+  show Trn = "T"
 
 -- | Human-readable Read instance.
 
 instance Read CTisomerism where
-  readsPrec p [] = []
-  readsPrec p (x:xs)
-    | x ==' ' = readsPrec p xs
-    | Just n <- x `lookup` charCTList = [(n,xs)]
-    | otherwise = []
-
-
-
--- * Instances
-
--- ** Instances for 'Edge'
-
-instance Bounded Edge where
-  minBound = wc
-  maxBound = unknownEdge
-
-instance Enum Edge where
-  toEnum   = Edge
-  fromEnum = unEdge
-
--- ** Instances for 'CTisomerism'
+  readPrec = parens $ do
+    Ident s <- lexP
+    return $ case s of
+      "C" -> Cis
+      "T" -> Trn
+      _   -> error $ "read CTisomerism: " ++ s
 
 instance Bounded CTisomerism where
-  minBound = cis
-  maxBound = unknownCT
+  minBound = Cis
+  maxBound = Trn
 
 instance Enum CTisomerism where
   toEnum   = CT
   fromEnum = unCT
+
+derivingUnbox "CTisomerism"
+  [t| CTisomerism -> Int |] [| unCT |] [| CT |]
 
 
 
@@ -242,24 +226,25 @@ type ExtPair = (Pair,ExtPairAnnotation)
 
 -- * little helpers
 
-cWW = (cis,wc,wc)
-cWS = (cis,wc,sugar)
-cWH = (cis,wc,hoogsteen)
-cSW = (cis,sugar,wc)
-cSS = (cis,sugar,sugar)
-cSH = (cis,sugar,hoogsteen)
-cHW = (cis,hoogsteen,wc)
-cHS = (cis,hoogsteen,sugar)
-cHH = (cis,hoogsteen,hoogsteen)
-tWW = (trans,wc,wc)
-tWS = (trans,wc,sugar)
-tWH = (trans,wc,hoogsteen)
-tSW = (trans,sugar,wc)
-tSS = (trans,sugar,sugar)
-tSH = (trans,sugar,hoogsteen)
-tHW = (trans,hoogsteen,wc)
-tHS = (trans,hoogsteen,sugar)
-tHH = (trans,hoogsteen,hoogsteen)
+pattern CHH = (Cis,H,H)
+pattern CHS = (Cis,H,S)
+pattern CHW = (Cis,H,W)
+pattern CSH = (Cis,S,H)
+pattern CSS = (Cis,S,S)
+pattern CSW = (Cis,S,W)
+pattern CWH = (Cis,W,H)
+pattern CWS = (Cis,W,S)
+pattern CWW = (Cis,W,W)
+
+pattern THH = (Trn,H,H)
+pattern THS = (Trn,H,S)
+pattern THW = (Trn,H,W)
+pattern TSH = (Trn,S,H)
+pattern TSS = (Trn,S,S)
+pattern TSW = (Trn,S,W)
+pattern TWH = (Trn,W,H)
+pattern TWS = (Trn,W,S)
+pattern TWW = (Trn,W,W)
 
 
 
@@ -315,11 +300,11 @@ instance BaseSelect (a,a) a where
   baseL (a,_) = a
   baseR (_,a) = a
   baseP = id
-  baseT _ = cWW
+  baseT _ = CWW
   updL n (_,y) = (n,y)
   updR n (x,_) = (x,n)
   updP n _     = n
-  updT n xy = if n==cWW then xy else error $ "updT on standard pairs can not update to: " ++ show n
+  updT n xy = if n==CWW then xy else error $ "updT on standard pairs can not update to: " ++ show n
   {-# INLINE baseL #-}
   {-# INLINE baseR #-}
   {-# INLINE baseP #-}
@@ -328,10 +313,4 @@ instance BaseSelect (a,a) a where
   {-# INLINE updR #-}
   {-# INLINE updP #-}
   {-# INLINE updT #-}
-
-derivingUnbox "Edge"
-  [t| Edge -> Int |] [| unEdge |] [| Edge |]
-
-derivingUnbox "CTisomerism"
-  [t| CTisomerism -> Int |] [| unCT |] [| CT |]
 

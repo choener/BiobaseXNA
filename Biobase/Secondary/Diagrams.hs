@@ -127,7 +127,7 @@ instance MkD1Secondary (Int,[PairIdx]) where
 -- TODO 'fromD2S' makes me wanna rewrite everything...
 
 instance MkD2Secondary D1Secondary where
-  mkD2S (D1S xs) = D2S . VU.map (\k -> ((k,wc,cis),(-1,unknownEdge,unknownCT))) $ xs
+  mkD2S = D2S . VU.map (\k -> ((k,W,Cis),(-1,W,Cis))) . unD1S
   fromD2S (D2S xs) = D1S . VU.map (sel1 . sel1) $ xs
 
 instance MkD2Secondary (Int,[ExtPairIdx]) where
@@ -136,7 +136,7 @@ instance MkD2Secondary (Int,[ExtPairIdx]) where
                                           , (j, (i,e2,ct))
                                           ]) ps
                        f (x,y) z = if sel1 x == -1 then (z,y) else (x,z)
-                   in D2S $ VU.accum f (VU.replicate len ((-1,unknownEdge,unknownCT),(-1,unknownEdge,unknownCT))) xs
+                   in D2S $ VU.accum f (VU.replicate len ((-1,W,Cis),(-1,W,Cis))) xs
   fromD2S (D2S s) = ( VU.length s
                     , let (xs,ys) = unzip . VU.toList $ s
                           g i j = let z = s VU.! i in if sel1 (sel1 z) == j then sel2 (sel1 z) else sel2 (sel2 z)
