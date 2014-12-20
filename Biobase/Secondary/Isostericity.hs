@@ -59,11 +59,11 @@ instance IsostericityLookup ExtPair where
 
 instance IsostericityLookup Pair where
   getClasses p
-    | Just cs <- M.lookup (p,cWW) defaultIsostericityMap
+    | Just cs <- M.lookup (p,CWW) defaultIsostericityMap
     = cs
     | otherwise = []
   inClass x = map (baseP.fst) -- remove extended information
-            . filter ((cWW==).baseT.fst) -- keep only cWW pairs (baseT-ype)
+            . filter ((CWW==).baseT.fst) -- keep only cWW pairs (baseT-ype)
             . filter ((x `elem`).snd) -- select based on class
             $ M.assocs defaultIsostericityMap
 
@@ -84,7 +84,7 @@ mkIsostericityMap = M.fromListWith (\x y -> nub $ x++y) . mkIsostericityList
 mkIsostericityList :: [[[String]]] -> [(ExtPair, [String])]
 mkIsostericityList gs = nubBy ((==) `on` fst) . concatMap turn . concatMap f $ gs where
   f g = map (\e ->  ( ( let [x,y] = fst e
-                        in (charRNA x, charRNA y), threeChar bpt
+                        in (charRNA x, charRNA y), read bpt
                       )
                     , nub $ snd e)
             ) $ map entry xs where
