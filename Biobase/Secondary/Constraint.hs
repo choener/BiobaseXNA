@@ -10,8 +10,6 @@
 
 module Biobase.Secondary.Constraint where
 
-import           Data.Array.Repa.Index
-import           Data.Array.Repa.Shape
 import           Data.Char (toLower)
 import           Data.Primitive.Types
 import           Prelude as P
@@ -20,7 +18,6 @@ import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
 import           Data.PrimitiveArray
-import           Data.PrimitiveArray.Zero
 
 import           Biobase.Secondary.Diagrams
 
@@ -57,9 +54,9 @@ nobonusCC = VU.fromList ".x"
 -- TODO and again, we should parametrize over "Energy", "Score", etc (that is,
 -- Prim a)
 
-bonusTable :: Double -> Double -> Constraint -> Unboxed DIM2 Double
+bonusTable :: Double -> Double -> Constraint -> Unboxed (Z:.Int:.Int) Double
 bonusTable bonus malus (Constraint constraint) = arr where
-  arr = fromAssocs zeroDim (Z:.n:.n) 0 $ bonusBr ++ bonusAn ++ bonusBa ++ malusBr ++ malusAn ++ malusX
+  arr = fromAssocs (Z:.0:.0) (Z:.n:.n) 0 $ bonusBr ++ bonusAn ++ bonusBa ++ malusBr ++ malusAn ++ malusX
   n = VU.length constraint -1
   infixl 1 `xor`
   xor a b = a && not b || not a && b

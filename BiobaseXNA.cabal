@@ -10,7 +10,7 @@ license:        GPL-3
 license-file:   LICENSE
 build-type:     Simple
 stability:      experimental
-cabal-version:  >= 1.6.0
+cabal-version:  >= 1.10.0
 description:
                 This is a base library for bioinformatics with emphasis on RNA
                 and DNA primary structure as well as amino acid sequences.
@@ -43,13 +43,13 @@ library
     aeson                   == 0.8.*    ,
     bimaps                  == 0.0.0.*  ,
     binary                  == 0.7.*    ,
-    bytes                   == 0.14.*   ,
+    bytes                   == 0.15.*   ,
     bytestring              == 0.10.*   ,
     cereal                  == 0.4.*    ,
     cereal-vector           == 0.2.*    ,
     containers              == 0.5.*    ,
     csv                     == 0.1.*    ,
-    file-embed              == 0.0.7.*  ,
+    file-embed              == 0.0.8.*  ,
     hashable                == 1.2.*    ,
     lens                    == 4.*      ,
     primitive               == 0.5.*    ,
@@ -84,14 +84,25 @@ library
     Biobase.Secondary.Structure
     Biobase.Secondary.Vienna
 
+  default-extensions: BangPatterns
+                    , TypeFamilies
+                    , TypeOperators
+
+  default-language: Haskell2010
+
   ghc-options:
     -O2 -funbox-strict-fields
 
 executable SubOptDistance
-  build-depends:
-    cmdargs == 0.10.*
+  build-depends:  base
+               ,  cmdargs == 0.10.*
+               ,  BiobaseXNA
   main-is:
     SubOptDistance.hs
+  hs-source-dirs:
+    src
+  default-language:
+    Haskell2010
   ghc-options:
     -O2
 

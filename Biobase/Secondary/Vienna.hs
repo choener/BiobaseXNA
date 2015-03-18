@@ -18,26 +18,23 @@
 module Biobase.Secondary.Vienna where
 
 import           Data.Aeson
-import           Data.Array.Repa.Index
-import           Data.Array.Repa.Shape
 import           Data.Binary
 import           Data.Ix
 import           Data.Primitive.Types
-import           Data.Serialize
+import           Data.Serialize (Serialize(..))
 import           Data.Tuple (swap)
+import           Data.Vector.Fusion.Stream.Monadic (map,flatten,Step(..))
 import           Data.Vector.Fusion.Stream.Size (Size (Unknown))
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           GHC.Generics (Generic)
-import           Prelude as P
-import qualified Data.Vector.Fusion.Stream.Monadic as VM
+import           Prelude hiding (map)
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
+import qualified Prelude as P
 
-import           Data.Array.Repa.ExtShape
-import           Data.PrimitiveArray as PA
-import           Data.PrimitiveArray.Zero as PA
+import           Data.PrimitiveArray hiding (Complement(..),map)
 
 import           Biobase.Primary.Letter
 import           Biobase.Primary.Nuc
@@ -55,6 +52,45 @@ instance Serialize (ViennaPair)
 instance FromJSON  (ViennaPair)
 instance ToJSON    (ViennaPair)
 
+instance Index ViennaPair where
+  linearIndex _ _ (ViennaPair p) = p
+  {-# Inline linearIndex #-}
+  smallestLinearIndex _ = error "still needed?"
+  {-# Inline smallestLinearIndex #-}
+  largestLinearIndex (ViennaPair p) = p
+  {-# Inline largestLinearIndex #-}
+  size _ (ViennaPair h) = h+1
+  {-# Inline size #-}
+  inBounds (ViennaPair l) (ViennaPair h) (ViennaPair p) = l <= p && p <= h
+  {-# Inline inBounds #-}
+
+instance IndexStream z => IndexStream (z:.ViennaPair) where
+  streamUp (ls:.ViennaPair l) (hs:.ViennaPair h) = flatten mk step Unknown $ streamUp ls hs
+    where mk z = return (z,l)
+          step (z,k)
+            | k > h     = return $ Done
+            | otherwise = return $ Yield (z:.ViennaPair k) (z,k+1)
+          {-# Inline [0] mk   #-}
+          {-# Inline [0] step #-}
+  {-# Inline streamUp #-}
+  streamDown (ls:.ViennaPair l) (hs:.ViennaPair h) = flatten mk step Unknown $ streamDown ls hs
+    where mk z = return (z,h)
+          step (z,k)
+            | k < l     = return $ Done
+            | otherwise = return $ Yield (z:.ViennaPair k) (z,k-1)
+          {-# Inline [0] mk   #-}
+          {-# Inline [0] step #-}
+  {-# Inline streamDown #-}
+
+instance IndexStream ViennaPair where
+  streamUp l h = map (\(Z:.k) -> k) $ streamUp (Z:.l) (Z:.h)
+  {-# Inline streamUp #-}
+  streamDown l h = map (\(Z:.k) -> k) $ streamDown (Z:.l) (Z:.h)
+  {-# Inline streamDown #-}
+
+
+
+{-
 instance (Shape sh,Show sh) => Shape (sh :. ViennaPair) where
   rank (sh:._) = rank sh + 1
   zeroDim = zeroDim:.ViennaPair 0
@@ -98,6 +134,7 @@ instance (Eq sh, Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. ViennaPair) 
     {-# INLINE [1] mk #-}
     {-# INLINE [1] step #-}
   {-# INLINE rangeStream #-}
+-}
 
 pattern    NP = ViennaPair 0 :: ViennaPair
 pattern    CG = ViennaPair 1 :: ViennaPair

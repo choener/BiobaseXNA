@@ -20,22 +20,21 @@ import           Data.Aeson
 import           Data.Binary
 import           Data.Hashable (Hashable)
 import           Data.Ix (Ix(..))
-import           Data.Serialize
+import           Data.Serialize (Serialize(..))
 import           Data.String (IsString(..))
+import           Data.Vector.Fusion.Stream.Monadic (map,flatten,Step(..))
 import           Data.Vector.Fusion.Stream.Size (Size (Unknown))
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           GHC.Generics (Generic)
+import           Prelude hiding (map)
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
-import qualified Data.Vector.Fusion.Stream.Monadic as VM
 import qualified Data.Vector.Unboxed as VU
 
-import           Data.Array.Repa.ExtShape
-import           Data.Array.Repa.Index
-import           Data.Array.Repa.Shape
+import           Data.PrimitiveArray hiding (map)
 
 
 
@@ -84,7 +83,46 @@ derivingUnbox "Letter"
 
 instance Hashable (Letter t)
 
-instance (Shape sh,Show sh) => Shape (sh :. Letter z) where
+instance Index (Letter l) where
+  linearIndex _ _ (Letter i) = i
+  {-# Inline linearIndex #-}
+  smallestLinearIndex _ = error "still needed?"
+  {-# Inline smallestLinearIndex #-}
+  largestLinearIndex (Letter h) = h
+  {-# Inline largestLinearIndex #-}
+  size _ (Letter h) = h+1
+  {-# Inline size #-}
+  inBounds (Letter l) (Letter h) (Letter i) = l <= i && i <= h
+  {-# Inline inBounds #-}
+
+instance IndexStream z => IndexStream (z:.Letter l) where
+  streamUp (ls:.Letter l) (hs:.Letter h) = flatten mk step Unknown $ streamUp ls hs
+    where mk z = return (z,l)
+          step (z,k)
+            | k > h     = return $ Done
+            | otherwise = return $ Yield (z:.Letter k) (z,k+1)
+          {-# Inline [0] mk   #-}
+          {-# Inline [0] step #-}
+  {-# Inline streamUp #-}
+  streamDown (ls:.Letter l) (hs:.Letter h) = flatten mk step Unknown $ streamDown ls hs
+    where mk z = return (z,h)
+          step (z,k)
+            | k < l     = return $ Done
+            | otherwise = return $ Yield (z:.Letter k) (z,k-1)
+          {-# Inline [0] mk   #-}
+          {-# Inline [0] step #-}
+  {-# Inline streamDown #-}
+
+-- TODO temporary, because defaults dont inline
+
+instance IndexStream (Letter l) where
+  streamUp l h = map (\(Z:.k) -> k) $ streamUp (Z:.l) (Z:.h)
+  {-# Inline streamUp #-}
+  streamDown l h = map (\(Z:.k) -> k) $ streamDown (Z:.l) (Z:.h)
+  {-# Inline streamDown #-}
+
+{-
+instance (Index sh, Show sh) => Shape (sh :. Letter z) where
   rank (sh:._) = rank sh + 1
   zeroDim = zeroDim:.Letter 0
   unitDim = unitDim:.Letter 1 -- TODO does this one make sense?
@@ -127,4 +165,5 @@ instance (Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. Letter z) where
     {-# INLINE [1] mk #-}
     {-# INLINE [1] step #-}
   {-# INLINE rangeStream #-}
+-}
 
