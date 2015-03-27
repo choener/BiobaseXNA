@@ -4,7 +4,6 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -12,6 +11,8 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE PatternSynonyms #-}
+
+-- {-# LANGUAGE OverlappingInstances #-}
 
 -- | Secondary structure: define basepairs as Int-tuples, the three edges, a
 -- nucleotide can use for pairing and the cis/trans isomerism. Both edges and
@@ -23,8 +24,8 @@
 module Biobase.Secondary.Basepair where
 
 import           Data.Aeson
-import           Data.Array.Repa.Index
-import           Data.Array.Repa.Shape
+-- import           Data.Array.Repa.Index
+-- import           Data.Array.Repa.Shape
 import           Data.Binary
 import           Data.Char (toLower, toUpper)
 import           Data.Ix (Ix(..))
@@ -63,6 +64,9 @@ instance Serialize Edge
 instance FromJSON  Edge
 instance ToJSON    Edge
 
+-- TODO Index instances!
+
+{-
 instance (Shape sh,Show sh) => Shape (sh :. Edge) where
   rank (sh:._) = rank sh + 1
   zeroDim = zeroDim:.Edge 0
@@ -94,6 +98,7 @@ instance (Shape sh,Show sh) => Shape (sh :. Edge) where
   {-# INLINE listOfShape #-}
   {-# INLINE shapeOfList #-}
   {-# INLINE deepSeq #-}
+-}
 
 -- | Human-readable Show instance.
 
@@ -139,6 +144,9 @@ instance Serialize CTisomerism
 instance FromJSON  CTisomerism
 instance ToJSON    CTisomerism
 
+-- TODO Index instances
+
+{-
 instance (Shape sh,Show sh) => Shape (sh :. CTisomerism) where
   rank (sh:._) = rank sh + 1
   zeroDim = zeroDim:.CT 0
@@ -170,6 +178,7 @@ instance (Shape sh,Show sh) => Shape (sh :. CTisomerism) where
   {-# INLINE listOfShape #-}
   {-# INLINE shapeOfList #-}
   {-# INLINE deepSeq #-}
+-}
 
 -- | Human-readable Show instance.
 

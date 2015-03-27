@@ -2,8 +2,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverlappingInstances #-}
 {-# LANGUAGE PatternSynonyms #-}
+{-# Language CPP #-}
+
+#if __GLASGOW_HASKELL__ < 710
+{-# LANGUAGE OverlappingInstances #-}
+#endif
 
 -- | Convert between different nucleotide representations
 
@@ -131,9 +135,20 @@ instance Complement (Letter R.RNA) (Letter D.DNA) where
       R.U -> D.A
       R.N -> D.N
 
-instance (Complement s t, VU.Unbox s, VU.Unbox t) => Complement (VU.Vector s) (VU.Vector t) where
-    complement = VU.map complement
+#if __GLASGOW_HASKELL__ >= 710
+instance {-# OVERLAPPING #-}
+#else
+instance
+#endif
+  ( Complement s t, VU.Unbox s, VU.Unbox t)
+  => Complement (VU.Vector s) (VU.Vector t)
+  where complement = VU.map complement
 
-instance (Complement s t, Functor f) => Complement (f s) (f t) where
-    complement = fmap complement
+#if __GLASGOW_HASKELL__ >= 710
+instance {-# Overlappable #-}
+#else
+instance
+#endif
+  ( Complement s t, Functor f) => Complement (f s) (f t)
+  where complement = fmap complement
 
