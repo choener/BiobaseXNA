@@ -1,16 +1,3 @@
-{-# LANGUAGE EmptyDataDecls #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE PackageImports #-}
-{-# LANGUAGE PatternGuards #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
--- #ifdef __GLASGOW_HASKELL < 710
--- {-# LANGUAGE OverlappingInstances #-}
--- #endif
 
 -- | The primary structure: interface to efficient encoding of RNA and DNA
 -- sequences. The design aims toward the 'vector' library and repa. In

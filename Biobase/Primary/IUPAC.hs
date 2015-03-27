@@ -1,13 +1,4 @@
 
-{-# LANGUAGE EmptyDataDecls #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell #-}
-
 -- | Degenerate base symbol representation. We use the same conventions as in
 -- <<https://en.wikipedia.org/wiki/Nucleic_acid_notation>> which ignores
 -- @U@racil, except if it stands alone for @Char@ and @XNA@ targets. If the

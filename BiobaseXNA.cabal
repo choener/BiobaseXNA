@@ -83,8 +83,20 @@ library
     Biobase.Secondary.Vienna
 
   default-extensions: BangPatterns
+                    , DeriveGeneric
+                    , EmptyDataDecls
+                    , FlexibleContexts
+                    , FlexibleInstances
+                    , GeneralizedNewtypeDeriving
+                    , LambdaCase
+                    , MultiParamTypeClasses
+                    , PatternSynonyms
+                    , ScopedTypeVariables
+                    , TemplateHaskell
                     , TypeFamilies
                     , TypeOperators
+                    , UndecidableInstances
+                    , ViewPatterns
 
   default-language: Haskell2010
 

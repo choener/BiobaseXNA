@@ -1,15 +1,4 @@
 
-{-# LANGUAGE EmptyDataDecls #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE PatternGuards #-}
-{-# LANGUAGE PatternSynonyms #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE ViewPatterns #-}
-
 -- | This module has the translation tables for the genetic code. We do
 -- have a symbol 'Undef' for undefined amino acids (say because of @N@s in
 -- the nucleotide code).
@@ -33,10 +22,6 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 import qualified Data.Bijection.Map as B
-
---import           Data.Array.Repa.ExtShape
---import           Data.Array.Repa.Index
---import           Data.Array.Repa.Shape
 
 import           Biobase.Primary.Letter
 

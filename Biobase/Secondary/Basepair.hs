@@ -1,16 +1,5 @@
 
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE PackageImports #-}
-{-# LANGUAGE PatternGuards #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE PatternSynonyms #-}
 
 -- {-# LANGUAGE OverlappingInstances #-}
 
@@ -24,8 +13,6 @@
 module Biobase.Secondary.Basepair where
 
 import           Data.Aeson
--- import           Data.Array.Repa.Index
--- import           Data.Array.Repa.Shape
 import           Data.Binary
 import           Data.Char (toLower, toUpper)
 import           Data.Ix (Ix(..))

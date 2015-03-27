@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE BangPatterns #-}
 
 -- | Methods to transform a secondary structure containing pseudoknots into a
 -- structure which is pseudoknot-free.

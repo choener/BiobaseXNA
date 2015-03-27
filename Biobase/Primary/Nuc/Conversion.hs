@@ -1,8 +1,4 @@
 
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE PatternSynonyms #-}
 {-# Language CPP #-}
 
 #if __GLASGOW_HASKELL__ < 710

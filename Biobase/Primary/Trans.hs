@@ -1,5 +1,3 @@
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 -- | This module provides functionality for translation between nucleotides
 -- and amino acids.
