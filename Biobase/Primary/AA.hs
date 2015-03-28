@@ -81,7 +81,7 @@ aaChar = B.findWithDefaultR '?' charBaa
 
 charBaa :: B.Bimap Char (Letter AA)
 charBaa = B.fromList
-  [ ('/',Stop)
+  [ ('*',Stop)
   , ('A',A)
   , ('B',B)
   , ('C',C)
