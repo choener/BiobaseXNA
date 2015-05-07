@@ -2,6 +2,7 @@
 -------
 
 - introduction of pattern synonyms for letters in molecular alphabets
+- travis-ci integration
 
 0.9.0.0
 -------

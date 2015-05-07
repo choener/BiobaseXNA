@@ -113,6 +113,10 @@ executable SubOptDistance
     src
   default-language:
     Haskell2010
+  default-extensions: DeriveDataTypeable
+                    , NoMonomorphismRestriction
+                    , RecordWildCards
+                    , ScopedTypeVariables
   ghc-options:
     -O2
 

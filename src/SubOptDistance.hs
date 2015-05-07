@@ -1,7 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE DeriveDataTypeable #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE NoMonomorphismRestriction #-}
 
 -- | A very simple program that calculates base pair distances given
 -- a secondary structure as argument and a Vienna RNAsubopt output via
