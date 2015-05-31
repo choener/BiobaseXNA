@@ -132,21 +132,6 @@ instance Enum (Letter AA) where
     toEnum k                               = error $ "toEnum/Letter RNA " ++ show k
     fromEnum (Letter k) = k
 
-instance MkPrimary [Char] AA  where
-  primary = VU.fromList . map charAA
-
-instance MkPrimary [Letter AA] AA where
-  primary = VU.fromList
-
 instance MkPrimary (VU.Vector Char) AA where
   primary = VU.map charAA
-
-instance MkPrimary BS.ByteString AA where
-  primary = VU.fromList . map charAA . BS.unpack
-
-instance MkPrimary BSL.ByteString AA where
-  primary = VU.fromList . map charAA . BSL.unpack
-
-instance MkPrimary T.Text AA where
-  primary = VU.fromList . map charAA . T.unpack
 

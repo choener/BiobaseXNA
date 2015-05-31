@@ -1,3 +1,8 @@
+0.9.2.0
+-------
+
+- fixed overlapping instances in AA
+
 0.9.1.0
 -------
 
