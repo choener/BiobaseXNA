@@ -5,6 +5,7 @@
 
 module Biobase.Primary.Letter where
 
+import           Control.DeepSeq (NFData)
 import           Data.Aeson
 import           Data.Binary
 import           Data.Hashable (Hashable)
@@ -36,6 +37,8 @@ instance Binary    (Letter t)
 instance Serialize (Letter t)
 instance FromJSON  (Letter t)
 instance ToJSON    (Letter t)
+
+instance NFData (Letter t)
 
 type Primary t = VU.Vector (Letter t)
 
