@@ -79,6 +79,7 @@ library
     Biobase.Primary.Nuc.RNA
     Biobase.Primary.Nuc.XNA
     Biobase.Primary.Trans
+    Biobase.Primary.Unknown
     Biobase.Secondary
     Biobase.Secondary.Basepair
     Biobase.Secondary.Constraint

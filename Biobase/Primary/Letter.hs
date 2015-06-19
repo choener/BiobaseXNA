@@ -30,7 +30,7 @@ import           Data.PrimitiveArray hiding (map)
 
 -- | A 'Letter' together with its phantom type @t@ encodes bio-sequences.
 
-newtype Letter t = Letter { unLetter :: Int }
+newtype Letter t = Letter { getLetter :: Int }
                    deriving (Eq,Ord,Generic,Ix)
 
 instance Binary    (Letter t)
@@ -71,7 +71,7 @@ instance (VU.Unbox (Letter t), IsString [Letter t]) => IsString (VU.Vector (Lett
 -- *** Instances for 'Letter'.
 
 derivingUnbox "Letter"
-  [t| forall a . Letter a -> Int |] [| unLetter |] [| Letter |]
+  [t| forall a . Letter a -> Int |] [| getLetter |] [| Letter |]
 
 instance Hashable (Letter t)
 
@@ -112,50 +112,4 @@ instance IndexStream (Letter l) where
   {-# Inline streamUp #-}
   streamDown l h = map (\(Z:.k) -> k) $ streamDown (Z:.l) (Z:.h)
   {-# Inline streamDown #-}
-
-{-
-instance (Index sh, Show sh) => Shape (sh :. Letter z) where
-  rank (sh:._) = rank sh + 1
-  zeroDim = zeroDim:.Letter 0
-  unitDim = unitDim:.Letter 1 -- TODO does this one make sense?
-  intersectDim (sh1:.n1) (sh2:.n2) = intersectDim sh1 sh2 :. min n1 n2
-  addDim (sh1:.Letter n1) (sh2:.Letter n2) = addDim sh1 sh2 :. Letter (n1+n2) -- TODO will not necessarily yield a valid Letter
-  size (sh1:.Letter n) = size sh1 * n
-  sizeIsValid (sh1:.Letter n) = sizeIsValid (sh1:.n)
-  toIndex (sh1:.Letter sh2) (sh1':.Letter sh2') = toIndex (sh1:.sh2) (sh1':.sh2')
-  fromIndex (ds:.Letter d) n = fromIndex ds (n `quotInt` d) :. Letter r where
-                              r | rank ds == 0 = n
-                                | otherwise    = n `remInt` d
-  inShapeRange (sh1:.n1) (sh2:.n2) (idx:.i) = i>=n1 && i<n2 && inShapeRange sh1 sh2 idx
-  listOfShape (sh:.Letter n) = n : listOfShape sh
-  shapeOfList xx = case xx of
-    []   -> error "empty list in shapeOfList/Primary"
-    x:xs -> shapeOfList xs :. Letter x
-  deepSeq (sh:.n) x = deepSeq sh (n `seq` x)
-  {-# INLINE rank #-}
-  {-# INLINE zeroDim #-}
-  {-# INLINE unitDim #-}
-  {-# INLINE intersectDim #-}
-  {-# INLINE addDim #-}
-  {-# INLINE size #-}
-  {-# INLINE sizeIsValid #-}
-  {-# INLINE toIndex #-}
-  {-# INLINE fromIndex #-}
-  {-# INLINE inShapeRange #-}
-  {-# INLINE listOfShape #-}
-  {-# INLINE shapeOfList #-}
-  {-# INLINE deepSeq #-}
-
-instance (Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. Letter z) where
-  subDim (sh1:.Letter n1) (sh2:.Letter n2) = subDim sh1 sh2 :. Letter (n1-n2)
-  rangeList (sh1:.Letter n1) (sh2:.Letter n2) = [ sh:.Letter n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
-  rangeStream (fs:.Letter f) (ts:.Letter t) = VM.flatten mk step Unknown $ rangeStream fs ts where
-    mk sh = return (sh :. f)
-    step (sh :. k)
-      | k>t       = return $ VM.Done
-      | otherwise = return $ VM.Yield (sh :. Letter k) (sh :. k +1)
-    {-# INLINE [1] mk #-}
-    {-# INLINE [1] step #-}
-  {-# INLINE rangeStream #-}
--}
 

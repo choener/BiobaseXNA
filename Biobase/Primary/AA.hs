@@ -128,7 +128,7 @@ instance Enum (Letter AA) where
     succ (Letter x) = Letter $ x+1
     pred Stop       = error "pred/Stop:AA"
     pred (Letter x) = Letter $ x-1
-    toEnum k | k>=0 && k<=(unLetter Undef) = Letter k
+    toEnum k | k>=0 && k<=(getLetter Undef) = Letter k
     toEnum k                               = error $ "toEnum/Letter RNA " ++ show k
     fromEnum (Letter k) = k
 
