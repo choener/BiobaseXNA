@@ -9,8 +9,7 @@ import           Data.Ix
 import           Data.Primitive.Types
 import           Data.Serialize (Serialize(..))
 import           Data.Tuple (swap)
-import           Data.Vector.Fusion.Stream.Monadic (map,flatten,Step(..))
-import           Data.Vector.Fusion.Stream.Size (Size (Unknown))
+import           Data.Vector.Fusion.Stream.Monadic (map,Step(..))
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           GHC.Generics (Generic)
@@ -51,7 +50,7 @@ instance Index ViennaPair where
   {-# Inline inBounds #-}
 
 instance IndexStream z => IndexStream (z:.ViennaPair) where
-  streamUp (ls:.ViennaPair l) (hs:.ViennaPair h) = flatten mk step Unknown $ streamUp ls hs
+  streamUp (ls:.ViennaPair l) (hs:.ViennaPair h) = flatten mk step $ streamUp ls hs
     where mk z = return (z,l)
           step (z,k)
             | k > h     = return $ Done
@@ -59,7 +58,7 @@ instance IndexStream z => IndexStream (z:.ViennaPair) where
           {-# Inline [0] mk   #-}
           {-# Inline [0] step #-}
   {-# Inline streamUp #-}
-  streamDown (ls:.ViennaPair l) (hs:.ViennaPair h) = flatten mk step Unknown $ streamDown ls hs
+  streamDown (ls:.ViennaPair l) (hs:.ViennaPair h) = flatten mk step $ streamDown ls hs
     where mk z = return (z,h)
           step (z,k)
             | k < l     = return $ Done

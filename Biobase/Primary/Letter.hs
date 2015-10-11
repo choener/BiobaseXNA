@@ -12,8 +12,7 @@ import           Data.Hashable (Hashable)
 import           Data.Ix (Ix(..))
 import           Data.Serialize (Serialize(..))
 import           Data.String (IsString(..))
-import           Data.Vector.Fusion.Stream.Monadic (map,flatten,Step(..))
-import           Data.Vector.Fusion.Stream.Size (Size (Unknown))
+import           Data.Vector.Fusion.Stream.Monadic (map,Step(..))
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           GHC.Generics (Generic)
@@ -88,7 +87,7 @@ instance Index (Letter l) where
   {-# Inline inBounds #-}
 
 instance IndexStream z => IndexStream (z:.Letter l) where
-  streamUp (ls:.Letter l) (hs:.Letter h) = flatten mk step Unknown $ streamUp ls hs
+  streamUp (ls:.Letter l) (hs:.Letter h) = flatten mk step $ streamUp ls hs
     where mk z = return (z,l)
           step (z,k)
             | k > h     = return $ Done
@@ -96,7 +95,7 @@ instance IndexStream z => IndexStream (z:.Letter l) where
           {-# Inline [0] mk   #-}
           {-# Inline [0] step #-}
   {-# Inline streamUp #-}
-  streamDown (ls:.Letter l) (hs:.Letter h) = flatten mk step Unknown $ streamDown ls hs
+  streamDown (ls:.Letter l) (hs:.Letter h) = flatten mk step $ streamDown ls hs
     where mk z = return (z,h)
           step (z,k)
             | k < l     = return $ Done
