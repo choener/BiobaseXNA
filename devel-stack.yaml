@@ -6,12 +6,16 @@ resolver: lts-3.9
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- ../Lib-OrderedBits/
-- ../Lib-PrimitiveArray/
-- ../Lib-bimaps/
+- location: ../Lib-OrderedBits/
+  extra-dep: true
+- location: ../Lib-PrimitiveArray/
+  extra-dep: true
+- location: ../Lib-bimaps/
+  extra-dep: true
 - location:
     git:    https://github.com/acid-state/safecopy
     commit: c4798e537b77ecc2a560f523a15dbab02360e335
+    extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps:
