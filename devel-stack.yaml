@@ -12,22 +12,18 @@ packages:
   extra-dep: true
 - location: ../Lib-bimaps/
   extra-dep: true
-- location:
-    git:    https://github.com/acid-state/safecopy
-    commit: c4798e537b77ecc2a560f523a15dbab02360e335
-    extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps:
 - aeson-0.10.0.0
 - attoparsec-0.13.0.1
 - cereal-text-0.1.0.1
+- safecopy-0.8.6
 - storable-record-0.0.3
 - storable-tuple-0.0.2
 - utility-ht-0.0.11
 - vector-0.11.0.0
 - vector-th-unbox-0.2.1.3
-#- safecopy-0.8.6
 
 # Override default flag values for local packages and extra-deps
 flags: {}
