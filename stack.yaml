@@ -9,6 +9,7 @@ packages:
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps:
+- bimaps-0.0.0.3
 - OrderedBits-0.0.1.0
 - PrimitiveArray-0.7.0.0
 - storable-record-0.0.3
