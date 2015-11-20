@@ -1,5 +1,5 @@
 name:           BiobaseXNA
-version:        0.9.2.0
+version:        0.9.2.1
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@bioinf.uni-leipzig.de
 homepage:       https://github.com/choener/BiobaseXNA
@@ -43,6 +43,7 @@ extra-source-files:
 
 data-files:
   sources/iupac-nucleotides
+
 
 
 library

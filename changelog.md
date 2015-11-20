@@ -1,3 +1,7 @@
+0.9.2.1
+
+- stack.yaml, some version bumping
+
 0.9.2.0
 -------
 

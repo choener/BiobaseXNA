@@ -2,7 +2,18 @@
 
 # BiobaseXNA
 
-Efficient encoding of biological sequences.
+Efficient encoding of (short) biological sequences. This package ist designed
+to deal with *in-memory* snippets of DNA, RNA, and amino acids. The encoding is
+geared toward time-efficiency, not necessarily space efficiency (we use Int's
+for encoding characters, not the smallest type possible).
+
+Additional modules provide conversion capabilities between different types of
+characters according to biological laws, and some biochemical constraint
+information. The latter includes canonical and non-canonical pairing
+information for RNA.
+
+Actual energy parameters for pairings are provided by other packages, for
+example BiobaseTurner for the loop energy model with measured parameters.
 
 
 
