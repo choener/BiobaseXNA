@@ -16,7 +16,7 @@ import           Data.Serialize
 import           Data.Tuple.Select (sel1,sel2)
 import           Data.Tuple (swap)
 import           Data.Vector.Binary
-import           Data.Vector.Cereal
+import           Data.Vector.Serialize
 import           GHC.Generics
 import qualified Data.Vector.Unboxed as VU
 import           Text.Printf
