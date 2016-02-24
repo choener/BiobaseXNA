@@ -32,14 +32,26 @@ import           Data.PrimitiveArray hiding (map)
 newtype Letter t = Letter { getLetter :: Int }
                    deriving (Eq,Ord,Generic,Ix)
 
+instance (LetterChar t) => ToJSON (Letter t) where
+  toJSON = toJSON . letterChar
+
+instance (LetterChar t) => FromJSON (Letter t) where
+  parseJSON = fmap charLetter . parseJSON
+
 instance Binary    (Letter t)
 instance Serialize (Letter t)
-instance FromJSON  (Letter t)
-instance ToJSON    (Letter t)
 
 instance NFData (Letter t)
 
 type Primary t = VU.Vector (Letter t)
+
+-- | Convert 'Letter' types into character forms. @DNA@, @RNA@, and @amino
+-- acid@ sequences can make use of this. Other @Letter@ types only if they
+-- have single-char representations.
+
+class LetterChar t where
+  letterChar :: Letter t -> Char
+  charLetter :: Char -> Letter t
 
 -- | Conversion from a large number of sequence-like inputs to primary
 -- sequences.

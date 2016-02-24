@@ -1,6 +1,7 @@
 
 module Biobase.Primary.Nuc.RNA where
 
+import           Data.Aeson
 import           Data.Char (toUpper)
 import           Data.Ix (Ix(..))
 import           Data.Primitive.Types
@@ -14,6 +15,7 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 import           Control.Category ((>>>))
+import qualified Data.ByteString.Builder as BB
 
 import           Biobase.Primary.Bounds
 import           Biobase.Primary.Letter
@@ -42,6 +44,19 @@ instance Enum (Letter RNA) where
     toEnum k | k>=0 && k<=4 = Letter k
     toEnum k                = error $ "toEnum/Letter RNA " ++ show k
     fromEnum (Letter k) = k
+
+instance LetterChar RNA where
+  letterChar = rnaChar
+  charLetter = charRNA
+
+-- | We encode 'Primary RNA' directly as a string.
+
+instance (LetterChar RNA) => ToJSON (Primary RNA) where
+  toJSON = toJSON . VU.toList . VU.map letterChar
+
+instance (MkPrimary (VU.Vector Char) RNA) => FromJSON (Primary RNA) where
+  parseJSON = fmap (primary :: String -> Primary RNA) . parseJSON
+
 
 acgu :: [Letter RNA]
 acgu = [A .. U]

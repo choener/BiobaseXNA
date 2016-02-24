@@ -1,6 +1,7 @@
 
 module Biobase.Primary.Nuc.DNA where
 
+import           Data.Aeson
 import           Data.Char (toUpper)
 import           Data.Ix (Ix(..))
 import           Data.Primitive.Types
@@ -41,6 +42,16 @@ instance Enum (Letter DNA) where
     toEnum k                = error $ "toEnum/Letter DNA " ++ show k
     fromEnum (Letter k) = k
 
+instance LetterChar DNA where
+  letterChar = dnaChar
+  charLetter = charDNA
+
+instance (LetterChar DNA) => ToJSON (Primary DNA) where
+  toJSON = toJSON . VU.toList . VU.map letterChar
+
+instance (MkPrimary (VU.Vector Char) DNA) => FromJSON (Primary DNA) where
+  parseJSON = fmap (primary :: String -> Primary DNA) . parseJSON
+
 acgt :: [Letter DNA]
 acgt = [A .. T]
 
@@ -58,7 +69,7 @@ dnaChar = \case
   G -> 'G'
   T -> 'T'
   N -> 'N'
-{-# INLINE dnaChar #-}            
+{-# INLINE dnaChar #-}
 
 instance Show (Letter DNA) where
     show c = [dnaChar c]

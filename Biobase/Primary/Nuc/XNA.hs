@@ -1,6 +1,7 @@
 
 module Biobase.Primary.Nuc.XNA where
 
+import           Data.Aeson
 import           Data.Char (toUpper)
 import           Data.Ix (Ix(..))
 import           Data.Primitive.Types
@@ -43,6 +44,16 @@ instance Enum (Letter XNA) where
     toEnum k | k>=0 && k<=5 = Letter k
     toEnum k                = error $ "toEnum/Letter XNA " ++ show k
     fromEnum (Letter k) = k
+
+instance LetterChar XNA where
+  letterChar = xnaChar
+  charLetter = charXNA
+
+instance (LetterChar XNA) => ToJSON (Primary XNA) where
+  toJSON = toJSON . VU.toList . VU.map letterChar
+
+instance (MkPrimary (VU.Vector Char) XNA) => FromJSON (Primary XNA) where
+  parseJSON = fmap (primary :: String -> Primary XNA) . parseJSON
 
 charXNA = toUpper >>> \case
     'A' -> A

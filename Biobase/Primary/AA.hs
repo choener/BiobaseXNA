@@ -5,6 +5,7 @@
 
 module Biobase.Primary.AA where
 
+import           Data.Aeson
 import           Control.Arrow ((***),first)
 import           Data.Hashable
 import           Data.Ix (Ix(..))
@@ -64,6 +65,16 @@ aa :: Int -> Letter AA
 aa = Letter
 
 aaRange = [Stop .. pred Undef]
+
+instance LetterChar AA where
+  letterChar = aaChar
+  charLetter = charAA
+
+instance (LetterChar AA) => ToJSON (Primary AA) where
+  toJSON = toJSON . VU.toList . VU.map letterChar
+
+instance (MkPrimary (VU.Vector Char) AA) => FromJSON (Primary AA) where
+  parseJSON = fmap (primary :: String -> Primary AA) . parseJSON
 
 -- | Translate 'Char' amino acid representation into efficient 'AA' newtype.
 
