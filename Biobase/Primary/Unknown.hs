@@ -8,6 +8,7 @@
 
 module Biobase.Primary.Unknown where
 
+import           Data.Aeson
 import           Control.Applicative ((<$>))
 import           Control.Arrow ((***),first)
 import           Data.Hashable
@@ -69,4 +70,18 @@ instance Enum (Letter Unknown) where
 instance MkPrimary (VU.Vector Int) Unknown where
   primary = VU.map Letter
   {-# Inline primary #-}
+
+instance ToJSON (Letter Unknown) where
+  toJSON = toJSON . getLetter
+
+instance FromJSON (Letter Unknown) where
+  parseJSON = fmap Letter . parseJSON
+
+{-
+instance ToJSON (Primary Unknown) where
+  toJSON = toJSON . map (show . getLetter) . VU.toList
+
+instance FromJSON (Primary Unknown) where
+  parseJSON = fmap (VU.fromList . map (Letter . read)) . parseJSON
+-}
 

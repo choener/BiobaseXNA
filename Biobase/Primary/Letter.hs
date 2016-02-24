@@ -32,12 +32,6 @@ import           Data.PrimitiveArray hiding (map)
 newtype Letter t = Letter { getLetter :: Int }
                    deriving (Eq,Ord,Generic,Ix)
 
-instance (LetterChar t) => ToJSON (Letter t) where
-  toJSON = toJSON . letterChar
-
-instance (LetterChar t) => FromJSON (Letter t) where
-  parseJSON = fmap charLetter . parseJSON
-
 instance Binary    (Letter t)
 instance Serialize (Letter t)
 

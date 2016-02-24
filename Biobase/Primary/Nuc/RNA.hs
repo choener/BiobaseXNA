@@ -49,12 +49,18 @@ instance LetterChar RNA where
   letterChar = rnaChar
   charLetter = charRNA
 
+instance ToJSON (Letter RNA) where
+  toJSON = toJSON . letterChar
+
+instance FromJSON (Letter RNA) where
+  parseJSON = fmap charLetter . parseJSON
+
 -- | We encode 'Primary RNA' directly as a string.
 
-instance (LetterChar RNA) => ToJSON (Primary RNA) where
+instance ToJSON (Primary RNA) where
   toJSON = toJSON . VU.toList . VU.map letterChar
 
-instance (MkPrimary (VU.Vector Char) RNA) => FromJSON (Primary RNA) where
+instance FromJSON (Primary RNA) where
   parseJSON = fmap (primary :: String -> Primary RNA) . parseJSON
 
 
