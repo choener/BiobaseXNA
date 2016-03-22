@@ -22,7 +22,7 @@ import qualified Data.Text as T
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
-import qualified Data.Bijection.Map as B
+import qualified Data.Bijection.HashMap as B
 
 import           Biobase.Primary.Letter
 
@@ -90,7 +90,7 @@ aaChar = B.findWithDefaultR '?' charBaa
 
 -- * lookup tables
 
-charBaa :: B.Bimap Char (Letter AA)
+charBaa :: B.Bimap (B.HashMap Char (Letter AA)) (B.HashMap (Letter AA) Char)
 charBaa = B.fromList
   [ ('*',Stop)
   , ('A',A)

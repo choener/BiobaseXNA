@@ -1,11 +1,10 @@
 flags: {}
 packages:
 - '.'
-- location: ../Lib-PrimitiveArray/
-  extra-dep: true
 - location: ../Lib-bimaps/
   extra-dep: true
 extra-deps:
+- PrimitiveArray-0.7.0.1
 - OneTuple-0.2.1
 - OrderedBits-0.0.1.0
 - storable-record-0.0.3.1
