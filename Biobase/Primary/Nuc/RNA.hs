@@ -55,13 +55,15 @@ instance ToJSON (Letter RNA) where
 instance FromJSON (Letter RNA) where
   parseJSON = fmap charLetter . parseJSON
 
--- | We encode 'Primary RNA' directly as a string.
+-- We encode 'Primary RNA' directly as a string.
+--
+-- TODO we can't anymore, because this is not a newtype, just a type.
 
-instance ToJSON (Primary RNA) where
-  toJSON = toJSON . VU.toList . VU.map letterChar
-
-instance FromJSON (Primary RNA) where
-  parseJSON = fmap (primary :: String -> Primary RNA) . parseJSON
+--instance ToJSON (Primary RNA) where
+--  toJSON = toJSON . VU.toList . VU.map letterChar
+--
+--instance FromJSON (Primary RNA) where
+--  parseJSON = fmap (primary :: String -> Primary RNA) . parseJSON
 
 
 acgu :: [Letter RNA]
