@@ -8,14 +8,12 @@ packages:
   extra-dep: true
 - location: ../Lib-OrderedBits
   extra-dep: true
+- location: ../Lib-DPutils
+  extra-dep: true
 
 extra-deps:
-#- PrimitiveArray-0.7.0.1
-#- OneTuple-0.2.1
-#- OrderedBits-0.0.1.0
 - storable-record-0.0.3.1
 - storable-tuple-0.0.3.2
-#- tuple-0.3.0.2
 
 flags: {}
 
