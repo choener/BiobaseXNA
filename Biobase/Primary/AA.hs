@@ -5,8 +5,8 @@
 
 module Biobase.Primary.AA where
 
-import           Data.Aeson
 import           Control.Arrow ((***),first)
+import           Data.Aeson
 import           Data.Hashable
 import           Data.Ix (Ix(..))
 import           Data.Map.Strict (Map)
@@ -14,15 +14,17 @@ import           Data.Primitive.Types
 import           Data.Tuple (swap)
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
+import qualified GHC.Exts as GHC
 import           GHC.Generics (Generic)
+import qualified Data.Bijection.HashMap as B
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
+import qualified Data.Foldable as F
 import qualified Data.Map.Strict as M
 import qualified Data.Text as T
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
-import qualified Data.Bijection.HashMap as B
 
 import           Biobase.Primary.Letter
 
@@ -70,11 +72,14 @@ instance LetterChar AA where
   letterChar = aaChar
   charLetter = charAA
 
-instance (LetterChar AA) => ToJSON (Primary AA) where
-  toJSON = toJSON . VU.toList . VU.map letterChar
+instance ToJSON (Letter AA) where
+  toJSON = toJSON . letterChar
 
-instance (MkPrimary (VU.Vector Char) AA) => FromJSON (Primary AA) where
-  parseJSON = fmap (primary :: String -> Primary AA) . parseJSON
+instance FromJSON (Letter AA) where
+  parseJSON = fmap charLetter . parseJSON
+
+--instance (GHC.IsString f) => ToJSON (Pretty f (Letter AA)) where
+--  toJSON = toJSON . T.pack . map letterChar . GHC.toList . getPretty
 
 -- | Translate 'Char' amino acid representation into efficient 'AA' newtype.
 

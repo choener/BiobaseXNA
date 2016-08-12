@@ -82,6 +82,7 @@ library
     Biobase.Primary.Nuc.DNA
     Biobase.Primary.Nuc.RNA
     Biobase.Primary.Nuc.XNA
+    Biobase.Primary.Pretty
     Biobase.Primary.Trans
     Biobase.Primary.Unknown
     Biobase.Secondary
