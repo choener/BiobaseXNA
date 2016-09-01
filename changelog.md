@@ -1,4 +1,10 @@
+0.9.3.0
+-------
+
+- bigger version bump together with multiple ghc compatibility
+
 0.9.2.1
+-------
 
 - stack.yaml, some version bumping
 

@@ -1,5 +1,5 @@
 name:           BiobaseXNA
-version:        0.9.2.2
+version:        0.9.3.0
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@bioinf.uni-leipzig.de
 homepage:       https://github.com/choener/BiobaseXNA
@@ -11,7 +11,7 @@ license:        GPL-3
 license-file:   LICENSE
 build-type:     Simple
 stability:      experimental
-tested-with:    GHC == 7.10.3
+tested-with:    GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.1
 cabal-version:  >= 1.10.0
 description:
                 This is a base library for bioinformatics with emphasis on RNA
@@ -48,8 +48,7 @@ data-files:
 
 library
   build-depends: base                     >= 4.7      &&  < 5.0
-               , aeson                    >= 0.8      &&  < 0.12
-               , bimaps                   >= 0.1      &&  < 0.2
+               , aeson                    >= 0.8      &&  < 1.1
                , binary                   >= 0.7      &&  < 0.8
                , bytes                    >= 0.15     &&  < 0.16
                , bytestring               >= 0.10     &&  < 0.11
@@ -69,7 +68,8 @@ library
                , vector-binary-instances  >= 0.2      &&  < 0.3
                , vector-th-unbox          >= 0.2      &&  < 0.3
                --
-               , PrimitiveArray           >= 0.7.0    &&  < 0.7.2
+               , bimaps                   == 0.1.0.*
+               , PrimitiveArray           == 0.7.1.*
   exposed-modules:
     Biobase.Primary
     Biobase.Primary.AA
