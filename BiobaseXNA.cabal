@@ -17,9 +17,9 @@ description:
                 This is a base library for bioinformatics with emphasis on RNA
                 and DNA primary structure as well as amino acid sequences.
                 .
-                Provided are efficient encodings for short sequences, as
-                required by RNA folding tools. Extended RNA secondary
-                structures can be represented as well.
+                Provided are efficient encodings for short (limited by the
+                amount of RAM) sequences, as required by RNA folding tools.
+                Extended RNA secondary structures can be represented as well.
                 .
                 Contains data from:
                 .
