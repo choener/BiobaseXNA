@@ -1,3 +1,8 @@
+0.9.3.1
+-------
+
+- removed upper version bounds, bumped dependent versions
+
 0.9.3.0
 -------
 
