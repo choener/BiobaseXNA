@@ -49,11 +49,11 @@ instance LetterChar XNA where
   letterChar = xnaChar
   charLetter = charXNA
 
-instance (LetterChar XNA) => ToJSON (Primary XNA) where
-  toJSON = toJSON . VU.toList . VU.map letterChar
-
-instance (MkPrimary (VU.Vector Char) XNA) => FromJSON (Primary XNA) where
-  parseJSON = fmap (primary :: String -> Primary XNA) . parseJSON
+--instance (LetterChar XNA) => ToJSON (Primary XNA) where
+--  toJSON = toJSON . VU.toList . VU.map letterChar
+--
+--instance (MkPrimary (VU.Vector Char) XNA) => FromJSON (Primary XNA) where
+--  parseJSON = fmap (primary :: String -> Primary XNA) . parseJSON
 
 charXNA = toUpper >>> \case
     'A' -> A

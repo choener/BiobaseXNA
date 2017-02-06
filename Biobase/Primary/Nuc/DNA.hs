@@ -46,11 +46,11 @@ instance LetterChar DNA where
   letterChar = dnaChar
   charLetter = charDNA
 
-instance (LetterChar DNA) => ToJSON (Primary DNA) where
-  toJSON = toJSON . VU.toList . VU.map letterChar
-
-instance (MkPrimary (VU.Vector Char) DNA) => FromJSON (Primary DNA) where
-  parseJSON = fmap (primary :: String -> Primary DNA) . parseJSON
+--instance (LetterChar DNA) => ToJSON (Primary DNA) where
+--  toJSON = toJSON . VU.toList . VU.map letterChar
+--
+--instance (MkPrimary (VU.Vector Char) DNA) => FromJSON (Primary DNA) where
+--  parseJSON = fmap (primary :: String -> Primary DNA) . parseJSON
 
 acgt :: [Letter DNA]
 acgt = [A .. T]

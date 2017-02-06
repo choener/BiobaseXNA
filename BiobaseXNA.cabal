@@ -69,7 +69,7 @@ library
                , vector-th-unbox          >= 0.2
                --
                , bimaps                   == 0.1.0.*
-               , PrimitiveArray           == 0.7.2.*
+               , PrimitiveArray           == 0.8.0.*
   exposed-modules:
     Biobase.Primary
     Biobase.Primary.AA
