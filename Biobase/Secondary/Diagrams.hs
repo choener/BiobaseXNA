@@ -20,6 +20,7 @@ import           Data.Vector.Serialize
 import           GHC.Generics
 import qualified Data.Vector.Unboxed as VU
 import           Text.Printf
+import           Control.DeepSeq
 
 import           Biobase.Primary.Nuc
 import           Biobase.Secondary.Basepair
@@ -31,7 +32,7 @@ import           Biobase.Secondary.Basepair
 -- paired if @unD1S VU.! k >=0 0@ Unpaired status is @-1@.
 
 newtype D1Secondary = D1S {unD1S :: VU.Vector Int}
-  deriving (Read,Show,Eq,Generic)
+  deriving (Read,Show,Eq,Generic,NFData)
 
 instance Binary    D1Secondary
 instance Serialize D1Secondary
