@@ -265,3 +265,20 @@ viennaStringDistance sPairs tPairs s t = (t,length $ ss++tt) where
   ss = if sPairs then s' \\ t' else []
   tt = if tPairs then t' \\ s' else []
 
+-- | Calculate the distance between two 'D1Secondary' structures, that live
+-- in the same underlying space. In particular, this probably only works
+-- for structures on the same primary sequence.
+--
+-- This function assumes somewhat dense structures, as it is @O(2n)@ with
+-- @n@ the length of the underlying vectors.
+--
+-- @(i,k)@ vs @(j,l)@
+--
+-- TODO error out on weird inputs!
+
+d1Distance :: D1Secondary -> D1Secondary -> Int
+d1Distance (D1S x) (D1S y)
+  | VU.length x /= VU.length y = error "d1Distance called on vectors with differing lengths!"
+  | otherwise = (`div` 2) . VU.sum $ VU.zipWith (\i j -> if i==j then 1 else 0) x y
+{-# NoInline d1Distance #-}
+

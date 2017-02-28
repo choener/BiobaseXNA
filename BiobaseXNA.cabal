@@ -4,7 +4,7 @@ author:         Christian Hoener zu Siederdissen
 maintainer:     choener@bioinf.uni-leipzig.de
 homepage:       https://github.com/choener/BiobaseXNA
 bug-reports:    https://github.com/choener/BiobaseXNA/issues
-copyright:      Christian Hoener zu Siederdissen, 2011 - 2015
+copyright:      Christian Hoener zu Siederdissen, 2011 - 2017
 category:       Bioinformatics
 synopsis:       Efficient RNA/DNA representations
 license:        GPL-3
@@ -61,6 +61,7 @@ library
                , hashable                 >= 1.2
                , lens                     >= 4.0
                , primitive                >= 0.5
+               , QuickCheck               >= 2.7
                , split                    >= 0.2
                , text                     >= 1.0
                , tuple                    >= 0.3
@@ -131,6 +132,30 @@ executable SubOptDistance
                     , ScopedTypeVariables
   ghc-options:
     -O2
+
+
+
+test-suite properties
+  type:
+    exitcode-stdio-1.0
+  main-is:
+    properties.hs
+  ghc-options:
+    -threaded -rtsopts -with-rtsopts=-N
+  hs-source-dirs:
+    tests
+  default-language:
+    Haskell2010
+  default-extensions: TemplateHaskell
+                    , ScopedTypeVariables
+  build-depends: base
+               , QuickCheck         >= 2.7
+               , tasty              >= 0.11
+               , tasty-quickcheck   >= 0.8
+               , tasty-th           >= 0.1
+               , vector
+               --
+               , BiobaseXNA
 
 
 

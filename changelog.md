@@ -2,6 +2,7 @@
 -------
 
 - removed upper version bounds, bumped dependent versions
+- added d1Distance for fast basepair distance calculations
 
 0.9.3.0
 -------
