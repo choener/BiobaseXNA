@@ -278,7 +278,14 @@ viennaStringDistance sPairs tPairs s t = (t,length $ ss++tt) where
 
 d1Distance :: D1Secondary -> D1Secondary -> Int
 d1Distance (D1S x) (D1S y)
-  | VU.length x /= VU.length y = error "d1Distance called on vectors with differing lengths!"
-  | otherwise = (`div` 2) . VU.sum $ VU.zipWith (\i j -> if i==j then 1 else 0) x y
+--  | VU.length x /= VU.length y = error "d1Distance called on vectors with differing lengths!"
+  | otherwise = (`div` 2) . VU.sum $ VU.zipWith chk (x VU.++ xx) (y VU.++ yy)
+  where xx = VU.replicate (VU.length y - VU.length x) (-2)
+        yy = VU.replicate (VU.length x - VU.length y) (-2)
+        chk i j | i==j             = 0
+                | i <  0 && j <  0 = 0
+                | i >= 0 && j >= 0 = 2
+                | otherwise        = 1
+        {-# Inline chk #-}
 {-# NoInline d1Distance #-}
 

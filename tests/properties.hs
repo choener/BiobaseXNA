@@ -5,7 +5,7 @@ import           Control.Monad (join)
 import           Data.Bits
 import           Data.Function (on)
 import           Data.Int (Int16(..))
-import           Data.List (groupBy,sort,permutations,nub)
+import           Data.List (groupBy,sort,permutations,nub,(\\))
 import           Data.Maybe (isJust)
 import           Data.Word (Word)
 import           Debug.Trace
@@ -21,20 +21,45 @@ import           Biobase.Secondary.Basepair (PairIdx)
 
 
 newtype ArbitrarySSTree = ASST (SSTree PairIdx ())
+  deriving (Show)
 
 instance Arbitrary ArbitrarySSTree where
-  arbitrary = sized arbitrarySSTree
+  arbitrary = ASST <$> sized arbitrarySSTree
+    where
+      arbitrarySSTree m = do
+        Positive c <- arbitrary
+        cs <- go 0 (c*m)
+        let k = if null cs then 0 else 1 + maximum [ z | SSTree (_,z) _ _ <- cs ]
+        return $ SSExtern k () cs
+      go i j = do
+        Positive c <- arbitrary
+        Positive d <- arbitrary
+        if i+c+d >= j
+          then return []
+          else do
+            cs <- go (i+c+1) (i+c+d)
+            let h = SSTree (i+c,i+c+d) () cs
+            ts <- go (i+c+d+1) j
+            return $ h:ts
+{-
+  shrink (ASST (SSExtern k () cs))
+    | null cs = []
+    | otherwise = [ ASST
+-}
 
-arbitrarySSTree m = undefined
+collectPairs (ASST (SSExtern k _ zs)) = (k, sort $ go zs)
+  where go [] = []
+        go (SSTree (i,j) _ cs : ss) = (i,j) : go cs ++ go ss
 
--- instance Arbitrary 
+bld :: Int -> [PairIdx] -> D1Secondary
+bld = curry mkD1S
 
-
-prop_d1Distance () = d1Distance x y == snd (viennaStringDistance True True x' y')
-  where x = mkD1S (["()"], x')
-        y = mkD1S (["()"], y')
-        x' = undefined :: String
-        y' = undefined :: String
+prop_d1Distance a@(ASST _) b@(ASST _) = d1Distance x y == k
+  where x = mkD1S (lx', x')
+        y = mkD1S (ly', y')
+        (lx', x') = collectPairs a
+        (ly', y') = collectPairs b
+        k = length $ (x' \\ y') ++ (y' \\ x')
 
 ---- | Check if both the memoized version and the population enumeration
 ---- produce the same multisets, but maybe in different order.
