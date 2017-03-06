@@ -11,7 +11,7 @@ license:        GPL-3
 license-file:   LICENSE
 build-type:     Simple
 stability:      experimental
-tested-with:    GHC == 7.8.4, GHC == 7.10.3, GHC == 8.0.1
+tested-with:    GHC == 7.10.3, GHC == 8.0.1
 cabal-version:  >= 1.10.0
 description:
                 This is a base library for bioinformatics with emphasis on RNA
