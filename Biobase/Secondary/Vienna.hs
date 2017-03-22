@@ -75,52 +75,6 @@ instance IndexStream ViennaPair where
 
 
 
-{-
-instance (Shape sh,Show sh) => Shape (sh :. ViennaPair) where
-  rank (sh:._) = rank sh + 1
-  zeroDim = zeroDim:.ViennaPair 0
-  unitDim = unitDim:.ViennaPair 1 -- TODO does this one make sense?
-  intersectDim (sh1:.n1) (sh2:.n2) = intersectDim sh1 sh2 :. min n1 n2
-  addDim (sh1:.ViennaPair n1) (sh2:.ViennaPair n2) = addDim sh1 sh2 :. ViennaPair (n1+n2) -- TODO will not necessarily yield a valid ViennaPair
-  size (sh1:.ViennaPair n) = size sh1 * n
-  sizeIsValid (sh1:.ViennaPair n) = sizeIsValid (sh1:.n)
-  toIndex (sh1:.ViennaPair sh2) (sh1':.ViennaPair sh2') = toIndex (sh1:.sh2) (sh1':.sh2')
-  fromIndex (ds:.ViennaPair d) n = fromIndex ds (n `quotInt` d) :. ViennaPair r where
-                              r | rank ds == 0 = n
-                                | otherwise    = n `remInt` d
-  inShapeRange (sh1:.n1) (sh2:.n2) (idx:.i) = i>=n1 && i<n2 && inShapeRange sh1 sh2 idx
-  listOfShape (sh:.ViennaPair n) = n : listOfShape sh
-  shapeOfList xx = case xx of
-    []   -> error "empty list in shapeOfList/Primary"
-    x:xs -> shapeOfList xs :. ViennaPair x
-  deepSeq (sh:.n) x = deepSeq sh (n `seq` x)
-  {-# INLINE rank #-}
-  {-# INLINE zeroDim #-}
-  {-# INLINE unitDim #-}
-  {-# INLINE intersectDim #-}
-  {-# INLINE addDim #-}
-  {-# INLINE size #-}
-  {-# INLINE sizeIsValid #-}
-  {-# INLINE toIndex #-}
-  {-# INLINE fromIndex #-}
-  {-# INLINE inShapeRange #-}
-  {-# INLINE listOfShape #-}
-  {-# INLINE shapeOfList #-}
-  {-# INLINE deepSeq #-}
-
-instance (Eq sh, Shape sh, Show sh, ExtShape sh) => ExtShape (sh :. ViennaPair) where
-  subDim (sh1:.ViennaPair n1) (sh2:.ViennaPair n2) = subDim sh1 sh2 :. (ViennaPair $ n1-n2)
-  rangeList (sh1:.ViennaPair n1) (sh2:.ViennaPair n2) = [sh:.ViennaPair n | sh <- rangeList sh1 sh2, n <- [n1 .. (n1+n2)]]
-  rangeStream (fs:.ViennaPair f) (ts:.ViennaPair t) = VM.flatten mk step Unknown $ rangeStream fs ts where
-    mk sh = return (sh :. f)
-    step (sh :. k)
-      | k>t       = return $ VM.Done
-      | otherwise = return $ VM.Yield (sh :. ViennaPair k) (sh :. k +1)
-    {-# INLINE [1] mk #-}
-    {-# INLINE [1] step #-}
-  {-# INLINE rangeStream #-}
--}
-
 pattern    NP = ViennaPair 0 :: ViennaPair
 pattern    CG = ViennaPair 1 :: ViennaPair
 pattern    GC = ViennaPair 2 :: ViennaPair
@@ -128,9 +82,11 @@ pattern    GU = ViennaPair 3 :: ViennaPair
 pattern    UG = ViennaPair 4 :: ViennaPair
 pattern    AU = ViennaPair 5 :: ViennaPair
 pattern    UA = ViennaPair 6 :: ViennaPair
+-- | Non-standard base pair
 pattern    NS = ViennaPair 7 :: ViennaPair
 pattern Undef = ViennaPair 8 :: ViennaPair
 
+{-
 class MkViennaPair a where
   mkViennaPair :: a -> ViennaPair
   fromViennaPair :: ViennaPair -> a
@@ -154,6 +110,7 @@ instance MkViennaPair (Letter RNA, Letter RNA) where
     UA -> (U,A)
     _  -> error "non-standard pairs can't be backcasted"
   {-# INLINE fromViennaPair #-}
+-}
 
 isViennaPair :: Letter RNA -> Letter RNA -> Bool
 isViennaPair l r =  l==C && r==G

@@ -1,3 +1,8 @@
+0.10.0.0
+--------
+
+- redesigned Biobase.Secondary.Basepair
+
 0.9.3.1
 -------
 

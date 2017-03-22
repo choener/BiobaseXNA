@@ -16,6 +16,7 @@ import           Data.ByteString.Char8 (ByteString)
 import           Data.FileEmbed (embedFile)
 import           Data.Function (on)
 import           Data.List
+import           Data.Tuple.Select
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.Map as M
 import           Text.CSV
@@ -58,11 +59,10 @@ instance IsostericityLookup Pair where
     | Just cs <- M.lookup (p,CWW) defaultIsostericityMap
     = cs
     | otherwise = []
-  inClass x = map (baseP.fst) -- remove extended information
-            . filter ((CWW==).baseT.fst) -- keep only cWW pairs (baseT-ype)
-            . filter ((x `elem`).snd) -- select based on class
+  inClass x = map (sel1 . fst)            -- remove extended information
+            . filter ((CWW==). snd . fst) -- keep only cWW pairs (baseT-ype)
+            . filter ((x `elem`).snd)     -- select based on class
             $ M.assocs defaultIsostericityMap
-
 
 
 -- ** default data

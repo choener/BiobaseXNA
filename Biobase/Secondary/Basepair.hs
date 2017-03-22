@@ -1,11 +1,10 @@
 
-{-# LANGUAGE FunctionalDependencies #-}
-
--- {-# LANGUAGE OverlappingInstances #-}
-
 -- | Secondary structure: define basepairs as Int-tuples, the three edges, a
 -- nucleotide can use for pairing and the cis/trans isomerism. Both edges and
 -- cis/trans come with a tag for "unknown".
+--
+-- Since we often want to make "pairedness" explicit, we have a newtype for
+-- this as well.
 --
 -- TODO set ext-annotations to be (isomerism,edge,edge) and have a asString
 -- instance to read "cWW" "tSH" and other notation.
@@ -18,8 +17,9 @@ import           Data.Char (toLower, toUpper)
 import           Data.Ix (Ix(..))
 import           Data.List as L
 import           Data.Primitive.Types
-import           Data.Serialize
+import           Data.Serialize (Serialize)
 import           Data.Tuple (swap)
+import           Data.Vector.Fusion.Stream.Monadic (map,Step(..))
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           GHC.Generics
@@ -28,8 +28,91 @@ import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 import           Text.Read
 
-import           Biobase.Primary
+import           Data.PrimitiveArray hiding (Complement(..),map)
 
+import           Biobase.Primary
+import           Biobase.Primary.Nuc.RNA
+import           Biobase.Primary.Nuc
+
+
+
+-- * Newtype for efficient basepair encoding.
+
+-- | Encode a base pair as a single @Int@.
+
+newtype Basepair = BP { getBP :: Int }
+  deriving (Eq,Ord,Ix,Generic)
+
+derivingUnbox "Basepair"
+  [t| Basepair -> Int |] [| getBP |] [| BP |]
+
+instance Binary    Basepair
+instance Serialize Basepair
+instance FromJSON  Basepair
+instance ToJSON    Basepair
+
+deriving instance Index Basepair
+
+instance IndexStream z => IndexStream (z:.Basepair) where
+  streamUp (ls:.BP l) (hs:.BP h) = flatten mk step $ streamUp ls hs
+    where mk z = return (z,l)
+          step (z,k)
+            | k > h     = return $ Done
+            | otherwise = return $ Yield (z:.BP k) (z,k+1)
+          {-# Inline [0] mk   #-}
+          {-# Inline [0] step #-}
+  {-# Inline streamUp #-}
+  streamDown (ls:.BP l) (hs:.BP h) = flatten mk step $ streamDown ls hs
+    where mk z = return (z,h)
+          step (z,k)
+            | k < l     = return $ Done
+            | otherwise = return $ Yield (z:.BP k) (z,k-1)
+          {-# Inline [0] mk   #-}
+          {-# Inline [0] step #-}
+  {-# Inline streamDown #-}
+
+instance IndexStream Basepair
+
+pattern AA   = BP  0
+pattern AC   = BP  1
+pattern AG   = BP  2
+pattern AU   = BP  3
+pattern CA   = BP  4
+pattern CC   = BP  5
+pattern CG   = BP  6
+pattern CU   = BP  7
+pattern GA   = BP  8
+pattern GC   = BP  9
+pattern GG   = BP 10
+pattern GU   = BP 11
+pattern UA   = BP 12
+pattern UC   = BP 13
+pattern UG   = BP 14
+pattern UU   = BP 15
+pattern NS   = BP 16
+pattern NoBP = BP 17
+
+{-
+class MkBasepair a where
+  mkBasepair :: a -> Basepair
+  fromBasepair :: Basepair -> a
+
+-- | If we get a "legal" base pair, we just create it, all other
+-- combinations yield 'NoBP'. Non-standard base pairs have to be created
+-- explicitly using @NS@. When going back to @a@, non-standard and no pair
+-- yield @(N,N)@.
+
+instance MkBasepair (Letter RNA,Letter RNA) where
+  mkBasepair (l,r)
+    | l >= A && l <= U && r >= A && r <= U
+    = BP $ 4 * getLetter l + getLetter r
+    | otherwise = NoBP
+  fromBasepair k
+    | k == NoBP || k == NS = (N,N)
+    | otherwise = let (l,r) = getBP k `divMod` 4 in (Letter l, Letter r)
+  {-# Inline mkBasepair #-}
+  {-# Inline fromBasepair #-}
+-}
 
 
 -- * Newtypes for extended secondary structures
@@ -51,41 +134,7 @@ instance Serialize Edge
 instance FromJSON  Edge
 instance ToJSON    Edge
 
--- TODO Index instances!
 
-{-
-instance (Shape sh,Show sh) => Shape (sh :. Edge) where
-  rank (sh:._) = rank sh + 1
-  zeroDim = zeroDim:.Edge 0
-  unitDim = unitDim:.Edge 1 -- TODO does this one make sense?
-  intersectDim (sh1:.n1) (sh2:.n2) = intersectDim sh1 sh2 :. min n1 n2
-  addDim (sh1:.Edge n1) (sh2:.Edge n2) = addDim sh1 sh2 :. Edge (n1+n2) -- TODO will not necessarily yield a valid Edge
-  size (sh1:.Edge n) = size sh1 * n
-  sizeIsValid (sh1:.Edge n) = sizeIsValid (sh1:.n)
-  toIndex (sh1:.Edge sh2) (sh1':.Edge sh2') = toIndex (sh1:.sh2) (sh1':.sh2')
-  fromIndex (ds:.Edge d) n = fromIndex ds (n `quotInt` d) :. Edge r where
-                              r | rank ds == 0 = n
-                                | otherwise    = n `remInt` d
-  inShapeRange (sh1:.n1) (sh2:.n2) (idx:.i) = i>=n1 && i<n2 && inShapeRange sh1 sh2 idx
-  listOfShape (sh:.Edge n) = n : listOfShape sh
-  shapeOfList xx = case xx of
-    []   -> error "empty list in shapeOfList/Primary"
-    x:xs -> shapeOfList xs :. Edge x
-  deepSeq (sh:.n) x = deepSeq sh (n `seq` x)
-  {-# INLINE rank #-}
-  {-# INLINE zeroDim #-}
-  {-# INLINE unitDim #-}
-  {-# INLINE intersectDim #-}
-  {-# INLINE addDim #-}
-  {-# INLINE size #-}
-  {-# INLINE sizeIsValid #-}
-  {-# INLINE toIndex #-}
-  {-# INLINE fromIndex #-}
-  {-# INLINE inShapeRange #-}
-  {-# INLINE listOfShape #-}
-  {-# INLINE shapeOfList #-}
-  {-# INLINE deepSeq #-}
--}
 
 -- | Human-readable Show instance.
 
@@ -131,41 +180,6 @@ instance Serialize CTisomerism
 instance FromJSON  CTisomerism
 instance ToJSON    CTisomerism
 
--- TODO Index instances
-
-{-
-instance (Shape sh,Show sh) => Shape (sh :. CTisomerism) where
-  rank (sh:._) = rank sh + 1
-  zeroDim = zeroDim:.CT 0
-  unitDim = unitDim:.CT 1 -- TODO does this one make sense?
-  intersectDim (sh1:.n1) (sh2:.n2) = intersectDim sh1 sh2 :. min n1 n2
-  addDim (sh1:.CT n1) (sh2:.CT n2) = addDim sh1 sh2 :. CT (n1+n2) -- TODO will not necessarily yield a valid CT
-  size (sh1:.CT n) = size sh1 * n
-  sizeIsValid (sh1:.CT n) = sizeIsValid (sh1:.n)
-  toIndex (sh1:.CT sh2) (sh1':.CT sh2') = toIndex (sh1:.sh2) (sh1':.sh2')
-  fromIndex (ds:.CT d) n = fromIndex ds (n `quotInt` d) :. CT r where
-                              r | rank ds == 0 = n
-                                | otherwise    = n `remInt` d
-  inShapeRange (sh1:.n1) (sh2:.n2) (idx:.i) = i>=n1 && i<n2 && inShapeRange sh1 sh2 idx
-  listOfShape (sh:.CT n) = n : listOfShape sh
-  shapeOfList xx = case xx of
-    []   -> error "empty list in shapeOfList/Primary"
-    x:xs -> shapeOfList xs :. CT x
-  deepSeq (sh:.n) x = deepSeq sh (n `seq` x)
-  {-# INLINE rank #-}
-  {-# INLINE zeroDim #-}
-  {-# INLINE unitDim #-}
-  {-# INLINE intersectDim #-}
-  {-# INLINE addDim #-}
-  {-# INLINE size #-}
-  {-# INLINE sizeIsValid #-}
-  {-# INLINE toIndex #-}
-  {-# INLINE fromIndex #-}
-  {-# INLINE inShapeRange #-}
-  {-# INLINE listOfShape #-}
-  {-# INLINE shapeOfList #-}
-  {-# INLINE deepSeq #-}
--}
 
 -- | Human-readable Show instance.
 
@@ -241,72 +255,4 @@ pattern TSW = (Trn,S,W)
 pattern TWH = (Trn,W,H)
 pattern TWS = (Trn,W,S)
 pattern TWW = (Trn,W,W)
-
-
-
--- * tuple-like selection
---
--- the 'lens' library provides combinators that should make this
--- superfluous.
-
--- | Selection of nucleotides and/or type classes independent of which type we
--- are looking at.
-
-class BaseSelect a b | a -> b where
-  -- |  select first index or nucleotide
-  baseL :: a -> b
-  -- | select second index or nucleotide
-  baseR :: a -> b
-  -- | select both nucleotides as pair
-  baseP :: a -> (b,b)
-  -- | select basepair type if existing or return default cWW
-  baseT :: a -> ExtPairAnnotation
-  -- | update first index or nucleotide
-  updL :: b -> a -> a
-  -- | update second index or nucleotide
-  updR :: b -> a -> a
-  -- | update complete pair
-  updP :: (b,b) -> a -> a
-  -- | update basepair type, error if not possible due to type a
-  updT :: ExtPairAnnotation -> a -> a
-
--- | extended pairtype annotation given
-
-instance BaseSelect ((a,a),ExtPairAnnotation) a where
-  baseL ((a,_),_) = a
-  baseR ((_,b),_) = b
-  baseP (lr   ,_) = lr
-  baseT (_,t) = t
-  updL n ((_,y),t) = ((n,y),t)
-  updR n ((x,_),t) = ((x,n),t)
-  updP n (_,t)     = (n,t)
-  updT n (xy,_) = (xy,n)
-  {-# INLINE baseL #-}
-  {-# INLINE baseR #-}
-  {-# INLINE baseP #-}
-  {-# INLINE baseT #-}
-  {-# INLINE updL #-}
-  {-# INLINE updR #-}
-  {-# INLINE updP #-}
-  {-# INLINE updT #-}
-
--- | simple cis/wc-wc basepairs
-
-instance BaseSelect (a,a) a where
-  baseL (a,_) = a
-  baseR (_,a) = a
-  baseP = id
-  baseT _ = CWW
-  updL n (_,y) = (n,y)
-  updR n (x,_) = (x,n)
-  updP n _     = n
-  updT n xy = if n==CWW then xy else error $ "updT on standard pairs can not update to: " ++ show n
-  {-# INLINE baseL #-}
-  {-# INLINE baseR #-}
-  {-# INLINE baseP #-}
-  {-# INLINE baseT #-}
-  {-# INLINE updL #-}
-  {-# INLINE updR #-}
-  {-# INLINE updP #-}
-  {-# INLINE updT #-}
 

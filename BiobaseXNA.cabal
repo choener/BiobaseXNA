@@ -1,5 +1,5 @@
 name:           BiobaseXNA
-version:        0.9.3.1
+version:        0.10.0.0
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@bioinf.uni-leipzig.de
 homepage:       https://github.com/choener/BiobaseXNA
@@ -48,7 +48,7 @@ data-files:
 
 library
   build-depends: base                     >= 4.7      &&  < 5.0
-               , aeson                    >= 0.8
+               , aeson                    >= 1.0
                , binary                   >= 0.7
                , bytes                    >= 0.15
                , bytestring               >= 0.10
@@ -89,6 +89,7 @@ library
     Biobase.Secondary
     Biobase.Secondary.Basepair
     Biobase.Secondary.Constraint
+    Biobase.Secondary.Convert
     Biobase.Secondary.Diagrams
     Biobase.Secondary.Isostericity
     Biobase.Secondary.Pseudoknots
@@ -104,6 +105,7 @@ library
                     , MultiParamTypeClasses
                     , PatternSynonyms
                     , ScopedTypeVariables
+                    , StandaloneDeriving
                     , TemplateHaskell
                     , TypeFamilies
                     , TypeOperators
