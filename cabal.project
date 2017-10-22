@@ -1,5 +1,4 @@
 packages: .
---          ../Lib-bimaps
---          ../Lib-DPutils
---          ../Lib-OrderedBits
---          ../Lib-PrimitiveArray
+
+optional-packages: ./*/*.cabal
+

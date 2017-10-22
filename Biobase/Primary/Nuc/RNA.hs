@@ -1,12 +1,15 @@
 
 module Biobase.Primary.Nuc.RNA where
 
+import           Control.Category ((>>>))
+import           Control.Lens (Iso', iso)
 import           Data.Aeson
 import           Data.Char (toUpper)
 import           Data.Ix (Ix(..))
 import           Data.Primitive.Types
 import           Data.String
 import           Data.Tuple (swap)
+import qualified Data.ByteString.Builder as BB
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import qualified Data.Text as T
@@ -14,8 +17,6 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
-import           Control.Category ((>>>))
-import qualified Data.ByteString.Builder as BB
 
 import           Biobase.Primary.Bounds
 import           Biobase.Primary.Letter
@@ -84,6 +85,13 @@ rnaChar = \case
   U -> 'U'
   N -> 'N'
 {-# INLINE rnaChar #-}            
+
+-- | An isomorphism from 'Char' to 'Letter RNA'. This assumes that the
+-- underlying @Char@s actually represent an RNA sequence. This allows typesafe
+-- modification of RNA sequences since only @[A,C,G,U,N]@ are allowed.
+
+crna ∷ Iso' Char (Letter RNA)
+crna = iso charRNA rnaChar
 
 instance Show (Letter RNA) where
     show c = [rnaChar c]

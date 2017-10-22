@@ -1,6 +1,8 @@
 
 module Biobase.Primary.Nuc.DNA where
 
+import           Control.Category ((>>>))
+import           Control.Lens (Iso', iso)
 import           Data.Aeson
 import           Data.Char (toUpper)
 import           Data.Ix (Ix(..))
@@ -14,7 +16,6 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
-import           Control.Category ((>>>))
 
 import           Biobase.Primary.Bounds
 import           Biobase.Primary.Letter
@@ -70,6 +71,13 @@ dnaChar = \case
   T -> 'T'
   N -> 'N'
 {-# INLINE dnaChar #-}
+
+-- | An isomorphism from 'Char' to 'Letter DNA'. This assumes that the
+-- underlying @Char@s actually represent a DNA sequence. This allows typesafe
+-- modification of DNA sequences since only @[A,C,G,T,N]@ are allowed.
+
+cdna ∷ Iso' Char (Letter DNA)
+cdna = iso charDNA dnaChar
 
 instance Show (Letter DNA) where
     show c = [dnaChar c]

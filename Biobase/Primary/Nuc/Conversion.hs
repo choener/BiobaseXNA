@@ -9,7 +9,10 @@
 
 module Biobase.Primary.Nuc.Conversion where
 
+import           Control.Lens (iso, from)
 import qualified Data.Vector.Unboxed as VU
+
+import           Biobase.Types.Sequence (Transcribe(..))
 
 import           Biobase.Primary.Letter (Letter(..), Primary)
 import qualified Biobase.Primary.Nuc.DNA as D
@@ -84,67 +87,93 @@ xnaSdna = \case
 
 
 
--- * Reverse-complement of characters.
+-- ** Transcription between RNA and DNA. Both on the individual sequence level,
+-- and on the level of primary sequence data.
 
--- | Produce the complement of a RNA or DNA sequence. Does intentionally
--- not work for XNA sequences as it is not possible to uniquely translate
--- @A@ into either @U@ or @T@.
+instance Transcribe (Letter R.RNA) where
+  type TranscribeTo (Letter R.RNA) = Letter D.DNA
+  transcribe = iso rnaTdna dnaTrna
+  {-# Inline transcribe #-}
 
-class Complement s t where
-    complement :: s -> t
+instance Transcribe (Letter D.DNA) where
+  type TranscribeTo (Letter D.DNA) = Letter R.RNA
+  transcribe = from transcribe
+  {-# Inline transcribe #-}
 
--- | To 'transcribe' a DNA sequence into RNA we reverse the complement of
--- the sequence.
+instance Transcribe (Primary R.RNA) where
+  type TranscribeTo (Primary R.RNA) = Primary D.DNA
+  transcribe = iso (VU.map rnaTdna) (VU.map dnaTrna)
+  {-# Inline transcribe #-}
 
-transcribe :: Primary D.DNA -> Primary R.RNA
-transcribe = VU.reverse . complement
+instance Transcribe (Primary D.DNA) where
+  type TranscribeTo (Primary D.DNA) = Primary R.RNA
+  transcribe = iso (VU.map dnaTrna) (VU.map rnaTdna)
+  {-# Inline transcribe #-}
 
-instance Complement (Letter R.RNA) (Letter R.RNA) where
-    complement = \case
-      R.A -> R.U
-      R.C -> R.G
-      R.G -> R.C
-      R.U -> R.A
-      R.N -> R.N
 
-instance Complement (Letter D.DNA) (Letter D.DNA) where
-    complement = \case
-      D.A -> D.T
-      D.C -> D.G
-      D.G -> D.C
-      D.T -> D.A
-      D.N -> D.N
+-- TODO to be removed soon
 
-instance Complement (Letter D.DNA) (Letter R.RNA) where
-    complement = \case
-      D.A -> R.U
-      D.C -> R.G
-      D.G -> R.C
-      D.T -> R.A
-      D.N -> R.N
-
-instance Complement (Letter R.RNA) (Letter D.DNA) where
-    complement = \case
-      R.A -> D.T
-      R.C -> D.G
-      R.G -> D.C
-      R.U -> D.A
-      R.N -> D.N
-
-#if __GLASGOW_HASKELL__ >= 710
-instance {-# OVERLAPPING #-}
-#else
-instance
-#endif
-  ( Complement s t, VU.Unbox s, VU.Unbox t)
-  => Complement (VU.Vector s) (VU.Vector t)
-  where complement = VU.map complement
-
-#if __GLASGOW_HASKELL__ >= 710
-instance {-# Overlappable #-}
-#else
-instance
-#endif
-  ( Complement s t, Functor f) => Complement (f s) (f t)
-  where complement = fmap complement
+---- * Reverse-complement of characters.
+--
+---- | Produce the complement of a RNA or DNA sequence. Does intentionally
+---- not work for XNA sequences as it is not possible to uniquely translate
+---- @A@ into either @U@ or @T@.
+--
+--class Complement s t where
+--    complement :: s -> t
+--
+---- | To 'transcribe' a DNA sequence into RNA we reverse the complement of
+---- the sequence.
+--
+--transcribe :: Primary D.DNA -> Primary R.RNA
+--transcribe = VU.reverse . complement
+--
+--instance Complement (Letter R.RNA) (Letter R.RNA) where
+--    complement = \case
+--      R.A -> R.U
+--      R.C -> R.G
+--      R.G -> R.C
+--      R.U -> R.A
+--      R.N -> R.N
+--
+--instance Complement (Letter D.DNA) (Letter D.DNA) where
+--    complement = \case
+--      D.A -> D.T
+--      D.C -> D.G
+--      D.G -> D.C
+--      D.T -> D.A
+--      D.N -> D.N
+--
+--instance Complement (Letter D.DNA) (Letter R.RNA) where
+--    complement = \case
+--      D.A -> R.U
+--      D.C -> R.G
+--      D.G -> R.C
+--      D.T -> R.A
+--      D.N -> R.N
+--
+--instance Complement (Letter R.RNA) (Letter D.DNA) where
+--    complement = \case
+--      R.A -> D.T
+--      R.C -> D.G
+--      R.G -> D.C
+--      R.U -> D.A
+--      R.N -> D.N
+--
+-- #if __GLASGOW_HASKELL__ >= 710
+-- instance {-# OVERLAPPING #-}
+-- #else
+-- instance
+-- #endif
+--   ( Complement s t, VU.Unbox s, VU.Unbox t)
+--   => Complement (VU.Vector s) (VU.Vector t)
+--   where complement = VU.map complement
+-- 
+-- #if __GLASGOW_HASKELL__ >= 710
+-- instance {-# Overlappable #-}
+-- #else
+-- instance
+-- #endif
+--   ( Complement s t, Functor f) => Complement (f s) (f t)
+--   where complement = fmap complement
 
