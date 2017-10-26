@@ -30,6 +30,8 @@ import           Biobase.Secondary.Basepair
 -- | RNA secondary structure with 1-diagrams. Each nucleotide is paired with at
 -- most one other nucleotide. A nucleotide with index @k@ in @[0..len-1]@ is
 -- paired if @unD1S VU.! k >=0 0@ Unpaired status is @-1@.
+--
+-- TODO Provide @iso@ between @D1Secondary@ and @RNAss@.
 
 newtype D1Secondary = D1S {unD1S :: VU.Vector Int}
   deriving (Read,Show,Eq,Generic,NFData)
