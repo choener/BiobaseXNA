@@ -99,6 +99,11 @@ instance Index (Letter l) where
   sizeIsValid (LtLetter k) = True
   {-# Inline sizeIsValid #-}
 
+deriving instance Eq      (LimitType (Letter l))
+deriving instance Generic (LimitType (Letter l))
+deriving instance Read    (LimitType (Letter l))
+deriving instance Show    (LimitType (Letter l))
+
 instance IndexStream z => IndexStream (z:.Letter l) where
   streamUp (ls:..LtLetter l) (hs:..LtLetter h) = flatten mk step $ streamUp ls hs
     where mk z = return (z,l)
