@@ -12,7 +12,7 @@ import           Data.Hashable (Hashable)
 import           Data.Ix (Ix(..))
 import           Data.Serialize (Serialize(..))
 import           Data.String (IsString(..))
-import           Data.Vector.Fusion.Stream.Monadic (map,Step(..))
+import           Data.Vector.Fusion.Stream.Monadic (map,Step(..),flatten)
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           GHC.Generics (Generic)
@@ -80,20 +80,27 @@ derivingUnbox "Letter"
 
 instance Hashable (Letter t)
 
+-- |
+--
+-- TODO replace @LtLetter Int@ with more specific limits? Maybe some constants?
+
 instance Index (Letter l) where
-  linearIndex _ _ (Letter i) = i
+  newtype LimitType (Letter l) = LtLetter Int
+  linearIndex _ (Letter i) = i
   {-# Inline linearIndex #-}
-  smallestLinearIndex _ = error "still needed?"
-  {-# Inline smallestLinearIndex #-}
-  largestLinearIndex (Letter h) = h
-  {-# Inline largestLinearIndex #-}
-  size _ (Letter h) = h+1
+  size (LtLetter h) = h+1
   {-# Inline size #-}
-  inBounds (Letter l) (Letter h) (Letter i) = l <= i && i <= h
+  inBounds (LtLetter h) (Letter i) = 0 <= i && i <= h
   {-# Inline inBounds #-}
+  zeroBound = Letter 0
+  {-# Inline zeroBound #-}
+  zeroBound' = LtLetter 0
+  {-# Inline zeroBound' #-}
+  sizeIsValid (LtLetter k) = True
+  {-# Inline sizeIsValid #-}
 
 instance IndexStream z => IndexStream (z:.Letter l) where
-  streamUp (ls:.Letter l) (hs:.Letter h) = flatten mk step $ streamUp ls hs
+  streamUp (ls:..LtLetter l) (hs:..LtLetter h) = flatten mk step $ streamUp ls hs
     where mk z = return (z,l)
           step (z,k)
             | k > h     = return $ Done
@@ -101,7 +108,7 @@ instance IndexStream z => IndexStream (z:.Letter l) where
           {-# Inline [0] mk   #-}
           {-# Inline [0] step #-}
   {-# Inline streamUp #-}
-  streamDown (ls:.Letter l) (hs:.Letter h) = flatten mk step $ streamDown ls hs
+  streamDown (ls:..LtLetter l) (hs:..LtLetter h) = flatten mk step $ streamDown ls hs
     where mk z = return (z,h)
           step (z,k)
             | k < l     = return $ Done
@@ -110,11 +117,5 @@ instance IndexStream z => IndexStream (z:.Letter l) where
           {-# Inline [0] step #-}
   {-# Inline streamDown #-}
 
--- TODO temporary, because defaults dont inline
-
-instance IndexStream (Letter l) where
-  streamUp l h = map (\(Z:.k) -> k) $ streamUp (Z:.l) (Z:.h)
-  {-# Inline streamUp #-}
-  streamDown l h = map (\(Z:.k) -> k) $ streamDown (Z:.l) (Z:.h)
-  {-# Inline streamDown #-}
+instance IndexStream (Letter l)
 

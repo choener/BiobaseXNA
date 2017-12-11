@@ -19,7 +19,7 @@ import           Data.List as L
 import           Data.Primitive.Types
 import           Data.Serialize (Serialize)
 import           Data.Tuple (swap)
-import           Data.Vector.Fusion.Stream.Monadic (map,Step(..))
+import           Data.Vector.Fusion.Stream.Monadic (map,Step(..),flatten)
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           GHC.Generics
@@ -51,10 +51,11 @@ instance Serialize Basepair
 instance FromJSON  Basepair
 instance ToJSON    Basepair
 
-deriving instance Index Basepair
+instance Index Basepair where
+  newtype LimitType Basepair = LtBP Basepair
 
 instance IndexStream z => IndexStream (z:.Basepair) where
-  streamUp (ls:.BP l) (hs:.BP h) = flatten mk step $ streamUp ls hs
+  streamUp (ls:..LtBP (BP l)) (hs:..LtBP (BP h)) = flatten mk step $ streamUp ls hs
     where mk z = return (z,l)
           step (z,k)
             | k > h     = return $ Done
@@ -62,7 +63,7 @@ instance IndexStream z => IndexStream (z:.Basepair) where
           {-# Inline [0] mk   #-}
           {-# Inline [0] step #-}
   {-# Inline streamUp #-}
-  streamDown (ls:.BP l) (hs:.BP h) = flatten mk step $ streamDown ls hs
+  streamDown (ls:..LtBP (BP l)) (hs:..LtBP (BP h)) = flatten mk step $ streamDown ls hs
     where mk z = return (z,h)
           step (z,k)
             | k < l     = return $ Done

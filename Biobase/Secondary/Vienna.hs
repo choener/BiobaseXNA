@@ -9,7 +9,7 @@ import           Data.Ix
 import           Data.Primitive.Types
 import           Data.Serialize (Serialize(..))
 import           Data.Tuple (swap)
-import           Data.Vector.Fusion.Stream.Monadic (map,Step(..))
+import           Data.Vector.Fusion.Stream.Monadic (map,Step(..),flatten)
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
 import           GHC.Generics (Generic)
@@ -38,40 +38,34 @@ instance FromJSON  (ViennaPair)
 instance ToJSON    (ViennaPair)
 
 instance Index ViennaPair where
-  linearIndex _ _ (ViennaPair p) = p
+  data LimitType ViennaPair
+    = Canonical | Extended
+  linearIndex _ (ViennaPair p) = p
   {-# Inline linearIndex #-}
-  smallestLinearIndex _ = error "still needed?"
-  {-# Inline smallestLinearIndex #-}
-  largestLinearIndex (ViennaPair p) = p
-  {-# Inline largestLinearIndex #-}
-  size _ (ViennaPair h) = h+1
+  size h = case h of { Canonical → 7; Extended → 9 }
   {-# Inline size #-}
-  inBounds (ViennaPair l) (ViennaPair h) (ViennaPair p) = l <= p && p <= h
+  inBounds h (ViennaPair p) = 0 <= p && p < size h
   {-# Inline inBounds #-}
 
 instance IndexStream z => IndexStream (z:.ViennaPair) where
-  streamUp (ls:.ViennaPair l) (hs:.ViennaPair h) = flatten mk step $ streamUp ls hs
-    where mk z = return (z,l)
+  streamUp (ls:..l) (hs:..h) = flatten mk step $ streamUp ls hs
+    where mk z = return (z,size l - 1)
           step (z,k)
-            | k > h     = return $ Done
-            | otherwise = return $ Yield (z:.ViennaPair k) (z,k+1)
+            | k > size h -1 = return $ Done
+            | otherwise     = return $ Yield (z:.ViennaPair k) (z,k+1)
           {-# Inline [0] mk   #-}
           {-# Inline [0] step #-}
   {-# Inline streamUp #-}
-  streamDown (ls:.ViennaPair l) (hs:.ViennaPair h) = flatten mk step $ streamDown ls hs
-    where mk z = return (z,h)
+  streamDown (ls:..l) (hs:..h) = flatten mk step $ streamDown ls hs
+    where mk z = return (z,size h - 1)
           step (z,k)
-            | k < l     = return $ Done
-            | otherwise = return $ Yield (z:.ViennaPair k) (z,k-1)
+            | k < size l -1 = return $ Done
+            | otherwise     = return $ Yield (z:.ViennaPair k) (z,k-1)
           {-# Inline [0] mk   #-}
           {-# Inline [0] step #-}
   {-# Inline streamDown #-}
 
 instance IndexStream ViennaPair where
-  streamUp l h = map (\(Z:.k) -> k) $ streamUp (Z:.l) (Z:.h)
-  {-# Inline streamUp #-}
-  streamDown l h = map (\(Z:.k) -> k) $ streamDown (Z:.l) (Z:.h)
-  {-# Inline streamDown #-}
 
 
 
@@ -122,7 +116,7 @@ isViennaPair l r =  l==C && r==G
 {-# INLINE isViennaPair #-}
 
 viennaPairTable :: Unboxed (Z:.Letter RNA:.Letter RNA) ViennaPair
-viennaPairTable = fromAssocs (Z:.N:.N) (Z:.U:.U) NS
+viennaPairTable = fromAssocs (ZZ:..LtLetter 4:..LtLetter 4) NS
   [ (Z:.C:.G , CG)
   , (Z:.G:.C , GC)
   , (Z:.G:.U , GU)
