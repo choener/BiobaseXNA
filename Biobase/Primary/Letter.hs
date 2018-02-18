@@ -96,8 +96,8 @@ instance Index (Letter l) where
   {-# Inline zeroBound #-}
   zeroBound' = LtLetter 0
   {-# Inline zeroBound' #-}
-  sizeIsValid (LtLetter k) = True
-  {-# Inline sizeIsValid #-}
+  totalSize (LtLetter k) = [ fromIntegral k + 1 ]
+  {-# Inline totalSize #-}
 
 deriving instance Eq      (LimitType (Letter l))
 deriving instance Generic (LimitType (Letter l))
