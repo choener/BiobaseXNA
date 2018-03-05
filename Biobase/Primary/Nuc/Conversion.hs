@@ -1,9 +1,9 @@
 
-{-# Language CPP #-}
-
-#if __GLASGOW_HASKELL__ < 710
-{-# LANGUAGE OverlappingInstances #-}
-#endif
+--  {-# Language CPP #-}
+--  
+--  #if __GLASGOW_HASKELL__ < 710
+--  {-# LANGUAGE OverlappingInstances #-}
+--  #endif
 
 -- | Convert between different nucleotide representations
 
@@ -12,7 +12,7 @@ module Biobase.Primary.Nuc.Conversion where
 import           Control.Lens (iso, from)
 import qualified Data.Vector.Unboxed as VU
 
-import           Biobase.Types.Sequence (Transcribe(..))
+import           Biobase.Types.NucleotideSequence (Transcribe(..))
 
 import           Biobase.Primary.Letter (Letter(..), Primary)
 import qualified Biobase.Primary.Nuc.DNA as D
