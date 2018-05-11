@@ -60,6 +60,8 @@ pattern     Y = Letter 22 :: Letter AA
 pattern     Z = Letter 23 :: Letter AA
 pattern Undef = Letter 24 :: Letter AA
 
+pattern     Any = Letter 21 :: Letter AA
+pattern Unknown = Letter 21 :: Letter AA
 
 -- * Creating functions and aa data.
 

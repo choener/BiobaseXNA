@@ -116,7 +116,7 @@ isViennaPair l r =  l==C && r==G
 {-# INLINE isViennaPair #-}
 
 viennaPairTable :: Unboxed (Z:.Letter RNA:.Letter RNA) ViennaPair
-viennaPairTable = fromAssocs (ZZ:..LtLetter 4:..LtLetter 4) NS
+viennaPairTable = fromAssocs (ZZ:..LtLetter maxBound:..LtLetter maxBound) NS
   [ (Z:.C:.G , CG)
   , (Z:.G:.C , GC)
   , (Z:.G:.U , GU)

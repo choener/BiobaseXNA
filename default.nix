@@ -8,6 +8,7 @@ let
   };
   sourceOverrides = packageOverrides.extend (haskell.lib.packageSourceOverrides {
     bimaps = ../Lib-bimaps;
+    BiobaseENA = ../Lib-BiobaseENA;
     BiobaseTypes = ../Lib-BiobaseTypes;
     BiobaseXNA = ./.;
     DPutils = ../Lib-DPutils;

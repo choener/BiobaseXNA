@@ -85,31 +85,31 @@ instance Hashable (Letter t)
 -- TODO replace @LtLetter Int@ with more specific limits? Maybe some constants?
 
 instance Index (Letter l) where
-  newtype LimitType (Letter l) = LtLetter Int
+  newtype LimitType (Letter l) = LtLetter (Letter l)
   linearIndex _ (Letter i) = i
   {-# Inline linearIndex #-}
-  size (LtLetter h) = h+1
+  size (LtLetter (Letter h)) = h+1
   {-# Inline size #-}
-  inBounds (LtLetter h) (Letter i) = 0 <= i && i <= h
+  inBounds (LtLetter h) i = zeroBound <= i && i <= h
   {-# Inline inBounds #-}
   zeroBound = Letter 0
   {-# Inline zeroBound #-}
-  zeroBound' = LtLetter 0
+  zeroBound' = LtLetter zeroBound
   {-# Inline zeroBound' #-}
-  totalSize (LtLetter k) = [ fromIntegral k + 1 ]
+  totalSize (LtLetter (Letter k)) = [ fromIntegral k + 1 ]
   {-# Inline totalSize #-}
 
 deriving instance Eq      (LimitType (Letter l))
 deriving instance Generic (LimitType (Letter l))
-deriving instance Read    (LimitType (Letter l))
-deriving instance Show    (LimitType (Letter l))
+deriving instance (Read (Letter l)) ⇒ Read    (LimitType (Letter l))
+deriving instance (Show (Letter l)) ⇒ Show    (LimitType (Letter l))
 
 instance IndexStream z => IndexStream (z:.Letter l) where
   streamUp (ls:..LtLetter l) (hs:..LtLetter h) = flatten mk step $ streamUp ls hs
     where mk z = return (z,l)
           step (z,k)
             | k > h     = return $ Done
-            | otherwise = return $ Yield (z:.Letter k) (z,k+1)
+            | otherwise = return $ Yield (z:.k) (z,Letter $ getLetter k +1)
           {-# Inline [0] mk   #-}
           {-# Inline [0] step #-}
   {-# Inline streamUp #-}
@@ -117,7 +117,7 @@ instance IndexStream z => IndexStream (z:.Letter l) where
     where mk z = return (z,h)
           step (z,k)
             | k < l     = return $ Done
-            | otherwise = return $ Yield (z:.Letter k) (z,k-1)
+            | otherwise = return $ Yield (z:.k) (z,Letter $ getLetter k -1)
           {-# Inline [0] mk   #-}
           {-# Inline [0] step #-}
   {-# Inline streamDown #-}
