@@ -127,6 +127,10 @@ charBaa = B.fromList
   ]
 {-# NOINLINE charBaa #-}
 
+-- | List of the twenty "default" amino acids
+
+twentyAA ∷ [Letter AA]
+twentyAA = [ A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y ]
 
 
 -- * instances
