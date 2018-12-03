@@ -8,10 +8,12 @@ module Biobase.Primary.Letter where
 import           Control.DeepSeq (NFData)
 import           Data.Aeson
 import           Data.Binary
+import           Data.Data
 import           Data.Hashable (Hashable)
 import           Data.Ix (Ix(..))
 import           Data.Serialize (Serialize(..))
 import           Data.String (IsString(..))
+import           Data.Typeable
 import           Data.Vector.Fusion.Stream.Monadic (map,Step(..),flatten)
 import           Data.Vector.Unboxed.Deriving
 import           GHC.Base (remInt,quotInt)
@@ -28,9 +30,12 @@ import           Data.PrimitiveArray hiding (map)
 
 
 -- | A 'Letter' together with its phantom type @t@ encodes bio-sequences.
+--
+-- TODO should get a polykinded phantom-type do make tape confusion less
+-- likely.
 
 newtype Letter t = Letter { getLetter :: Int }
-                   deriving (Eq,Ord,Generic,Ix)
+                   deriving (Eq,Ord,Generic,Ix,Data,Typeable)
 
 instance Binary    (Letter t)
 instance Serialize (Letter t)
@@ -103,6 +108,8 @@ deriving instance Eq      (LimitType (Letter l))
 deriving instance Generic (LimitType (Letter l))
 deriving instance (Read (Letter l)) ⇒ Read    (LimitType (Letter l))
 deriving instance (Show (Letter l)) ⇒ Show    (LimitType (Letter l))
+deriving instance Typeable (LimitType (Letter l))
+deriving instance Data (Letter l) ⇒ Data (LimitType (Letter l))
 
 instance IndexStream z => IndexStream (z:.Letter l) where
   streamUp (ls:..LtLetter l) (hs:..LtLetter h) = flatten mk step $ streamUp ls hs

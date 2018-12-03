@@ -5,10 +5,12 @@ import           Control.Category ((>>>))
 import           Control.Lens (Iso', iso)
 import           Data.Aeson
 import           Data.Char (toUpper)
+import           Data.Data
 import           Data.Ix (Ix(..))
 import           Data.Primitive.Types
 import           Data.String
 import           Data.Tuple (swap)
+import           Data.Typeable
 import qualified Data.ByteString.Builder as BB
 import qualified Data.ByteString.Char8 as BS
 import qualified Data.ByteString.Lazy.Char8 as BSL
@@ -26,6 +28,7 @@ import           Biobase.Primary.Letter
 -- | RNA nucleotides.
 
 data RNA
+  deriving (Data,Typeable)
 
 pattern A = Letter 0 :: Letter RNA
 pattern C = Letter 1 :: Letter RNA

@@ -102,18 +102,19 @@ library
     Biobase.Secondary.Structure
     Biobase.Secondary.Vienna
   default-extensions: BangPatterns
+                    , DeriveDataTypeable
+                    , DeriveFunctor
                     , DeriveGeneric
+                    , DeriveGeneric
+                    , DeriveTraversable
                     , EmptyDataDecls
                     , FlexibleContexts
                     , FlexibleInstances
                     , GeneralizedNewtypeDeriving
                     , LambdaCase
-                    , PolyKinds
-                    , DeriveFunctor
-                    , DeriveTraversable
-                    , DeriveGeneric
                     , MultiParamTypeClasses
                     , PatternSynonyms
+                    , PolyKinds
                     , ScopedTypeVariables
                     , StandaloneDeriving
                     , TemplateHaskell
