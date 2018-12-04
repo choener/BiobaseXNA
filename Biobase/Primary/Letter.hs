@@ -35,7 +35,22 @@ import           Data.PrimitiveArray hiding (map)
 -- likely.
 
 newtype Letter t = Letter { getLetter :: Int }
-                   deriving (Eq,Ord,Generic,Ix,Data,Typeable)
+                   deriving (Eq,Ord,Generic,Ix,Typeable)
+
+-- | Manual @Data@ instance because @Letter@ should not show its
+-- implementation. This also allows for better use of generic programming
+-- downstream.
+
+instance (Typeable t, Typeable (Letter t)) ⇒ Data (Letter t) where
+  toConstr = mkIntegralConstr letterDataType . getLetter
+  gunfold _ z c = case constrRep c of
+    (IntConstr x) → z (Letter $ fromIntegral x)
+    _ → errorWithoutStackTrace $ "Biobase.Primary.Letter.gunfold: Constructor "
+          ++ show c
+          ++ " is not of type Letter (using Int-rep)"
+  dataTypeOf _ = letterDataType
+letterDataType = mkDataType "Biobase.Primary.Letter" [letterConstr]
+letterConstr   = mkConstr letterDataType "Letter" [] Prefix
 
 instance Binary    (Letter t)
 instance Serialize (Letter t)
