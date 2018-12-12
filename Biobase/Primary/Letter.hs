@@ -1,7 +1,7 @@
 
--- | A newtype with an attached phenotype which allows us to encode
--- nucleotides and amino acids. Actual seqence-specific functions can be
--- founds in the appropriate modules @AA@ and @Nuc@.
+-- | A newtype with an attached phantom type which allows us to encode
+-- nucleotides and amino acids. Actual seqence-specific functions can be founds
+-- in the appropriate modules @AA@ and @Nuc@.
 
 module Biobase.Primary.Letter where
 
@@ -70,31 +70,31 @@ type Primary t n = VU.Vector (Letter t n)
 -- have single-char representations.
 
 class LetterChar t n where
-  letterChar :: Letter t n -> Char
-  charLetter :: Char -> Letter t n
+  letterChar ∷ Letter t n → Char
+  charLetter ∷ Char → Letter t n
 
 -- | Conversion from a large number of sequence-like inputs to primary
 -- sequences.
 
 class MkPrimary c t n where
-    primary :: c -> Primary t n
+    primary ∷ c → Primary t n
 
-instance MkPrimary (VU.Vector Char) t n => MkPrimary String t n where
+instance MkPrimary (VU.Vector Char) t n ⇒ MkPrimary String t n where
     primary = primary . VU.fromList
 
-instance MkPrimary (VU.Vector Char) t n =>  MkPrimary T.Text t n where
+instance MkPrimary (VU.Vector Char) t n ⇒  MkPrimary T.Text t n where
     primary = primary . VU.fromList . T.unpack
 
-instance MkPrimary (VU.Vector Char) t n => MkPrimary TL.Text t n where
+instance MkPrimary (VU.Vector Char) t n ⇒ MkPrimary TL.Text t n where
     primary = primary . VU.fromList . TL.unpack
 
-instance MkPrimary (VU.Vector Char) t n => MkPrimary BS.ByteString t n where
+instance MkPrimary (VU.Vector Char) t n ⇒ MkPrimary BS.ByteString t n where
     primary = primary . VU.fromList . BS.unpack
 
-instance MkPrimary (VU.Vector Char) t n => MkPrimary BSL.ByteString t n where
+instance MkPrimary (VU.Vector Char) t n ⇒ MkPrimary BSL.ByteString t n where
     primary = primary . VU.fromList . BSL.unpack
 
-instance (VU.Unbox (Letter t n), IsString [Letter t n]) => IsString (VU.Vector (Letter t n)) where
+instance (VU.Unbox (Letter t n), IsString [Letter t n]) ⇒ IsString (VU.Vector (Letter t n)) where
     fromString = VU.fromList . fromString
 
 
@@ -102,7 +102,7 @@ instance (VU.Unbox (Letter t n), IsString [Letter t n]) => IsString (VU.Vector (
 -- *** Instances for 'Letter'.
 
 derivingUnbox "Letter"
-  [t| forall t n . Letter t n -> Int |] [| getLetter |] [| Letter |]
+  [t| forall t n . Letter t n → Int |] [| getLetter |] [| Letter |]
 
 instance Hashable (Letter t n)
 
@@ -132,7 +132,7 @@ deriving instance (Show (Letter l n)) ⇒ Show    (LimitType (Letter l n))
 deriving instance Typeable (LimitType (Letter l n))
 deriving instance Data (Letter l n) ⇒ Data (LimitType (Letter l n))
 
-instance IndexStream z => IndexStream (z:.Letter l n) where
+instance IndexStream z ⇒ IndexStream (z:.Letter l n) where
   streamUp (ls:..LtLetter l) (hs:..LtLetter h) = flatten mk step $ streamUp ls hs
     where mk z = return (z,l)
           step (z,k)
@@ -150,5 +150,9 @@ instance IndexStream z => IndexStream (z:.Letter l n) where
           {-# Inline [0] step #-}
   {-# Inline streamDown #-}
 
-instance IndexStream (Letter l n)
+instance IndexStream (Letter l n) where
+  streamUp l h = map (\(Z:.k) → k) $ streamUp (ZZ:..l) (ZZ:..h)
+  streamDown l h = map (\(Z:.k) → k) $ streamDown (ZZ:..l) (ZZ:..h)
+  {-# Inline streamUp #-}
+  {-# Inline streamDown #-}
 

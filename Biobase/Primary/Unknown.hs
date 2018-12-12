@@ -1,10 +1,13 @@
 
--- | A 'Letter' with unknown annotation. We sometimes want to encode that
--- we are dealing with @Letter@s in an alphabet, but we do not want to
--- commit to a certain alphabet (just yet).
+-- | A 'Letter' with unknown annotation. We sometimes want to encode that we
+-- are dealing with @Letter@s in an alphabet, but we do not want to commit to a
+-- certain alphabet (just yet).
 --
 -- This module allows us to make explicit that we do not know the specific
 -- alphabet type yet.
+--
+-- One should NEVER blindly coerce, since the order and limits of @Letter@'s
+-- might well be different.
 
 module Biobase.Primary.Unknown where
 
@@ -44,7 +47,7 @@ data Unknown
 
 -- | Creating an unknown letter.
 
-unk :: Int -> Letter Unknown n
+unk ∷ Int → Letter Unknown n
 unk = Letter
 
 
@@ -58,8 +61,8 @@ instance Read (Letter Unknown n) where
   readPrec = parens $ do
     Lex.Ident u <- lexP
     case u of
-      "U" -> unk <$> readPrec
-      _   -> RP.pfail
+      "U" → unk <$> readPrec
+      _   → RP.pfail
 
 instance Enum (Letter Unknown n) where
     succ (Letter x) = Letter $ x+1
@@ -76,12 +79,4 @@ instance ToJSON (Letter Unknown n) where
 
 instance FromJSON (Letter Unknown n) where
   parseJSON = fmap Letter . parseJSON
-
-{-
-instance ToJSON (Primary Unknown) where
-  toJSON = toJSON . map (show . getLetter) . VU.toList
-
-instance FromJSON (Primary Unknown) where
-  parseJSON = fmap (VU.fromList . map (Letter . read)) . parseJSON
--}
 

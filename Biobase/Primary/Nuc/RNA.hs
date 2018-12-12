@@ -30,11 +30,11 @@ import           Biobase.Primary.Letter
 data RNA
   deriving (Data,Typeable)
 
-pattern A = Letter 0 :: Letter RNA n
-pattern C = Letter 1 :: Letter RNA n
-pattern G = Letter 2 :: Letter RNA n
-pattern U = Letter 3 :: Letter RNA n
-pattern N = Letter 4 :: Letter RNA n
+pattern A = Letter 0 ∷ Letter RNA n
+pattern C = Letter 1 ∷ Letter RNA n
+pattern G = Letter 2 ∷ Letter RNA n
+pattern U = Letter 3 ∷ Letter RNA n
+pattern N = Letter 4 ∷ Letter RNA n
 
 instance Bounded (Letter RNA n) where
     minBound = A
@@ -67,26 +67,26 @@ instance FromJSON (Letter RNA n) where
 --  toJSON = toJSON . VU.toList . VU.map letterChar
 --
 --instance FromJSON (Primary RNA) where
---  parseJSON = fmap (primary :: String -> Primary RNA) . parseJSON
+--  parseJSON = fmap (primary ∷ String → Primary RNA) . parseJSON
 
 
-acgu :: [Letter RNA n]
+acgu ∷ [Letter RNA n]
 acgu = [A .. U]
 
 charRNA = toUpper >>> \case
-    'A' -> A
-    'C' -> C
-    'G' -> G
-    'U' -> U
-    _   -> N
+    'A' → A
+    'C' → C
+    'G' → G
+    'U' → U
+    _   → N
 {-# INLINE charRNA #-}
 
 rnaChar = \case
-  A -> 'A'
-  C -> 'C'
-  G -> 'G'
-  U -> 'U'
-  N -> 'N'
+  A → 'A'
+  C → 'C'
+  G → 'G'
+  U → 'U'
+  N → 'N'
 {-# INLINE rnaChar #-}            
 
 -- | An isomorphism from 'Char' to 'Letter RNA'. This assumes that the
@@ -105,7 +105,7 @@ instance Read (Letter RNA n) where
     | x==' ' = readsPrec p xs
     | otherwise = [(charRNA x, xs)]
 
-rnaSeq :: MkPrimary p RNA n => p -> Primary RNA n
+rnaSeq ∷ MkPrimary p RNA n ⇒ p → Primary RNA n
 rnaSeq = primary
 
 instance MkPrimary (VU.Vector Char) RNA n where
