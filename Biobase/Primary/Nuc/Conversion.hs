@@ -90,23 +90,23 @@ xnaSdna = \case
 -- ** Transcription between RNA and DNA. Both on the individual sequence level,
 -- and on the level of primary sequence data.
 
-instance Transcribe (Letter R.RNA) where
-  type TranscribeTo (Letter R.RNA) = Letter D.DNA
+instance Transcribe (Letter R.RNA n) where
+  type TranscribeTo (Letter R.RNA n) = Letter D.DNA n
   transcribe = iso rnaTdna dnaTrna
   {-# Inline transcribe #-}
 
-instance Transcribe (Letter D.DNA) where
-  type TranscribeTo (Letter D.DNA) = Letter R.RNA
+instance Transcribe (Letter D.DNA n) where
+  type TranscribeTo (Letter D.DNA n) = Letter R.RNA n
   transcribe = from transcribe
   {-# Inline transcribe #-}
 
-instance Transcribe (Primary R.RNA) where
-  type TranscribeTo (Primary R.RNA) = Primary D.DNA
+instance Transcribe (Primary R.RNA n) where
+  type TranscribeTo (Primary R.RNA n) = Primary D.DNA n
   transcribe = iso (VU.map rnaTdna) (VU.map dnaTrna)
   {-# Inline transcribe #-}
 
-instance Transcribe (Primary D.DNA) where
-  type TranscribeTo (Primary D.DNA) = Primary R.RNA
+instance Transcribe (Primary D.DNA n) where
+  type TranscribeTo (Primary D.DNA n) = Primary R.RNA n
   transcribe = iso (VU.map dnaTrna) (VU.map rnaTdna)
   {-# Inline transcribe #-}
 

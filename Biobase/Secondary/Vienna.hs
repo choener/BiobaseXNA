@@ -106,7 +106,7 @@ instance MkViennaPair (Letter RNA, Letter RNA) where
   {-# INLINE fromViennaPair #-}
 -}
 
-isViennaPair :: Letter RNA -> Letter RNA -> Bool
+isViennaPair :: Letter RNA m -> Letter RNA n -> Bool
 isViennaPair l r =  l==C && r==G
                  || l==G && r==C
                  || l==A && r==U
@@ -115,7 +115,7 @@ isViennaPair l r =  l==C && r==G
                  || l==U && r==G
 {-# INLINE isViennaPair #-}
 
-viennaPairTable :: Unboxed (Z:.Letter RNA:.Letter RNA) ViennaPair
+viennaPairTable :: Unboxed (Z:.Letter RNA n:.Letter RNA n) ViennaPair
 viennaPairTable = fromAssocs (ZZ:..LtLetter maxBound:..LtLetter maxBound) NS
   [ (Z:.C:.G , CG)
   , (Z:.G:.C , GC)

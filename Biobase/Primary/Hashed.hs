@@ -19,26 +19,26 @@ import           Biobase.Primary.Letter
 
 -- | The hash of a primary sequence.
 
-newtype HashedPrimary t = HashedPrimary { unHashedPrimary :: Int }
+newtype HashedPrimary t n = HashedPrimary { unHashedPrimary :: Int }
   deriving (Eq,Ord,Ix,Read,Show,Enum,Bounded)
 
 derivingUnbox "HashedPrimary"
-  [t| forall a . HashedPrimary a -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
+  [t| forall t n . HashedPrimary t n -> Int |] [| unHashedPrimary |] [| HashedPrimary |]
 
 -- | Given a piece of primary sequence information, reduce it to an index.
 -- The empty input produces an index of 0.
 
-mkHashedPrimary :: forall t . (VU.Unbox (Letter t), Bounded (Letter t), Enum (Letter t)) => Primary t -> HashedPrimary t
+mkHashedPrimary :: forall t n . (VU.Unbox (Letter t n), Bounded (Letter t n), Enum (Letter t n)) => Primary t n -> HashedPrimary t n
 mkHashedPrimary = HashedPrimary . fst . VU.foldl' f (0, 1) where
-  f (z, c) n = (z + c * (fromEnum n +1), c * (fromEnum (maxBound :: Letter t) + 1))
+  f (z, c) n = (z + c * (fromEnum n +1), c * (fromEnum (maxBound :: Letter t n) + 1))
 {-# INLINE mkHashedPrimary #-}
 
 -- | Turn a hash back into a sequence. Will fail if the resulting sequence
 -- has more than 100 elements.
 
-hash2primary :: forall t . (VU.Unbox (Letter t), Bounded (Letter t), Enum (Letter t)) => HashedPrimary t -> Primary t
+hash2primary :: forall t n . (VU.Unbox (Letter t n), Bounded (Letter t n), Enum (Letter t n)) => HashedPrimary t n -> Primary t n
 hash2primary (HashedPrimary h) = VU.unfoldrN l f h where
-  m = fromEnum (maxBound :: Letter t) +1
+  m = fromEnum (maxBound :: Letter t n) +1
   l = VU.length . VU.takeWhile (>0) . VU.iterateN 100 (`div` m) $ h
   f k = if k>0 then Just (toEnum $ ((k-1) `mod` m) , (k-1) `div` m)
                else Nothing

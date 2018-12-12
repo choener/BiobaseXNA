@@ -34,28 +34,28 @@ import           Biobase.GeneticCodes.Types
 
 -- | Transform translation tables into the @Letter DNA/Letter AA@ format.
 
-letterTranslationTable ∷ TranslationTable Char Char → TranslationTable (Letter DNA) (Letter AA)
+letterTranslationTable ∷ TranslationTable Char Char → TranslationTable (Letter DNA n) (Letter AA n)
 letterTranslationTable tbl = TranslationTable
   { _tripletToAminoAcid  = M.fromList . map (ftriplet *** felement) . M.toList $ tbl^.tripletToAminoAcid
   , _aminoAcidtoTriplets = M.fromList . map (charAA *** map felement) . M.toList $ tbl^.aminoAcidtoTriplets
   , _tableID             = tbl^.tableID
   , _tableName           = tbl^.tableName
-  } where ftriplet ∷ BaseTriplet Char → BaseTriplet (Letter DNA)
+  } where ftriplet ∷ BaseTriplet Char → BaseTriplet (Letter DNA n)
           ftriplet = over tripletChars (map charDNA)
-          felement ∷ TranslationElement Char Char → TranslationElement (Letter DNA) (Letter AA)
+          felement ∷ TranslationElement Char Char → TranslationElement (Letter DNA n) (Letter AA n)
           felement = over (baseTriplet.tripletChars) (map charDNA) . over aminoAcid charAA
 
-instance Translation (BaseTriplet (Letter DNA)) where
-  type TargetType (BaseTriplet (Letter DNA)) = Letter AA
-  type TripletType (BaseTriplet (Letter DNA)) = Letter DNA
-  type AAType (BaseTriplet (Letter DNA)) = Letter AA
+instance Translation (BaseTriplet (Letter DNA n)) where
+  type TargetType (BaseTriplet (Letter DNA n)) = Letter AA n
+  type TripletType (BaseTriplet (Letter DNA n)) = Letter DNA n
+  type AAType (BaseTriplet (Letter DNA n)) = Letter AA n
   translate tbl t = maybe Unknown _aminoAcid $ M.lookup t (tbl^.tripletToAminoAcid)
   {-# Inline translate #-}
 
-instance Translation (Primary DNA) where
-  type TargetType (Primary DNA) = Primary AA
-  type TripletType (Primary DNA) = Letter DNA
-  type AAType (Primary DNA) = Letter AA
+instance Translation (Primary DNA n) where
+  type TargetType (Primary DNA n) = Primary AA n
+  type TripletType (Primary DNA n) = Letter DNA n
+  type AAType (Primary DNA n) = Letter AA n
   -- |
   --
   -- TODO we could consider returning @Nothing@ in case the input is not

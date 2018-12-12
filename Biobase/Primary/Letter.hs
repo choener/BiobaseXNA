@@ -8,6 +8,7 @@ module Biobase.Primary.Letter where
 import           Control.DeepSeq (NFData)
 import           Data.Aeson
 import           Data.Binary
+import           Data.Coerce
 import           Data.Data
 import           Data.Hashable (Hashable)
 import           Data.Ix (Ix(..))
@@ -29,19 +30,24 @@ import           Data.PrimitiveArray hiding (map)
 
 
 
--- | A 'Letter' together with its phantom type @t@ encodes bio-sequences.
---
--- TODO should get a polykinded phantom-type do make tape confusion less
--- likely.
+-- | A 'Letter' together with its phantom type @seqTy@ encodes bio-sequences,
+-- while @nameTy@ allows to specify a type-level name for a letter.
 
-newtype Letter t = Letter { getLetter :: Int }
-                   deriving (Eq,Ord,Generic,Ix,Typeable)
+newtype Letter (seqTy ∷ *) (nameTy ∷ k) = Letter { getLetter ∷ Int }
+  deriving (Eq,Ord,Generic,Ix,Typeable)
+
+-- | While @coerce@ will always work, this way restricts the change to just the
+-- @nameTy@.
+
+changeNameTy ∷ Letter seqTy nameTy → Letter seqTy newNameTy
+{-# Inline changeNameTy #-}
+changeNameTy = coerce
 
 -- | Manual @Data@ instance because @Letter@ should not show its
 -- implementation. This also allows for better use of generic programming
 -- downstream.
 
-instance (Typeable t, Typeable (Letter t)) ⇒ Data (Letter t) where
+instance (Typeable t, Typeable (Letter t n)) ⇒ Data (Letter t n) where
   toConstr = mkIntegralConstr letterDataType . getLetter
   gunfold _ z c = case constrRep c of
     (IntConstr x) → z (Letter $ fromIntegral x)
@@ -52,43 +58,43 @@ instance (Typeable t, Typeable (Letter t)) ⇒ Data (Letter t) where
 letterDataType = mkDataType "Biobase.Primary.Letter" [letterConstr]
 letterConstr   = mkConstr letterDataType "Letter" [] Prefix
 
-instance Binary    (Letter t)
-instance Serialize (Letter t)
+instance Binary    (Letter t n)
+instance Serialize (Letter t n)
 
-instance NFData (Letter t)
+instance NFData (Letter t n)
 
-type Primary t = VU.Vector (Letter t)
+type Primary t n = VU.Vector (Letter t n)
 
 -- | Convert 'Letter' types into character forms. @DNA@, @RNA@, and @amino
 -- acid@ sequences can make use of this. Other @Letter@ types only if they
 -- have single-char representations.
 
-class LetterChar t where
-  letterChar :: Letter t -> Char
-  charLetter :: Char -> Letter t
+class LetterChar t n where
+  letterChar :: Letter t n -> Char
+  charLetter :: Char -> Letter t n
 
 -- | Conversion from a large number of sequence-like inputs to primary
 -- sequences.
 
-class MkPrimary n t where
-    primary :: n -> Primary t
+class MkPrimary c t n where
+    primary :: c -> Primary t n
 
-instance (MkPrimary (VU.Vector Char) t) => MkPrimary String t where
+instance MkPrimary (VU.Vector Char) t n => MkPrimary String t n where
     primary = primary . VU.fromList
 
-instance MkPrimary (VU.Vector Char) t =>  MkPrimary T.Text t where
+instance MkPrimary (VU.Vector Char) t n =>  MkPrimary T.Text t n where
     primary = primary . VU.fromList . T.unpack
 
-instance MkPrimary (VU.Vector Char) t => MkPrimary TL.Text t where
+instance MkPrimary (VU.Vector Char) t n => MkPrimary TL.Text t n where
     primary = primary . VU.fromList . TL.unpack
 
-instance MkPrimary (VU.Vector Char) t => MkPrimary BS.ByteString t where
+instance MkPrimary (VU.Vector Char) t n => MkPrimary BS.ByteString t n where
     primary = primary . VU.fromList . BS.unpack
 
-instance MkPrimary (VU.Vector Char) t => MkPrimary BSL.ByteString t where
+instance MkPrimary (VU.Vector Char) t n => MkPrimary BSL.ByteString t n where
     primary = primary . VU.fromList . BSL.unpack
 
-instance (VU.Unbox (Letter t), IsString [Letter t]) => IsString (VU.Vector (Letter t)) where
+instance (VU.Unbox (Letter t n), IsString [Letter t n]) => IsString (VU.Vector (Letter t n)) where
     fromString = VU.fromList . fromString
 
 
@@ -96,16 +102,16 @@ instance (VU.Unbox (Letter t), IsString [Letter t]) => IsString (VU.Vector (Lett
 -- *** Instances for 'Letter'.
 
 derivingUnbox "Letter"
-  [t| forall a . Letter a -> Int |] [| getLetter |] [| Letter |]
+  [t| forall t n . Letter t n -> Int |] [| getLetter |] [| Letter |]
 
-instance Hashable (Letter t)
+instance Hashable (Letter t n)
 
 -- |
 --
 -- TODO replace @LtLetter Int@ with more specific limits? Maybe some constants?
 
-instance Index (Letter l) where
-  newtype LimitType (Letter l) = LtLetter (Letter l)
+instance Index (Letter l n) where
+  newtype LimitType (Letter l n) = LtLetter (Letter l n)
   linearIndex _ (Letter i) = i
   {-# Inline linearIndex #-}
   size (LtLetter (Letter h)) = h+1
@@ -119,14 +125,14 @@ instance Index (Letter l) where
   totalSize (LtLetter (Letter k)) = [ fromIntegral k + 1 ]
   {-# Inline totalSize #-}
 
-deriving instance Eq      (LimitType (Letter l))
-deriving instance Generic (LimitType (Letter l))
-deriving instance (Read (Letter l)) ⇒ Read    (LimitType (Letter l))
-deriving instance (Show (Letter l)) ⇒ Show    (LimitType (Letter l))
-deriving instance Typeable (LimitType (Letter l))
-deriving instance Data (Letter l) ⇒ Data (LimitType (Letter l))
+deriving instance Eq      (LimitType (Letter l n))
+deriving instance Generic (LimitType (Letter l n))
+deriving instance (Read (Letter l n)) ⇒ Read    (LimitType (Letter l n))
+deriving instance (Show (Letter l n)) ⇒ Show    (LimitType (Letter l n))
+deriving instance Typeable (LimitType (Letter l n))
+deriving instance Data (Letter l n) ⇒ Data (LimitType (Letter l n))
 
-instance IndexStream z => IndexStream (z:.Letter l) where
+instance IndexStream z => IndexStream (z:.Letter l n) where
   streamUp (ls:..LtLetter l) (hs:..LtLetter h) = flatten mk step $ streamUp ls hs
     where mk z = return (z,l)
           step (z,k)
@@ -144,5 +150,5 @@ instance IndexStream z => IndexStream (z:.Letter l) where
           {-# Inline [0] step #-}
   {-# Inline streamDown #-}
 
-instance IndexStream (Letter l)
+instance IndexStream (Letter l n)
 

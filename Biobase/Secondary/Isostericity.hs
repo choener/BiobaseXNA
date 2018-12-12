@@ -43,7 +43,7 @@ class IsostericityLookup a where
 --
 -- TODO inClass missing
 
-instance IsostericityLookup ExtPair where
+instance IsostericityLookup (ExtPair n) where
   getClasses p
     | Just cs <- M.lookup p defaultIsostericityMap
     = cs
@@ -54,7 +54,7 @@ instance IsostericityLookup ExtPair where
 --
 -- TODO inClass missing
 
-instance IsostericityLookup Pair where
+instance IsostericityLookup (Pair n) where
   getClasses p
     | Just cs <- M.lookup (p,CWW) defaultIsostericityMap
     = cs
@@ -77,7 +77,7 @@ mkIsostericityMap = M.fromListWith (\x y -> nub $ x++y) . mkIsostericityList
 
 -- | Process CSV list-of-lists to get the isostericity data.
 
-mkIsostericityList :: [[[String]]] -> [(ExtPair, [String])]
+mkIsostericityList :: [[[String]]] -> [(ExtPair n, [String])]
 mkIsostericityList gs = nubBy ((==) `on` fst) . concatMap turn . concatMap f $ gs where
   f g = map (\e ->  ( ( let [x,y] = fst e
                         in (charRNA x, charRNA y), read bpt

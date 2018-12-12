@@ -16,15 +16,15 @@ import Biobase.Primary.Letter
 
 newtype Pretty f a = Pretty { getPretty :: f a }
 
-instance (LetterChar x) => ToJSON (Pretty VU.Vector (Letter x)) where
+instance (LetterChar x n) => ToJSON (Pretty VU.Vector (Letter x n)) where
   toJSON = String . T.pack . map letterChar . VU.toList . getPretty
 
-instance (LetterChar x) => ToJSON (Pretty V.Vector (Letter x)) where
+instance (LetterChar x n) => ToJSON (Pretty V.Vector (Letter x n)) where
   toJSON = String . T.pack . map letterChar . V.toList . getPretty
 
-instance (LetterChar x, VS.Storable (Letter x)) => ToJSON (Pretty VS.Vector (Letter x)) where
+instance (LetterChar x n, VS.Storable (Letter x n)) => ToJSON (Pretty VS.Vector (Letter x n)) where
   toJSON = String . T.pack . map letterChar . VS.toList . getPretty
 
-instance (LetterChar x) => ToJSON (Pretty [] (Letter x)) where
+instance (LetterChar x n) => ToJSON (Pretty [] (Letter x n)) where
   toJSON = String . T.pack . map letterChar . getPretty
 

@@ -219,7 +219,7 @@ type PairIdx = (Int,Int)
 
 -- | A pair as a tuple containing 'Nuc's.
 
-type Pair = (Letter RNA,Letter RNA)
+type Pair n = (Letter RNA n, Letter RNA n)
 
 -- | Annotation for a basepair.
 
@@ -231,7 +231,7 @@ type ExtPairIdx = (PairIdx,ExtPairAnnotation)
 
 -- | An extended basepair, with nucleotides an annotation.
 
-type ExtPair = (Pair,ExtPairAnnotation)
+type ExtPair n = (Pair n, ExtPairAnnotation)
 
 
 

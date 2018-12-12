@@ -30,17 +30,17 @@ import           Biobase.Primary.Letter
 data RNA
   deriving (Data,Typeable)
 
-pattern A = Letter 0 :: Letter RNA
-pattern C = Letter 1 :: Letter RNA
-pattern G = Letter 2 :: Letter RNA
-pattern U = Letter 3 :: Letter RNA
-pattern N = Letter 4 :: Letter RNA
+pattern A = Letter 0 :: Letter RNA n
+pattern C = Letter 1 :: Letter RNA n
+pattern G = Letter 2 :: Letter RNA n
+pattern U = Letter 3 :: Letter RNA n
+pattern N = Letter 4 :: Letter RNA n
 
-instance Bounded (Letter RNA) where
+instance Bounded (Letter RNA n) where
     minBound = A
     maxBound = N
 
-instance Enum (Letter RNA) where
+instance Enum (Letter RNA n) where
     succ N          = error "succ/N:RNA"
     succ (Letter x) = Letter $ x+1
     pred A          = error "pred/A:RNA"
@@ -49,14 +49,14 @@ instance Enum (Letter RNA) where
     toEnum k                = error $ "toEnum/Letter RNA " ++ show k
     fromEnum (Letter k) = k
 
-instance LetterChar RNA where
+instance LetterChar RNA n where
   letterChar = rnaChar
   charLetter = charRNA
 
-instance ToJSON (Letter RNA) where
+instance ToJSON (Letter RNA n) where
   toJSON = toJSON . letterChar
 
-instance FromJSON (Letter RNA) where
+instance FromJSON (Letter RNA n) where
   parseJSON = fmap charLetter . parseJSON
 
 -- We encode 'Primary RNA' directly as a string.
@@ -70,7 +70,7 @@ instance FromJSON (Letter RNA) where
 --  parseJSON = fmap (primary :: String -> Primary RNA) . parseJSON
 
 
-acgu :: [Letter RNA]
+acgu :: [Letter RNA n]
 acgu = [A .. U]
 
 charRNA = toUpper >>> \case
@@ -93,24 +93,24 @@ rnaChar = \case
 -- underlying @Char@s actually represent an RNA sequence. This allows typesafe
 -- modification of RNA sequences since only @[A,C,G,U,N]@ are allowed.
 
-crna ∷ Iso' Char (Letter RNA)
+crna ∷ Iso' Char (Letter RNA n)
 crna = iso charRNA rnaChar
 
-instance Show (Letter RNA) where
+instance Show (Letter RNA n) where
     show c = [rnaChar c]
 
-instance Read (Letter RNA) where
+instance Read (Letter RNA n) where
   readsPrec p [] = []
   readsPrec p (x:xs)
     | x==' ' = readsPrec p xs
     | otherwise = [(charRNA x, xs)]
 
-rnaSeq :: MkPrimary n RNA => n -> Primary RNA
+rnaSeq :: MkPrimary p RNA n => p -> Primary RNA n
 rnaSeq = primary
 
-instance MkPrimary (VU.Vector Char) RNA where
+instance MkPrimary (VU.Vector Char) RNA n where
     primary = VU.map charRNA
 
-instance IsString [Letter RNA] where
+instance IsString [Letter RNA n] where
     fromString = map charRNA
 

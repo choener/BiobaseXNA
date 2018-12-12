@@ -27,28 +27,28 @@ import qualified Biobase.Primary.Nuc.RNA as R
 
 data DEG
 
-pattern A = Letter  0 :: Letter DEG
-pattern C = Letter  1 :: Letter DEG
-pattern G = Letter  2 :: Letter DEG
-pattern T = Letter  3 :: Letter DEG
-pattern U = Letter  4 :: Letter DEG
-pattern W = Letter  5 :: Letter DEG
-pattern S = Letter  6 :: Letter DEG
-pattern M = Letter  7 :: Letter DEG
-pattern K = Letter  8 :: Letter DEG
-pattern R = Letter  9 :: Letter DEG
-pattern Y = Letter 10 :: Letter DEG
-pattern B = Letter 11 :: Letter DEG
-pattern D = Letter 12 :: Letter DEG
-pattern H = Letter 13 :: Letter DEG
-pattern V = Letter 14 :: Letter DEG
-pattern N = Letter 15 :: Letter DEG
+pattern A = Letter  0 :: Letter DEG n
+pattern C = Letter  1 :: Letter DEG n
+pattern G = Letter  2 :: Letter DEG n
+pattern T = Letter  3 :: Letter DEG n
+pattern U = Letter  4 :: Letter DEG n
+pattern W = Letter  5 :: Letter DEG n
+pattern S = Letter  6 :: Letter DEG n
+pattern M = Letter  7 :: Letter DEG n
+pattern K = Letter  8 :: Letter DEG n
+pattern R = Letter  9 :: Letter DEG n
+pattern Y = Letter 10 :: Letter DEG n
+pattern B = Letter 11 :: Letter DEG n
+pattern D = Letter 12 :: Letter DEG n
+pattern H = Letter 13 :: Letter DEG n
+pattern V = Letter 14 :: Letter DEG n
+pattern N = Letter 15 :: Letter DEG n
 
-instance Bounded (Letter DEG) where
+instance Bounded (Letter DEG n) where
     minBound = A
     maxBound = N
 
-instance Enum (Letter DEG) where
+instance Enum (Letter DEG n) where
     succ N           = error "succ/N:DEG"
     succ (Letter x)  = Letter $ x+1
     pred A           = error "pred/A:DEG"
@@ -95,16 +95,16 @@ degChar = \case
   N -> 'N'
 {-# INLINE degChar #-}            
 
-instance Show (Letter DEG) where
+instance Show (Letter DEG n) where
     show c = [degChar c]
 
-degSeq :: MkPrimary n DEG => n -> Primary DEG
+degSeq :: MkPrimary p DEG n => p -> Primary DEG n
 degSeq = primary
 
-instance MkPrimary (VU.Vector Char) DEG where
+instance MkPrimary (VU.Vector Char) DEG n where
     primary = VU.map charDEG
 
-instance IsString [Letter DEG] where
+instance IsString [Letter DEG n] where
     fromString = map charDEG
 
 
@@ -119,18 +119,18 @@ instance Degenerate Char where
   fromDegenerate = maybe [] id . flip lookup iupacXDNAchars
   toDegenerate   = flip lookup (map swap iupacXDNAchars) . nub . sort
 
-instance Degenerate (Letter RNA) where
+instance Degenerate (Letter RNA n) where
     fromDegenerate 'T' = []
     fromDegenerate x   = map dnaTrna $ fromDegenerate x
     toDegenerate   xs  | xs == [R.U] = Just 'U'
                        | otherwise  = toDegenerate $ map rnaTdna xs
 
-instance Degenerate (Letter DNA) where
+instance Degenerate (Letter DNA n) where
     fromDegenerate 'U' = []
     fromDegenerate x   = map charDNA $ fromDegenerate x
     toDegenerate       = toDegenerate . map dnaChar
 
-instance Degenerate (Letter XNA) where
+instance Degenerate (Letter XNA n) where
     fromDegenerate = map charXNA . fromDegenerate
     toDegenerate   = toDegenerate . map xnaChar
 

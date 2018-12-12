@@ -24,14 +24,14 @@ class BasepairConvert a b where
 
 -- ** @(RNA,RNA) <-> Basepair@
 
-instance BasepairConvert (Letter RNA,Letter RNA) Basepair where
+instance BasepairConvert (Letter RNA n,Letter RNA n) Basepair where
   basepairConvert (l,r)
     | l >= A && l <= U && r >= A && r <= U
     = BP $ 4 * getLetter l + getLetter r
     | otherwise = NoBP
   {-# Inline basepairConvert #-}
 
-instance BasepairConvert Basepair (Letter RNA, Letter RNA) where
+instance BasepairConvert Basepair (Letter RNA n, Letter RNA n) where
   basepairConvert k
     | k == NoBP || k == NS = (N,N)
     | otherwise = let (l,r) = getBP k `divMod` 4 in (Letter l, Letter r)
@@ -41,7 +41,7 @@ instance BasepairConvert Basepair (Letter RNA, Letter RNA) where
 
 -- ** @(RNA,RNA) <-> ViennaPair@
 
-instance BasepairConvert (Letter RNA, Letter RNA) ViennaPair where
+instance BasepairConvert (Letter RNA n, Letter RNA n) ViennaPair where
   basepairConvert = \case
     (C,G) -> SV.CG
     (G,C) -> SV.GC
@@ -52,7 +52,7 @@ instance BasepairConvert (Letter RNA, Letter RNA) ViennaPair where
     _     -> SV.NS
   {-# Inline basepairConvert #-}
 
-instance BasepairConvert ViennaPair (Letter RNA, Letter RNA) where
+instance BasepairConvert ViennaPair (Letter RNA n, Letter RNA n) where
   basepairConvert = \case
     SV.CG -> (C,G)
     SV.GC -> (G,C)

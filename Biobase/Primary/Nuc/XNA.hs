@@ -25,18 +25,18 @@ import           Biobase.Primary.Letter
 
 data XNA
 
-pattern A = Letter 0 :: Letter XNA
-pattern C = Letter 1 :: Letter XNA
-pattern G = Letter 2 :: Letter XNA
-pattern T = Letter 3 :: Letter XNA
-pattern U = Letter 4 :: Letter XNA
-pattern N = Letter 5 :: Letter XNA
+pattern A = Letter 0 :: Letter XNA n
+pattern C = Letter 1 :: Letter XNA n
+pattern G = Letter 2 :: Letter XNA n
+pattern T = Letter 3 :: Letter XNA n
+pattern U = Letter 4 :: Letter XNA n
+pattern N = Letter 5 :: Letter XNA n
 
-instance Bounded (Letter XNA) where
+instance Bounded (Letter XNA n) where
     minBound = A
     maxBound = N
 
-instance Enum (Letter XNA) where
+instance Enum (Letter XNA n) where
     succ N          = error "succ/N:XNA"
     succ (Letter x) = Letter $ x+1
     pred A          = error "pred/A:XNA"
@@ -45,7 +45,7 @@ instance Enum (Letter XNA) where
     toEnum k                = error $ "toEnum/Letter XNA " ++ show k
     fromEnum (Letter k) = k
 
-instance LetterChar XNA where
+instance LetterChar XNA n where
   letterChar = xnaChar
   charLetter = charXNA
 
@@ -73,21 +73,21 @@ xnaChar = \case
   N -> 'N'
 {-# INLINE xnaChar #-}            
 
-instance Show (Letter XNA) where
+instance Show (Letter XNA n) where
     show c = [xnaChar c]
 
-instance Read (Letter XNA) where
+instance Read (Letter XNA n) where
   readsPrec p [] = []
   readsPrec p (x:xs)
     | x==' ' = readsPrec p xs
     | otherwise = [(charXNA x, xs)]
 
-xnaSeq :: MkPrimary n XNA => n -> Primary XNA
+xnaSeq :: MkPrimary p XNA n => p -> Primary XNA n
 xnaSeq = primary
 
-instance MkPrimary (VU.Vector Char) XNA where
+instance MkPrimary (VU.Vector Char) XNA n where
     primary = VU.map charXNA
 
-instance IsString [Letter XNA] where
+instance IsString [Letter XNA n] where
     fromString = map charXNA
 

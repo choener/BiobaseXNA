@@ -28,13 +28,13 @@ data DNA
 
 -- Single-character names for nucleotides.
 
-pattern A = Letter 0 :: Letter DNA
-pattern C = Letter 1 :: Letter DNA
-pattern G = Letter 2 :: Letter DNA
-pattern T = Letter 3 :: Letter DNA
-pattern N = Letter 4 :: Letter DNA
+pattern A = Letter 0 :: Letter DNA n
+pattern C = Letter 1 :: Letter DNA n
+pattern G = Letter 2 :: Letter DNA n
+pattern T = Letter 3 :: Letter DNA n
+pattern N = Letter 4 :: Letter DNA n
 
-instance Enum (Letter DNA) where
+instance Enum (Letter DNA n) where
     succ N          = error "succ/N:DNA"
     succ (Letter x) = Letter $ x+1
     pred A          = error "pred/A:DNA"
@@ -43,7 +43,7 @@ instance Enum (Letter DNA) where
     toEnum k                = error $ "toEnum/Letter DNA " ++ show k
     fromEnum (Letter k) = k
 
-instance LetterChar DNA where
+instance LetterChar DNA n where
   letterChar = dnaChar
   charLetter = charDNA
 
@@ -53,7 +53,7 @@ instance LetterChar DNA where
 --instance (MkPrimary (VU.Vector Char) DNA) => FromJSON (Primary DNA) where
 --  parseJSON = fmap (primary :: String -> Primary DNA) . parseJSON
 
-acgt :: [Letter DNA]
+acgt :: [Letter DNA n]
 acgt = [A .. T]
 
 charDNA = toUpper >>> \case
@@ -76,28 +76,28 @@ dnaChar = \case
 -- underlying @Char@s actually represent a DNA sequence. This allows typesafe
 -- modification of DNA sequences since only @[A,C,G,T,N]@ are allowed.
 
-cdna ∷ Iso' Char (Letter DNA)
+cdna ∷ Iso' Char (Letter DNA n)
 cdna = iso charDNA dnaChar
 
-instance Show (Letter DNA) where
+instance Show (Letter DNA n) where
     show c = [dnaChar c]
 
-instance Read (Letter DNA) where
+instance Read (Letter DNA n) where
   readsPrec p [] = []
   readsPrec p (x:xs)
     | x==' ' = readsPrec p xs
     | otherwise = [(charDNA x, xs)]
 
-dnaSeq :: MkPrimary n DNA => n -> Primary DNA
+dnaSeq :: MkPrimary p DNA n => p -> Primary DNA n
 dnaSeq = primary
 
-instance Bounded (Letter DNA) where
+instance Bounded (Letter DNA n) where
     minBound = A
     maxBound = N
 
-instance MkPrimary (VU.Vector Char) DNA where
+instance MkPrimary (VU.Vector Char) DNA n where
     primary = VU.map charDNA
 
-instance IsString [Letter DNA] where
+instance IsString [Letter DNA n] where
     fromString = map charDNA
 

@@ -44,37 +44,37 @@ data Unknown
 
 -- | Creating an unknown letter.
 
-unk :: Int -> Letter Unknown
+unk :: Int -> Letter Unknown n
 unk = Letter
 
 
 
 -- *** instances
 
-instance Show (Letter Unknown) where
+instance Show (Letter Unknown n) where
   show (Letter i) = "U " ++ show i
 
-instance Read (Letter Unknown) where
+instance Read (Letter Unknown n) where
   readPrec = parens $ do
     Lex.Ident u <- lexP
     case u of
       "U" -> unk <$> readPrec
       _   -> RP.pfail
 
-instance Enum (Letter Unknown) where
+instance Enum (Letter Unknown n) where
     succ (Letter x) = Letter $ x+1
     pred (Letter x) = Letter $ x-1
     toEnum = Letter
     fromEnum = getLetter
 
-instance MkPrimary (VU.Vector Int) Unknown where
+instance MkPrimary (VU.Vector Int) Unknown n where
   primary = VU.map Letter
   {-# Inline primary #-}
 
-instance ToJSON (Letter Unknown) where
+instance ToJSON (Letter Unknown n) where
   toJSON = toJSON . getLetter
 
-instance FromJSON (Letter Unknown) where
+instance FromJSON (Letter Unknown n) where
   parseJSON = fmap Letter . parseJSON
 
 {-

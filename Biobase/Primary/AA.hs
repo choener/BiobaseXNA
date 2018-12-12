@@ -34,50 +34,50 @@ import           Biobase.Primary.Letter
 
 data AA
 
-pattern  Stop = Letter  0 :: Letter AA
-pattern     A = Letter  1 :: Letter AA
-pattern     B = Letter  2 :: Letter AA
-pattern     C = Letter  3 :: Letter AA
-pattern     D = Letter  4 :: Letter AA
-pattern     E = Letter  5 :: Letter AA
-pattern     F = Letter  6 :: Letter AA
-pattern     G = Letter  7 :: Letter AA
-pattern     H = Letter  8 :: Letter AA
-pattern     I = Letter  9 :: Letter AA
-pattern     K = Letter 10 :: Letter AA
-pattern     L = Letter 11 :: Letter AA
-pattern     M = Letter 12 :: Letter AA
-pattern     N = Letter 13 :: Letter AA
-pattern     P = Letter 14 :: Letter AA
-pattern     Q = Letter 15 :: Letter AA
-pattern     R = Letter 16 :: Letter AA
-pattern     S = Letter 17 :: Letter AA
-pattern     T = Letter 18 :: Letter AA
-pattern     V = Letter 19 :: Letter AA
-pattern     W = Letter 20 :: Letter AA
-pattern     X = Letter 21 :: Letter AA
-pattern     Y = Letter 22 :: Letter AA
-pattern     Z = Letter 23 :: Letter AA
-pattern Undef = Letter 24 :: Letter AA
+pattern  Stop = Letter  0 :: Letter AA n
+pattern     A = Letter  1 :: Letter AA n
+pattern     B = Letter  2 :: Letter AA n
+pattern     C = Letter  3 :: Letter AA n
+pattern     D = Letter  4 :: Letter AA n
+pattern     E = Letter  5 :: Letter AA n
+pattern     F = Letter  6 :: Letter AA n
+pattern     G = Letter  7 :: Letter AA n
+pattern     H = Letter  8 :: Letter AA n
+pattern     I = Letter  9 :: Letter AA n
+pattern     K = Letter 10 :: Letter AA n
+pattern     L = Letter 11 :: Letter AA n
+pattern     M = Letter 12 :: Letter AA n
+pattern     N = Letter 13 :: Letter AA n
+pattern     P = Letter 14 :: Letter AA n
+pattern     Q = Letter 15 :: Letter AA n
+pattern     R = Letter 16 :: Letter AA n
+pattern     S = Letter 17 :: Letter AA n
+pattern     T = Letter 18 :: Letter AA n
+pattern     V = Letter 19 :: Letter AA n
+pattern     W = Letter 20 :: Letter AA n
+pattern     X = Letter 21 :: Letter AA n
+pattern     Y = Letter 22 :: Letter AA n
+pattern     Z = Letter 23 :: Letter AA n
+pattern Undef = Letter 24 :: Letter AA n
 
-pattern     Any = Letter 21 :: Letter AA
-pattern Unknown = Letter 21 :: Letter AA
+pattern     Any = Letter 21 :: Letter AA n
+pattern Unknown = Letter 21 :: Letter AA n
 
 -- * Creating functions and aa data.
 
-aa :: Int -> Letter AA
+aa :: Int -> Letter AA n
 aa = Letter
 
 aaRange = [Stop .. pred Undef]
 
-instance LetterChar AA where
+instance LetterChar AA n where
   letterChar = aaChar
   charLetter = charAA
 
-instance ToJSON (Letter AA) where
+instance ToJSON (Letter AA n) where
   toJSON = toJSON . letterChar
 
-instance FromJSON (Letter AA) where
+instance FromJSON (Letter AA n) where
   parseJSON = fmap charLetter . parseJSON
 
 --instance (GHC.IsString f) => ToJSON (Pretty f (Letter AA)) where
@@ -85,19 +85,19 @@ instance FromJSON (Letter AA) where
 
 -- | Translate 'Char' amino acid representation into efficient 'AA' newtype.
 
-charAA :: Char -> Letter AA
+charAA :: Char -> Letter AA n
 charAA = B.findWithDefaultL Undef charBaa
 {-# INLINE charAA #-}
 
 -- | 'Char' representation of an 'AA'.
 
-aaChar :: Letter AA -> Char
+aaChar :: Letter AA n -> Char
 aaChar = B.findWithDefaultR '?' charBaa
 {-# INLINE aaChar #-}
 
 -- * lookup tables
 
-charBaa :: B.Bimap (B.HashMap Char (Letter AA)) (B.HashMap (Letter AA) Char)
+charBaa :: B.Bimap (B.HashMap Char (Letter AA n)) (B.HashMap (Letter AA n) Char)
 charBaa = B.fromList
   [ ('*',Stop)
   , ('A',A)
@@ -129,23 +129,23 @@ charBaa = B.fromList
 
 -- | List of the twenty "default" amino acids
 
-twentyAA ∷ [Letter AA]
+twentyAA ∷ [Letter AA n]
 twentyAA = [ A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y ]
 
 
 -- * instances
 
-instance Show (Letter AA) where
+instance Show (Letter AA n) where
   show n = [aaChar n]
 
-instance Read (Letter AA) where
+instance Read (Letter AA n) where
   readsPrec p [] = []
   readsPrec p (x:xs)
     | x==' ' = readsPrec p xs
     | aa <- charAA x = [(aa,xs)]
     | otherwise = []
 
-instance Enum (Letter AA) where
+instance Enum (Letter AA n) where
     succ Undef      = error "succ/Undef:AA"
     succ (Letter x) = Letter $ x+1
     pred Stop       = error "pred/Stop:AA"
@@ -154,6 +154,6 @@ instance Enum (Letter AA) where
     toEnum k                               = error $ "toEnum/Letter RNA " ++ show k
     fromEnum (Letter k) = k
 
-instance MkPrimary (VU.Vector Char) AA where
+instance MkPrimary (VU.Vector Char) AA n where
   primary = VU.map charAA
 
