@@ -20,6 +20,7 @@ import qualified Data.Vector.Unboxed as VU
 import qualified Prelude as P
 
 import           Data.PrimitiveArray hiding (Complement(..),map)
+import           Biobase.Types.BioSequence
 
 import           Biobase.Primary.Letter
 import           Biobase.Primary.Nuc

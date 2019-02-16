@@ -18,6 +18,8 @@ import           Data.Tuple (swap)
 import qualified Data.Vector.Unboxed as VU
 import           Control.Category ((>>>))
 
+import           Biobase.Types.BioSequence
+
 import           Biobase.Primary.Letter
 import           Biobase.Primary.Nuc
 import qualified Biobase.Primary.Nuc.RNA as R

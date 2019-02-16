@@ -28,6 +28,7 @@ import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 import           Text.Read
 
+import           Biobase.Types.BioSequence
 import           Data.PrimitiveArray hiding (Complement(..),map)
 
 import           Biobase.Primary

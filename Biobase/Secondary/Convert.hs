@@ -4,6 +4,8 @@
 
 module Biobase.Secondary.Convert where
 
+import           Biobase.Types.BioSequence
+
 import           Biobase.Primary.Letter
 import           Biobase.Primary.Nuc.RNA
 import           Biobase.Secondary.Basepair

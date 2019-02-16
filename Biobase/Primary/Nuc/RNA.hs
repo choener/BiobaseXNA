@@ -20,15 +20,12 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
+import           Biobase.Types.BioSequence (RNA)
+
 import           Biobase.Primary.Bounds
 import           Biobase.Primary.Letter
 
 
-
--- | RNA nucleotides.
-
-data RNA
-  deriving (Data,Typeable)
 
 pattern A = Letter 0 ∷ Letter RNA n
 pattern C = Letter 1 ∷ Letter RNA n

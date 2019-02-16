@@ -30,13 +30,11 @@ import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 import qualified GHC.Exts as GHC
 
+import           Biobase.Types.BioSequence
+
 import           Biobase.Primary.Letter
 
 
-
--- | Amino acid phantom type.
-
-data AA
 
 pattern  Stop   = Letter  0 ∷ Letter AA n
 pattern     A   = Letter  1 ∷ Letter AA n

@@ -17,14 +17,12 @@ import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 
+import           Biobase.Types.BioSequence (DNA)
+
 import           Biobase.Primary.Bounds
 import           Biobase.Primary.Letter
 
 
-
--- | DNA nucleotides.
-
-data DNA
 
 -- Single-character names for nucleotides.
 

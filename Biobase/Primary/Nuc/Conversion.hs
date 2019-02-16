@@ -12,7 +12,7 @@ module Biobase.Primary.Nuc.Conversion where
 import           Control.Lens (iso, from)
 import qualified Data.Vector.Unboxed as VU
 
-import           Biobase.Types.NucleotideSequence (Transcribe(..))
+import           Biobase.Types.BioSequence (Transcribe(..),RNA,DNA)
 
 import           Biobase.Primary.Letter (Letter(..), Primary)
 import qualified Biobase.Primary.Nuc.DNA as D
@@ -90,23 +90,23 @@ xnaSdna = \case
 -- ** Transcription between RNA and DNA. Both on the individual sequence level,
 -- and on the level of primary sequence data.
 
-instance Transcribe (Letter R.RNA n) where
-  type TranscribeTo (Letter R.RNA n) = Letter D.DNA n
+instance Transcribe (Letter RNA n) where
+  type TranscribeTo (Letter RNA n) = Letter DNA n
   transcribe = iso rnaTdna dnaTrna
   {-# Inline transcribe #-}
 
-instance Transcribe (Letter D.DNA n) where
-  type TranscribeTo (Letter D.DNA n) = Letter R.RNA n
+instance Transcribe (Letter DNA n) where
+  type TranscribeTo (Letter DNA n) = Letter RNA n
   transcribe = from transcribe
   {-# Inline transcribe #-}
 
-instance Transcribe (Primary R.RNA n) where
-  type TranscribeTo (Primary R.RNA n) = Primary D.DNA n
+instance Transcribe (Primary RNA n) where
+  type TranscribeTo (Primary RNA n) = Primary DNA n
   transcribe = iso (VU.map rnaTdna) (VU.map dnaTrna)
   {-# Inline transcribe #-}
 
-instance Transcribe (Primary D.DNA n) where
-  type TranscribeTo (Primary D.DNA n) = Primary R.RNA n
+instance Transcribe (Primary DNA n) where
+  type TranscribeTo (Primary DNA n) = Primary RNA n
   transcribe = iso (VU.map dnaTrna) (VU.map rnaTdna)
   {-# Inline transcribe #-}
 

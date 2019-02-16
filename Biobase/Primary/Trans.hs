@@ -24,6 +24,8 @@ import           Data.Tuple (swap)
 import qualified Data.Map.Strict as M
 import qualified Data.Vector.Unboxed as VU
 
+import           Biobase.Types.BioSequence
+
 import           Biobase.Primary.AA
 import           Biobase.Primary.Nuc
 import           Biobase.Primary.Letter

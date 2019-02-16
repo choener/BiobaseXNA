@@ -16,14 +16,14 @@ import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 import           Control.Category ((>>>))
 
+import           Biobase.Types.BioSequence
+
 import           Biobase.Primary.Bounds
 import           Biobase.Primary.Letter
 
 
 
 -- | Combine both, RNA and DNA.
-
-data XNA
 
 pattern A = Letter 0 :: Letter XNA n
 pattern C = Letter 1 :: Letter XNA n
