@@ -25,6 +25,7 @@ import qualified Data.Map.Strict as M
 import qualified Data.Vector.Unboxed as VU
 
 import           Biobase.Types.BioSequence
+import           Biobase.Types.Codon
 
 import           Biobase.Primary.AA
 import           Biobase.Primary.Nuc
@@ -38,25 +39,25 @@ import           Biobase.GeneticCodes.Types
 
 letterTranslationTable ∷ TranslationTable Char Char → TranslationTable (Letter DNA n) (Letter AA n)
 letterTranslationTable tbl = TranslationTable
-  { _tripletToAminoAcid  = M.fromList . map (ftriplet *** felement) . M.toList $ tbl^.tripletToAminoAcid
-  , _aminoAcidtoTriplets = M.fromList . map (charAA *** map felement) . M.toList $ tbl^.aminoAcidtoTriplets
-  , _tableID             = tbl^.tableID
-  , _tableName           = tbl^.tableName
-  } where ftriplet ∷ BaseTriplet Char → BaseTriplet (Letter DNA n)
-          ftriplet = over tripletChars (map charDNA)
+  { _codonToAminoAcid  = M.fromList . map (ftriplet *** felement) . M.toList $ tbl^.codonToAminoAcid
+  , _aminoAcidtoCodons = M.fromList . map (charAA *** map felement) . M.toList $ tbl^.aminoAcidtoCodons
+  , _tableID           = tbl^.tableID
+  , _tableName         = tbl^.tableName
+  } where ftriplet ∷ Codon Char → Codon (Letter DNA n)
+          ftriplet = over each charDNA
           felement ∷ TranslationElement Char Char → TranslationElement (Letter DNA n) (Letter AA n)
-          felement = over (baseTriplet.tripletChars) (map charDNA) . over aminoAcid charAA
+          felement = over (baseCodon.each) charDNA . over aminoAcid charAA
 
-instance Translation (BaseTriplet (Letter DNA n)) where
-  type TargetType (BaseTriplet (Letter DNA n)) = Letter AA n
-  type TripletType (BaseTriplet (Letter DNA n)) = Letter DNA n
-  type AAType (BaseTriplet (Letter DNA n)) = Letter AA n
-  translate tbl t = maybe Unknown _aminoAcid $ M.lookup t (tbl^.tripletToAminoAcid)
+instance Translation (Codon (Letter DNA n)) where
+  type TargetType (Codon (Letter DNA n)) = Letter AA n
+  type CodonType (Codon (Letter DNA n)) = Letter DNA n
+  type AAType (Codon (Letter DNA n)) = Letter AA n
+  translate tbl t = maybe Unknown _aminoAcid $ M.lookup t (tbl^.codonToAminoAcid)
   {-# Inline translate #-}
 
 instance Translation (Primary DNA n) where
   type TargetType (Primary DNA n) = Primary AA n
-  type TripletType (Primary DNA n) = Letter DNA n
+  type CodonType (Primary DNA n) = Letter DNA n
   type AAType (Primary DNA n) = Letter AA n
   -- |
   --
@@ -67,7 +68,7 @@ instance Translation (Primary DNA n) where
             | VU.length hs < 3 = Nothing
             | otherwise        = Just (aa,ts)
             where [a,b,c] = VU.toList hs
-                  aa      = translate tbl $ BaseTriplet a b c
+                  aa      = translate tbl $ Codon a b c
   {-# Inline translate #-}
 
 

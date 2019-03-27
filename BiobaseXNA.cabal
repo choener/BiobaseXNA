@@ -1,3 +1,4 @@
+cabal-version:  2.2
 name:           BiobaseXNA
 version:        0.11.0.0
 author:         Christian Hoener zu Siederdissen
@@ -7,12 +8,11 @@ bug-reports:    https://github.com/choener/BiobaseXNA/issues
 copyright:      Christian Hoener zu Siederdissen, 2011 - 2019
 category:       Bioinformatics
 synopsis:       Efficient RNA/DNA/Protein Primary/Secondary Structure
-license:        GPL-3
+license:        BSD-3-Clause
 license-file:   LICENSE
 build-type:     Simple
 stability:      experimental
 tested-with:    GHC == 8.4.4
-cabal-version:  >= 1.10.0
 description:
                 This is a base library for bioinformatics with emphasis on RNA
                 and DNA primary structure as well as amino acid sequences.
@@ -45,8 +45,7 @@ data-files:
   sources/iupac-nucleotides
 
 
-
-library
+common deps
   build-depends: base                     >= 4.7      &&  < 5.0
                , aeson                    >= 1.0
                , attoparsec               >= 0.13
@@ -76,7 +75,42 @@ library
                , BiobaseENA               == 0.0.0.*
                , BiobaseTypes             == 0.2.0.*
                , ForestStructures         == 0.0.1.*
-               , PrimitiveArray           == 0.9.0.*
+               , PrimitiveArray           == 0.9.1.*
+  default-extensions: BangPatterns
+                    , DataKinds
+                    , DeriveDataTypeable
+                    , DeriveFunctor
+                    , DeriveGeneric
+                    , DeriveGeneric
+                    , DeriveTraversable
+                    , EmptyDataDecls
+                    , FlexibleContexts
+                    , FlexibleInstances
+                    , GeneralizedNewtypeDeriving
+                    , LambdaCase
+                    , MultiParamTypeClasses
+                    , PatternSynonyms
+                    , PolyKinds
+                    , RankNTypes
+                    , RecordWildCards
+                    , ScopedTypeVariables
+                    , StandaloneDeriving
+                    , TemplateHaskell
+                    , TypeApplications
+                    , TypeFamilies
+                    , TypeOperators
+                    , UndecidableInstances
+                    , UnicodeSyntax
+                    , ViewPatterns
+  default-language:
+    Haskell2010
+  ghc-options:
+    -O2 -funbox-strict-fields
+
+
+library
+  import:
+    deps
   exposed-modules:
     -- new
     Biobase.Primary.AA
@@ -104,39 +138,12 @@ library
     Biobase.Secondary.Pseudoknots
     Biobase.Secondary.Structure
     Biobase.Secondary.Vienna
-  default-extensions: BangPatterns
-                    , DataKinds
-                    , DeriveDataTypeable
-                    , DeriveFunctor
-                    , DeriveGeneric
-                    , DeriveGeneric
-                    , DeriveTraversable
-                    , EmptyDataDecls
-                    , FlexibleContexts
-                    , FlexibleInstances
-                    , GeneralizedNewtypeDeriving
-                    , LambdaCase
-                    , MultiParamTypeClasses
-                    , PatternSynonyms
-                    , PolyKinds
-                    , RankNTypes
-                    , ScopedTypeVariables
-                    , StandaloneDeriving
-                    , TemplateHaskell
-                    , TypeApplications
-                    , TypeFamilies
-                    , TypeOperators
-                    , UndecidableInstances
-                    , UnicodeSyntax
-                    , ViewPatterns
-  default-language:
-    Haskell2010
-  ghc-options:
-    -O2 -funbox-strict-fields
 
 
 
 executable SubOptDistance
+  import:
+    deps
   build-depends: base
                , BiobaseXNA
                , cmdargs      >= 0.10
@@ -144,18 +151,12 @@ executable SubOptDistance
     SubOptDistance.hs
   hs-source-dirs:
     src
-  default-language:
-    Haskell2010
-  default-extensions: DeriveDataTypeable
-                    , NoMonomorphismRestriction
-                    , RecordWildCards
-                    , ScopedTypeVariables
-  ghc-options:
-    -O2
 
 
 
 test-suite properties
+  import:
+    deps
   type:
     exitcode-stdio-1.0
   main-is:
@@ -173,7 +174,6 @@ test-suite properties
                , tasty              >= 0.11
                , tasty-quickcheck   >= 0.8
                , tasty-th           >= 0.1
-               , vector
                --
                , BiobaseXNA
 
