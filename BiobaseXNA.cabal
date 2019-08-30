@@ -75,7 +75,7 @@ common deps
                , BiobaseENA               == 0.0.0.*
                , BiobaseTypes             == 0.2.0.*
                , ForestStructures         == 0.0.1.*
-               , PrimitiveArray           == 0.9.1.*
+               , PrimitiveArray           == 0.10.0.*
   default-extensions: BangPatterns
                     , DataKinds
                     , DeriveDataTypeable
