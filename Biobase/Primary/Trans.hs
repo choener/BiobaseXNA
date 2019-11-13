@@ -18,7 +18,6 @@ module Biobase.Primary.Trans where
 import           Control.Lens
 import           Control.Arrow ((***))
 import           Data.ByteString.Char8 (ByteString,unpack)
-import           Data.FileEmbed (embedFile)
 import           Data.Map.Strict (Map)
 import           Data.Tuple (swap)
 import qualified Data.Map.Strict as M
@@ -70,52 +69,4 @@ instance Translation (Primary DNA n) where
             where [a,b,c] = VU.toList hs
                   aa      = translate tbl $ Codon a b c
   {-# Inline translate #-}
-
-
-{-
--- | Using the codon table, create an amino acid sequence from a @DNA@
--- sequence (encoded as 'Primary DNA'). Suffixed @seq@ as we deal with
--- sequences, not letters.
-
-dnaAAseq :: Primary DNA -> Primary AA
-dnaAAseq = VU.fromList . go where
-  go (VU.length -> 0) = []
-  go (VU.splitAt 3 -> (hs,ts)) = case M.lookup hs dnaAAmap of
-    Just aa -> aa : go ts
-    _       -> error $ "dnaAAseq: " ++ show (hs,ts)
-
--- | Transform an amino acid sequence back into DNA.
---
--- WARNING: This is lossy!
-
-aaDNAseq :: Primary AA -> Primary DNA
-aaDNAseq = VU.concatMap go where
-  go aa = case M.lookup aa aaDNAmap of
-            Just codon -> codon
-            Nothing    -> error $ "aaDNAseq" ++ show aa
-
-
--- * Embedded codon data
-
--- | Lossy backtransformation.
-
-aaDNAmap :: M.Map (Letter AA) (Primary DNA)
-aaDNAmap = M.fromList . map swap . M.assocs $ dnaAAmap
-{-# NOINLINE aaDNAmap #-}
-
-dnaAAmap :: Map (Primary DNA) (Letter AA)
-dnaAAmap = M.fromList . map (primary *** charAA) . M.assocs $ codonTable where
-{-# NOINLINE dnaAAmap #-}
-
-codonTable :: Map String Char
-codonTable = M.fromList . map (go . words) . lines . unpack $ codonListEmbedded where
-  go [cs,[c]] = (cs,c)
-  go e        = error $ "codonTable:" ++ show e
-{-# NOINLINE codonTable #-}
-
--- | Raw codon table
-
-codonListEmbedded :: ByteString
-codonListEmbedded = $(embedFile "sources/codontable")
--}
 

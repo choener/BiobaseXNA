@@ -11,7 +11,7 @@ module Biobase.Primary.IUPAC where
 import           Control.Arrow ((***))
 import           Data.ByteString.Char8 (ByteString,unpack)
 import           Data.Char (toUpper)
-import           Data.FileEmbed (embedFile)
+import           Data.FileEmbed (makeRelativeToProject, embedFile)
 import           Data.List (nub,sort)
 import           Data.String
 import           Data.Tuple (swap)
@@ -151,5 +151,5 @@ iupacXDNAchars = map (go . words) . lines . unpack $ iupacNucleotides where
 -- | Raw iupac data, embedded into the library.
 
 iupacNucleotides :: ByteString
-iupacNucleotides = $(embedFile "sources/iupac-nucleotides")
+iupacNucleotides = $(makeRelativeToProject "sources/iupac-nucleotides" >>= embedFile)
 

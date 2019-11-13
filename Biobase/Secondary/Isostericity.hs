@@ -13,7 +13,7 @@
 module Biobase.Secondary.Isostericity where
 
 import           Data.ByteString.Char8 (ByteString)
-import           Data.FileEmbed (embedFile)
+import           Data.FileEmbed (makeRelativeToProject, embedFile)
 import           Data.Function (on)
 import           Data.List
 import           Data.Tuple.Select
@@ -102,5 +102,5 @@ parsedCSV = filter (not . null) gs where
 -- | Raw CSV data, embedded into the library.
 
 detailedCSV :: ByteString
-detailedCSV = $(embedFile "sources/isostericity-detailed.csv")
+detailedCSV = $(makeRelativeToProject "sources/isostericity-detailed.csv" >>= embedFile)
 
