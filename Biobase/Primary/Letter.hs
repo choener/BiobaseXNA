@@ -124,6 +124,8 @@ instance Index (Letter l n) where
   {-# Inline zeroBound' #-}
   totalSize (LtLetter (Letter k)) = [ fromIntegral k + 1 ]
   {-# Inline totalSize #-}
+  showBound (LtLetter (Letter k)) = [ show k ]
+  showIndex (Letter k) = [ show k ]
 
 deriving instance Eq      (LimitType (Letter l n))
 deriving instance Generic (LimitType (Letter l n))
