@@ -36,15 +36,15 @@ import           Biobase.GeneticCodes.Types
 
 -- | Transform translation tables into the @Letter DNA/Letter AA@ format.
 
-letterTranslationTable ∷ TranslationTable Char Char → TranslationTable (Letter DNA n) (Letter AA n)
+letterTranslationTable :: TranslationTable Char Char -> TranslationTable (Letter DNA n) (Letter AA n)
 letterTranslationTable tbl = TranslationTable
   { _codonToAminoAcid  = M.fromList . map (ftriplet *** felement) . M.toList $ tbl^.codonToAminoAcid
   , _aminoAcidtoCodons = M.fromList . map (charAA *** map felement) . M.toList $ tbl^.aminoAcidtoCodons
   , _tableID           = tbl^.tableID
   , _tableName         = tbl^.tableName
-  } where ftriplet ∷ Codon Char → Codon (Letter DNA n)
+  } where ftriplet :: Codon Char -> Codon (Letter DNA n)
           ftriplet = over each charDNA
-          felement ∷ TranslationElement Char Char → TranslationElement (Letter DNA n) (Letter AA n)
+          felement :: TranslationElement Char Char -> TranslationElement (Letter DNA n) (Letter AA n)
           felement = over (baseCodon.each) charDNA . over aminoAcid charAA
 
 instance Translation (Codon (Letter DNA n)) where
@@ -53,6 +53,8 @@ instance Translation (Codon (Letter DNA n)) where
   type AAType (Codon (Letter DNA n)) = Letter AA n
   translate tbl t = maybe Unknown _aminoAcid $ M.lookup t (tbl^.codonToAminoAcid)
   {-# Inline translate #-}
+  translateAllFrames = translate
+  {-# Inline translateAllFrames #-}
 
 instance Translation (Primary DNA n) where
   type TargetType (Primary DNA n) = Primary AA n
@@ -63,10 +65,15 @@ instance Translation (Primary DNA n) where
   -- TODO we could consider returning @Nothing@ in case the input is not
   -- power-of-three.
   translate tbl xs = VU.unfoldrN (VU.length xs `div` 3) go xs
-    where go (VU.splitAt 3 → (hs,ts))
+    where go (VU.splitAt 3 -> (hs,ts))
             | VU.length hs < 3 = Nothing
             | otherwise        = Just (aa,ts)
             where [a,b,c] = VU.toList hs
                   aa      = translate tbl $ Codon a b c
   {-# Inline translate #-}
+  translateAllFrames tbl xs = VU.unfoldrN (VU.length xs) go 0
+    where go 0 = Just (Undef,1)
+          go 1 = Just (Undef,2)
+          go k = Just (translate tbl $ Codon (xs VU.! (k-2)) (xs VU.! (k-1)) (xs VU.! k), k+1)
+  {-# Inlinable translateAllFrames #-}
 

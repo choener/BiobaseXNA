@@ -33,13 +33,13 @@ import           Data.PrimitiveArray hiding (map)
 -- | A 'Letter' together with its phantom type @seqTy@ encodes bio-sequences,
 -- while @nameTy@ allows to specify a type-level name for a letter.
 
-newtype Letter (seqTy ∷ *) (nameTy ∷ k) = Letter { getLetter ∷ Int }
+newtype Letter (seqTy :: *) (nameTy :: k) = Letter { getLetter :: Int }
   deriving (Eq,Ord,Generic,Ix,Typeable)
 
 -- | While @coerce@ will always work, this way restricts the change to just the
 -- @nameTy@.
 
-changeNameTy ∷ Letter seqTy nameTy → Letter seqTy newNameTy
+changeNameTy :: Letter seqTy nameTy -> Letter seqTy newNameTy
 {-# Inline changeNameTy #-}
 changeNameTy = coerce
 
@@ -47,11 +47,11 @@ changeNameTy = coerce
 -- implementation. This also allows for better use of generic programming
 -- downstream.
 
-instance (Typeable t, Typeable (Letter t n)) ⇒ Data (Letter t n) where
+instance (Typeable t, Typeable (Letter t n)) => Data (Letter t n) where
   toConstr = mkIntegralConstr letterDataType . getLetter
   gunfold _ z c = case constrRep c of
-    (IntConstr x) → z (Letter $ fromIntegral x)
-    _ → errorWithoutStackTrace $ "Biobase.Primary.Letter.gunfold: Constructor "
+    (IntConstr x) -> z (Letter $ fromIntegral x)
+    _ -> errorWithoutStackTrace $ "Biobase.Primary.Letter.gunfold: Constructor "
           ++ show c
           ++ " is not of type Letter (using Int-rep)"
   dataTypeOf _ = letterDataType
@@ -70,31 +70,31 @@ type Primary t n = VU.Vector (Letter t n)
 -- have single-char representations.
 
 class LetterChar t n where
-  letterChar ∷ Letter t n → Char
-  charLetter ∷ Char → Letter t n
+  letterChar :: Letter t n -> Char
+  charLetter :: Char -> Letter t n
 
 -- | Conversion from a large number of sequence-like inputs to primary
 -- sequences.
 
 class MkPrimary c t n where
-    primary ∷ c → Primary t n
+    primary :: c -> Primary t n
 
-instance MkPrimary (VU.Vector Char) t n ⇒ MkPrimary String t n where
+instance MkPrimary (VU.Vector Char) t n => MkPrimary String t n where
     primary = primary . VU.fromList
 
-instance MkPrimary (VU.Vector Char) t n ⇒  MkPrimary T.Text t n where
+instance MkPrimary (VU.Vector Char) t n =>  MkPrimary T.Text t n where
     primary = primary . VU.fromList . T.unpack
 
-instance MkPrimary (VU.Vector Char) t n ⇒ MkPrimary TL.Text t n where
+instance MkPrimary (VU.Vector Char) t n => MkPrimary TL.Text t n where
     primary = primary . VU.fromList . TL.unpack
 
-instance MkPrimary (VU.Vector Char) t n ⇒ MkPrimary BS.ByteString t n where
+instance MkPrimary (VU.Vector Char) t n => MkPrimary BS.ByteString t n where
     primary = primary . VU.fromList . BS.unpack
 
-instance MkPrimary (VU.Vector Char) t n ⇒ MkPrimary BSL.ByteString t n where
+instance MkPrimary (VU.Vector Char) t n => MkPrimary BSL.ByteString t n where
     primary = primary . VU.fromList . BSL.unpack
 
-instance (VU.Unbox (Letter t n), IsString [Letter t n]) ⇒ IsString (VU.Vector (Letter t n)) where
+instance (VU.Unbox (Letter t n), IsString [Letter t n]) => IsString (VU.Vector (Letter t n)) where
     fromString = VU.fromList . fromString
 
 
@@ -102,7 +102,7 @@ instance (VU.Unbox (Letter t n), IsString [Letter t n]) ⇒ IsString (VU.Vector 
 -- *** Instances for 'Letter'.
 
 derivingUnbox "Letter"
-  [t| forall t n . Letter t n → Int |] [| getLetter |] [| Letter |]
+  [t| forall t n . Letter t n -> Int |] [| getLetter |] [| Letter |]
 
 instance Hashable (Letter t n)
 
@@ -114,6 +114,8 @@ instance Index (Letter l n) where
   newtype LimitType (Letter l n) = LtLetter (Letter l n)
   linearIndex _ (Letter i) = i
   {-# Inline linearIndex #-}
+  fromLinearIndex _ k = Letter k
+  {-# Inline fromLinearIndex #-}
   size (LtLetter (Letter h)) = h+1
   {-# Inline size #-}
   inBounds (LtLetter h) i = zeroBound <= i && i <= h
@@ -129,12 +131,12 @@ instance Index (Letter l n) where
 
 deriving instance Eq      (LimitType (Letter l n))
 deriving instance Generic (LimitType (Letter l n))
-deriving instance (Read (Letter l n)) ⇒ Read    (LimitType (Letter l n))
-deriving instance (Show (Letter l n)) ⇒ Show    (LimitType (Letter l n))
+deriving instance (Read (Letter l n)) => Read    (LimitType (Letter l n))
+deriving instance (Show (Letter l n)) => Show    (LimitType (Letter l n))
 deriving instance Typeable (LimitType (Letter l n))
-deriving instance Data (Letter l n) ⇒ Data (LimitType (Letter l n))
+deriving instance Data (Letter l n) => Data (LimitType (Letter l n))
 
-instance IndexStream z ⇒ IndexStream (z:.Letter l n) where
+instance IndexStream z => IndexStream (z:.Letter l n) where
   streamUp (ls:..LtLetter l) (hs:..LtLetter h) = flatten mk step $ streamUp ls hs
     where mk z = return (z,l)
           step (z,k)
@@ -153,8 +155,8 @@ instance IndexStream z ⇒ IndexStream (z:.Letter l n) where
   {-# Inline streamDown #-}
 
 instance IndexStream (Letter l n) where
-  streamUp l h = map (\(Z:.k) → k) $ streamUp (ZZ:..l) (ZZ:..h)
-  streamDown l h = map (\(Z:.k) → k) $ streamDown (ZZ:..l) (ZZ:..h)
+  streamUp l h = map (\(Z:.k) -> k) $ streamUp (ZZ:..l) (ZZ:..h)
+  streamDown l h = map (\(Z:.k) -> k) $ streamDown (ZZ:..l) (ZZ:..h)
   {-# Inline streamUp #-}
   {-# Inline streamDown #-}
 
