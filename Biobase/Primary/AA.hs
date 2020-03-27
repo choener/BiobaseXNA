@@ -30,7 +30,8 @@ import qualified Data.Vector.Generic.Mutable as VGM
 import qualified Data.Vector.Unboxed as VU
 import qualified GHC.Exts as GHC
 
-import           Biobase.Types.BioSequence
+import Biobase.Types.BioSequence
+import Data.Info
 
 import           Biobase.Primary.Letter
 
@@ -86,6 +87,9 @@ instance ToJSON (Letter AA n) where
 
 instance FromJSON (Letter AA n) where
   parseJSON = fmap charLetter . parseJSON
+
+instance Info (Letter AA n) where
+  info = (:[]) . aaChar
 
 --instance (GHC.IsString f) => ToJSON (Pretty f (Letter AA)) where
 --  toJSON = toJSON . T.pack . map letterChar . GHC.toList . getPretty

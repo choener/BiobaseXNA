@@ -27,6 +27,7 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.Vector.Unboxed as VU
 
 import           Data.PrimitiveArray hiding (map)
+import Data.Info
 
 
 
