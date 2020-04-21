@@ -253,11 +253,11 @@ dotBracket2pairlist dict str = fmap (sort . concat) . sequence . map (f str) $ d
     g k st ('.':xs) = g (k+1) st xs
     g k st (x:xs) | l==x = g (k+1) (k:st) xs
     g k (s:st) (x:xs) | r==x = ((s,k):) <$> g (k+1) st xs
-    g k [] xs = fail $ printf "too many closing brackets at position %d: '%s' (dot-bracket: %s)" k xs str
-    g k st [] = fail $ printf "too many opening brackets, opening bracket(s) at: %s (dot-bracket: %s)" (show $ reverse st) str
-    g a b c   = fail $ printf "unspecified error: %s (dot-bracket: %s)" (show (a,b,c)) str
-  f xs lr@(_:_:_:_) = fail $ printf "unsound dictionary: %s (dot-bracket: %s)" lr str
-  f xs lr     = fail $ printf "unspecified error: dict: %s, input: %s (dot-bracket: %s)" lr xs str
+    g k [] xs = error $ printf "too many closing brackets at position %d: '%s' (dot-bracket: %s)" k xs str
+    g k st [] = error $ printf "too many opening brackets, opening bracket(s) at: %s (dot-bracket: %s)" (show $ reverse st) str
+    g a b c   = error $ printf "unspecified error: %s (dot-bracket: %s)" (show (a,b,c)) str
+  f xs lr@(_:_:_:_) = error $ printf "unsound dictionary: %s (dot-bracket: %s)" lr str
+  f xs lr     = error $ printf "unspecified error: dict: %s, input: %s (dot-bracket: %s)" lr xs str
 
 -- | Calculates the distance between two vienna strings.
 
