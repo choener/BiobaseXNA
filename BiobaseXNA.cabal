@@ -5,14 +5,14 @@ author:         Christian Hoener zu Siederdissen
 maintainer:     choener@bioinf.uni-leipzig.de
 homepage:       https://github.com/choener/BiobaseXNA
 bug-reports:    https://github.com/choener/BiobaseXNA/issues
-copyright:      Christian Hoener zu Siederdissen, 2011 - 2019
+copyright:      Christian Hoener zu Siederdissen, 2011 - 2020
 category:       Bioinformatics
 synopsis:       Efficient RNA/DNA/Protein Primary/Secondary Structure
 license:        BSD-3-Clause
 license-file:   LICENSE
 build-type:     Simple
 stability:      experimental
-tested-with:    GHC == 8.4.4
+tested-with:    GHC == 8.6.5
 description:
                 This is a base library for bioinformatics with emphasis on RNA
                 and DNA primary structure as well as amino acid sequences.
