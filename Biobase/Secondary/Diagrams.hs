@@ -186,13 +186,13 @@ instance MkD1Secondary (VU.Vector Char) where
 -- TODO Check size of hairpins and interior loops?
 
 isCanonicalStructure :: String -> Bool
-isCanonicalStructure = all (`elem` "().")
+isCanonicalStructure = all (flip (elem @[]) "().")
 
 -- | Is constraint type structure, i.e. there can also be symbols present
 -- that denote up- or downstream pairing.
 
 isConstraintStructure :: String -> Bool
-isConstraintStructure = all (`elem` "().<>{}|")
+isConstraintStructure = all (flip (elem @[]) "().<>{}|")
 
 -- | Take a structural string and split it into its constituents.
 --
