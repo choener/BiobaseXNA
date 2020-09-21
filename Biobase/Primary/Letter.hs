@@ -130,6 +130,7 @@ instance Index (Letter l n) where
   showBound (LtLetter (Letter k)) = [ show k ]
   showIndex (Letter k) = [ show k ]
 
+deriving instance (Bounded (Letter l n)) => Bounded (LimitType (Letter l n))
 deriving instance Eq      (LimitType (Letter l n))
 deriving instance Generic (LimitType (Letter l n))
 deriving instance (Read (Letter l n)) => Read    (LimitType (Letter l n))

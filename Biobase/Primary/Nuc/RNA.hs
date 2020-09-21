@@ -111,3 +111,7 @@ instance MkPrimary (VU.Vector Char) RNA n where
 instance IsString [Letter RNA n] where
     fromString = map charRNA
 
+viennaPairs = [ (C,G), (G,C), (G,U), (U,G), (A,U), (U,A) ]
+viennaPairsNN = viennaPairs ++ [ (N,N) ]
+
+
