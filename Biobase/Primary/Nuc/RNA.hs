@@ -71,19 +71,20 @@ acgu ∷ [Letter RNA n]
 acgu = [A .. U]
 
 charRNA = toUpper >>> \case
-    'A' → A
-    'C' → C
-    'G' → G
-    'U' → U
-    _   → N
+    'A' -> A
+    'C' -> C
+    'G' -> G
+    'U' -> U
+    _   -> N
 {-# INLINE charRNA #-}
 
 rnaChar = \case
-  A → 'A'
-  C → 'C'
-  G → 'G'
-  U → 'U'
-  N → 'N'
+  A -> 'A'
+  C -> 'C'
+  G -> 'G'
+  U -> 'U'
+  N -> 'N'
+  _ -> '\9888'
 {-# INLINE rnaChar #-}            
 
 -- | An isomorphism from 'Char' to 'Letter RNA'. This assumes that the
