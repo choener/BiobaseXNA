@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/choener/BiobaseXNA.svg?branch=master)](https://travis-ci.org/choener/BiobaseXNA)
+![github action: master](https://github.com/choener/BiobaseXNA/actions/workflows/action.yml/badge.svg)
 
 # BiobaseXNA
 
