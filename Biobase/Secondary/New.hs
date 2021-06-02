@@ -24,9 +24,9 @@ import GHC.Generics (Generic)
 -- TODO Should be extended with @Extended@, but this requires knowing which of
 -- the ends overlap with paired: left, right, or both.
 
-data SubStructure (t ∷ k) a
-  = Unpaired { _label ∷ !a }
-  | Paired   { _label ∷ !a, _subStructures ∷ !(Vector (SubStructure t a)) }
+data SubStructure (t :: *) a
+  = Unpaired { _label :: !a }
+  | Paired   { _label :: !a, _subStructures :: !(Vector (SubStructure t a)) }
   deriving (Show, Read, Functor, Traversable, Foldable, Generic, Eq, Ord)
 makeLenses ''SubStructure
 makePrisms ''SubStructure
@@ -34,8 +34,8 @@ makePrisms ''SubStructure
 -- | A full structure is composed of a number of sub-structures. The empty
 -- structure is a full structure.
 
-newtype FullStructure (t ∷ k) a
-  = FullStructure { _fullStructure ∷ Vector (SubStructure t a) }
+newtype FullStructure (t :: *) a
+  = FullStructure { _fullStructure :: Vector (SubStructure t a) }
   deriving (Show, Read, Functor, Traversable, Foldable, Generic, Eq, Ord)
 makeLenses ''FullStructure
 
@@ -43,26 +43,26 @@ makeLenses ''FullStructure
 
 -- ** Parses a ViennaRNA secondary structure string.
 
-pUnpaired ∷ Parser (SubStructure () ())
+pUnpaired :: Parser (SubStructure () ())
 pUnpaired = Unpaired () <$ char '.'
 {-# Inlinable pUnpaired #-}
 
-pPaired ∷ Parser (SubStructure () ())
+pPaired :: Parser (SubStructure () ())
 pPaired = Paired () <$ char '(' <*> (fromList <$> many pSubStructure) <* char ')'
 {-# Inlinable pPaired #-}
 
-pSubStructure ∷ Parser (SubStructure () ())
+pSubStructure :: Parser (SubStructure () ())
 pSubStructure = pUnpaired <|> pPaired
 {-# Inlinable pSubStructure #-}
 
-pFullStructure ∷ Parser (FullStructure () ())
+pFullStructure :: Parser (FullStructure () ())
 pFullStructure = FullStructure <$> fromList <$> many pSubStructure <* endOfInput
 {-# Inlinable pFullStructure #-}
 
 newtype StructureParseError = StructureParseError String
   deriving (Show)
 
-parseVienna ∷ MonadError StructureParseError m ⇒ ByteString → m (FullStructure () ())
+parseVienna :: MonadError StructureParseError m ⇒ ByteString -> m (FullStructure () ())
 parseVienna = either (throwError . StructureParseError) return . parseOnly pFullStructure
 {-# Inlinable parseVienna #-}
 
@@ -83,19 +83,19 @@ parseVienna = either (throwError . StructureParseError) return . parseOnly pFull
 -- @
 
 toTree
-  ∷ (SubStructure t a → Maybe b)
+  :: (SubStructure t a -> Maybe b)
   -- ^ how to handle substructure elements? @Nothing@ means discard this
   -- substructure and all children.
-  → b
+  -> b
   -- ^ The root label
-  → FullStructure (t ∷ k) a
+  -> FullStructure (t :: *) a
   -- ^ The @FullStructure@ to transform into a @Tree@.
-  → Tree b
+  -> Tree b
 toTree f r (FullStructure ts) = Node r $ fmap go ts ^.. traverse . _Just
   where
     go u@Unpaired{} = (`Node` []) <$> f u
     go p@Paired{}   = case f p of
-      Nothing  → Nothing
-      Just lbl → Just $ Node lbl $ (fmap go $ p^.subStructures) ^.. traverse . _Just
+      Nothing  -> Nothing
+      Just lbl -> Just $ Node lbl $ (fmap go $ p^.subStructures) ^.. traverse . _Just
 {-# Inlinable toTree #-}
 
