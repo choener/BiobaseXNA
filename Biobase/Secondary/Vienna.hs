@@ -33,6 +33,11 @@ import           Biobase.Primary.Nuc.RNA
 newtype ViennaPair = ViennaPair { unViennaPair :: Int }
   deriving (Eq,Ord,Generic,Ix)
 
+derivingUnbox "ViennaPair"
+  [t| ViennaPair -> Int |]
+  [| unViennaPair |]
+  [| ViennaPair |]
+
 instance Binary    (ViennaPair)
 instance Serialize (ViennaPair)
 instance FromJSON  (ViennaPair)
@@ -175,7 +180,4 @@ revPair = \case
 cguaP = [CG .. UA]
 cgnsP = [CG .. NS]
 pairToString = [(CG,"CG"),(GC,"GC"),(UA,"UA"),(AU,"AU"),(GU,"GU"),(UG,"UG"),(NS,"NS"),(NP,"NP")]
-
-derivingUnbox "ViennaPair"
-  [t| ViennaPair -> Int |] [| unViennaPair |] [| ViennaPair |]
 
