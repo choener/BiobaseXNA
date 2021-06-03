@@ -1,6 +1,6 @@
 cabal-version:  2.2
 name:           BiobaseXNA
-version:        0.11.0.0
+version:        0.11.1.0
 author:         Christian Hoener zu Siederdissen
 maintainer:     choener@bioinf.uni-leipzig.de
 homepage:       https://github.com/choener/BiobaseXNA
