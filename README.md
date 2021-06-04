@@ -1,4 +1,5 @@
-![github action: master](https://github.com/choener/BiobaseXNA/actions/workflows/action.yml/badge.svg)
+![github action: master](https://github.com/choener/BiobaseXNA/actions/workflows/ci.yml/badge.svg?branch=master)
+![github action: hackage](https://github.com/choener/SciBaseTypes/actions/workflows/hackage.yml/badge.svg)
 
 # BiobaseXNA
 

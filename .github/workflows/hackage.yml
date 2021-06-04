@@ -1,7 +1,7 @@
 # this action shall run whenever we prepare for a hackage release. It triggers on a push to the
 # hackage branch and will run cabal v2-test without using a cabal.project file.
 
-name: CI
+name: hackage
 on:
   push:
     branches:

@@ -1,3 +1,6 @@
+# any push (to any repository) should start a CI run, which makes use of the cabal.project file to
+# test against current "work-in-progress" of dependencies
+
 name: CI
 on: [push]
 jobs:
