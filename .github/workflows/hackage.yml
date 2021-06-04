@@ -1,0 +1,28 @@
+# this action shall run whenever we prepare for a hackage release. It triggers on a push to the
+# hackage branch and will run cabal v2-test without using a cabal.project file.
+
+name: CI
+on:
+  push:
+    branches:
+      - hackage
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        ghc: ['8.8', '8.10', '9.0']
+        cabal: ['3.2', '3.4']
+        os: [ubuntu-latest]
+    name: Haskell GHC ${{ matrix.ghc }}, cabal ${{ matrix.cabal }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Haskell
+        uses: haskell/actions/setup@v1
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
+      - run: |
+          rm cabal.project
+          cabal v2-test
+
