@@ -76,7 +76,7 @@ common deps
                , BiobaseTypes             == 0.2.1.*
                , DPutils                  == 0.1.1.*
                , ForestStructures         == 0.0.1.*
-               , PrimitiveArray           == 0.10.1.*
+               , PrimitiveArray           == 0.10.2.*
   default-extensions: BangPatterns
                     , DataKinds
                     , DeriveDataTypeable
